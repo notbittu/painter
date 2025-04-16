@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paint Home - Visualize Your Perfect Wall Color</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-paint-roller"></i>
+                <h1>Paint Home</h1>
+            </div>
+            <p class="tagline">Visualize Your Perfect Wall Color with AI</p>
+        </header>
+
+        <main>
+            <div class="upload-section" id="upload-section">
+                <div class="upload-container">
+                    <div class="upload-box" id="drop-area">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Upload Wall Image</h3>
+                        <p>Drag and drop your image here or click to browse</p>
+                        <input type="file" id="file-input" accept="image/*" capture>
+                        <button class="upload-btn">Choose File</button>
+                    </div>
+                    <div class="or-divider">
+                        <span>OR</span>
+                    </div>
+                    <div class="camera-capture">
+                        <button id="camera-btn" class="camera-btn">
+                            <i class="fas fa-camera"></i> Take Photo
+                        </button>
+                        <video id="camera-preview" autoplay playsinline style="display: none;"></video>
+                        <canvas id="camera-canvas" style="display: none;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-section" id="preview-section" style="display: none;">
+                <div class="preview-container">
+                    <div class="image-container">
+                        <img id="original-image" alt="Original Wall">
+                        <img id="colored-image" alt="Colored Wall" style="display: none;">
+                        <div class="toggle-view">
+                            <button id="view-original" class="active">Original</button>
+                            <button id="view-colored">Colored</button>
+                        </div>
+                    </div>
+
+                    <div class="color-selection">
+                        <h3>Color Selection</h3>
+                        <div class="tabs">
+                            <button class="tab-btn active" data-tab="suggested">AI Suggested</button>
+                            <button class="tab-btn" data-tab="palette">Color Palette</button>
+                            <button class="tab-btn" data-tab="complementary">Complementary</button>
+                        </div>
+
+                        <div class="tab-content active" id="suggested-tab">
+                            <p>Colors extracted from your image:</p>
+                            <div class="color-grid" id="suggested-colors"></div>
+                        </div>
+
+                        <div class="tab-content" id="palette-tab">
+                            <p>Popular paint colors:</p>
+                            <div class="color-grid" id="palette-colors"></div>
+                        </div>
+
+                        <div class="tab-content" id="complementary-tab">
+                            <p>Complementary colors to your selection:</p>
+                            <div class="color-grid" id="complementary-colors"></div>
+                        </div>
+
+                        <div class="selected-color">
+                            <h4>Selected Color</h4>
+                            <div class="color-display" id="selected-color-display"></div>
+                            <span id="selected-color-hex">#FFFFFF</span>
+                            <button id="apply-color-btn" class="apply-btn">Apply to Wall</button>
+                        </div>
+                    </div>
+                </div>
+                <button id="back-btn" class="back-btn"><i class="fas fa-arrow-left"></i> Upload New Image</button>
+            </div>
+        </main>
+        
+        <div class="loading-overlay" id="loading-overlay">
+            <div class="spinner"></div>
+            <p>Processing your image...</p>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 Paint Home - AI-Powered Wall Color Visualization</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html> 

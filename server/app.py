@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory
 import os
 from werkzeug.utils import secure_filename
 from utils.ai_color import extract_colors, apply_color_to_image
@@ -17,6 +17,11 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+# API ping endpoint for health check
+@app.route('/api/ping', methods=['GET'])
+def ping():
+    return jsonify({"message": "pong"})
 
 # Serve React App - Catch-all route to serve the React app
 @app.route('/', defaults={'path': ''})
@@ -79,4 +84,4 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(host='0.0.0.0') 

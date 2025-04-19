@@ -7,37 +7,22 @@ RUN npm install
 COPY client/ .
 RUN npm run build
 
+# Install serve globally
+RUN npm install -g serve
+
 # Production stage
-FROM python:3.9-slim
+FROM node:18-alpine
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy Python requirements
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Create necessary directories first
-RUN mkdir -p /app/static/client/build
+# Install serve globally
+RUN npm install -g serve
 
 # Copy the built React app
-COPY --from=build /app/client/build/ /app/static/client/build/
-
-# Copy the Python application
-COPY app.py .
-COPY utils/ ./utils/
-
-# Set environment variables
-ENV FLASK_APP=app.py
-ENV FLASK_ENV=production
-ENV PORT=10000
+COPY --from=build /app/client/build /app/build
 
 # Expose the port
-EXPOSE 10000
+EXPOSE 3000
 
 # Run the application
-CMD ["python", "app.py"] 
+CMD ["serve", "-s", "build", "-l", "3000"] 

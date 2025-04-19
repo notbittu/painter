@@ -1,1 +1,1 @@
-web: pip install -r requirements.txt && cd client && npm install && npm run build && cd .. && rm -rf static/client/build && mkdir -p static/client/build && cp -r client/build/* static/client/build/ && python app.py
+web: docker build -t painter . && docker run -p 10000:10000 painter

@@ -2,7 +2,7 @@ services:
   - type: web
     name: painter
     env: node
-    buildCommand: npm run build
+    buildCommand: chmod +x render-build.sh && ./render-build.sh
     startCommand: npm install && npm start
     envVars:
       - key: PORT

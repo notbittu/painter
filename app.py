@@ -2,8 +2,8 @@ from flask import Flask, send_from_directory
 from whitenoise import WhiteNoise
 import os
 
-app = Flask(__name__, static_folder='client/build')
-app.wsgi_app = WhiteNoise(app.wsgi_app, root='client/build')
+app = Flask(__name__, static_folder='static/client/build')
+app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/client/build')
 
 # Serve React App
 @app.route('/', defaults={'path': ''})
@@ -19,6 +19,6 @@ app.debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
 
 # This is the main entry point for Render.com deployment
 if __name__ == "__main__":
-    # For local development
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=app.debug)
+    # For production
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port, debug=False)

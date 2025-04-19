@@ -1,21 +1,32 @@
 #!/bin/bash
 
-# Install dependencies
-cd client
-npm install
-
-# Build the React app
-npm run build
-
-# Create the static directory if it doesn't exist
-cd ..
+# Create the static directory structure first
 mkdir -p static/client/build
 
+# Install dependencies and build
+cd client
+npm install
+npm run build
+
 # Copy the build files to the static directory
-cp -r client/build/* static/client/build/
+cd ..
+echo "Copying build files..."
+cp -r client/build/* static/client/build/ || {
+    echo "Failed to copy build files"
+    exit 1
+}
+
+# Verify the files were copied
+if [ -f "static/client/build/index.html" ]; then
+    echo "Build files copied successfully"
+else
+    echo "Build files not found in static directory"
+    exit 1
+fi
 
 # Install serve globally
 npm install -g serve
 
 # Start the server
+echo "Starting server..."
 serve -s static/client/build -l 3000 

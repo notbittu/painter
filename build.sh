@@ -27,4 +27,22 @@ fi
 # Go back to the root
 cd ..
 
+# Create static directory structure
+echo "Creating static directory structure..."
+mkdir -p static/client/build
+
+# Copy build files
+echo "Copying build files..."
+cp -r client/build/* static/client/build/
+
+# Verify files were copied
+echo "Verifying copied files..."
+if [ -d "static/client/build" ]; then
+  echo "static/client/build directory exists. Contents:"
+  ls -la static/client/build
+else
+  echo "static/client/build directory not found!"
+  exit 1
+fi
+
 echo "Build process completed successfully." 

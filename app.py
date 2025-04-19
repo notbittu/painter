@@ -1,18 +1,25 @@
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, jsonify
 from whitenoise import WhiteNoise
 import os
 
-app = Flask(__name__, static_folder='static/client/build')
-app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/client/build')
+# Get the absolute path to the static directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, 'static', 'client', 'build')
+
+app = Flask(__name__, static_folder=STATIC_DIR)
+app.wsgi_app = WhiteNoise(app.wsgi_app, root=STATIC_DIR)
 
 # Serve React App
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-        return send_from_directory(app.static_folder, path)
-    else:
-        return send_from_directory(app.static_folder, 'index.html')
+    try:
+        if path != "" and os.path.exists(os.path.join(STATIC_DIR, path)):
+            return send_from_directory(STATIC_DIR, path)
+        else:
+            return send_from_directory(STATIC_DIR, 'index.html')
+    except Exception as e:
+        return jsonify({"error": str(e), "static_dir": STATIC_DIR}), 500
 
 # Configure for both local and production
 app.debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
@@ -21,4 +28,8 @@ app.debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
 if __name__ == "__main__":
     # For production
     port = int(os.environ.get("PORT", 10000))
+    print(f"Static directory path: {STATIC_DIR}")
+    print(f"Directory exists: {os.path.exists(STATIC_DIR)}")
+    if os.path.exists(STATIC_DIR):
+        print(f"Contents of static directory: {os.listdir(STATIC_DIR)}")
     app.run(host="0.0.0.0", port=port, debug=False)

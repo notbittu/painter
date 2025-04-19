@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "cd client && npm install && npm run build",
+    "heroku-postbuild": "cd client && npm install && npm run build",
     "install": "npm install && cd client && npm install"
   },
   "keywords": [],
@@ -13,5 +13,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.2"
+  },
+  "engines": {
+    "node": "18.17.0"
   }
 }

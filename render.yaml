@@ -2,7 +2,7 @@ services:
   - type: web
     name: painter
     env: node
-    buildCommand: npm run build
+    buildCommand: npm run heroku-postbuild
     startCommand: npm start
     envVars:
       - key: NODE_VERSION

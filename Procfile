@@ -1,1 +1,1 @@
-web: python app.py
+web: pip install -r requirements.txt && cd client && npm install && npm run build && cd .. && rm -rf static/client/build && mkdir -p static/client/build && cp -r client/build/* static/client/build/ && python app.py

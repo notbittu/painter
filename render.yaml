@@ -2,7 +2,7 @@ services:
   - type: web
     name: painter
     env: node
-    buildCommand: npm run build
+    buildCommand: chmod +x debug-build.sh && ./debug-build.sh
     startCommand: npm start
     envVars:
       - key: PORT

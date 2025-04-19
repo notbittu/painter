@@ -21,19 +21,20 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Create necessary directories first
+RUN mkdir -p /app/static/client/build
+
 # Copy the built React app
-COPY --from=build /app/client/build /app/static/client/build
+COPY --from=build /app/client/build/ /app/static/client/build/
 
 # Copy the Python application
 COPY app.py .
 COPY utils/ ./utils/
 
-# Create necessary directories
-RUN mkdir -p /app/static/client/build
-
 # Set environment variables
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
+ENV PORT=10000
 
 # Expose the port
 EXPOSE 10000

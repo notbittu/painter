@@ -64,8 +64,5 @@ logs
 .DS_Store
 Thumbs.db
 
-# Keep runtime.txt and static directory structure
-!runtime.txt
-!static/
-!static/client/
-!static/client/build/ 
+# Keep runtime.txt
+!runtime.txt 

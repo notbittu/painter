@@ -7,19 +7,6 @@ echo "NPM version: $(npm --version)"
 echo "Current directory: $(pwd)"
 echo "=============================="
 
-# Create the static directory structure first
-echo "Creating static directory structure..."
-mkdir -p static/client/build || {
-    echo "Failed to create static directory"
-    exit 1
-}
-
-# Verify directory creation
-if [ ! -d "static/client/build" ]; then
-    echo "Static directory not created successfully"
-    exit 1
-fi
-
 # Install dependencies and build
 echo "Installing dependencies..."
 cd client
@@ -40,25 +27,6 @@ if [ ! -d "build" ]; then
     exit 1
 fi
 
-# Copy the build files to the static directory
-echo "Copying build files..."
-cd ..
-cp -r client/build/* static/client/build/ || {
-    echo "Failed to copy build files"
-    exit 1
-}
-
-# Verify the files were copied
-echo "Verifying build files..."
-if [ -f "static/client/build/index.html" ]; then
-    echo "Build files copied successfully"
-    echo "Contents of static directory:"
-    ls -la static/client/build/
-else
-    echo "Build files not found in static directory"
-    exit 1
-fi
-
 # Install serve globally
 echo "Installing serve..."
 npm install -g serve || {
@@ -68,4 +36,5 @@ npm install -g serve || {
 
 # Start the server
 echo "Starting server..."
-serve -s static/client/build -l 3000 
+cd build
+serve -s . -l 3000 

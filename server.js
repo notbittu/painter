@@ -13,72 +13,70 @@ try {
   console.error('Error reading directory:', err);
 }
 
-// Find the build directory
-let buildPath = path.join(__dirname, 'client/build');
-let indexHtmlPath = path.join(buildPath, 'index.html');
+// Try to find the build directory
+console.log('Looking for build directory...');
 
-// If direct path doesn't exist, try searching for it
-if (!fs.existsSync(indexHtmlPath)) {
-  console.log('client/build/index.html not found at the expected location, searching...');
+// Check static directory path
+const staticBuildPath = path.join(__dirname, 'static/client/build');
+if (fs.existsSync(staticBuildPath) && fs.existsSync(path.join(staticBuildPath, 'index.html'))) {
+  console.log('Found build at static/client/build');
   
-  // Try client/build
-  if (fs.existsSync('client') && fs.existsSync(path.join('client', 'build'))) {
-    buildPath = path.join(process.cwd(), 'client/build');
-    indexHtmlPath = path.join(buildPath, 'index.html');
-    console.log('Found build at:', buildPath);
-  } 
-  // Try build
-  else if (fs.existsSync('build')) {
-    buildPath = path.join(process.cwd(), 'build');
-    indexHtmlPath = path.join(buildPath, 'index.html');
-    console.log('Found build at:', buildPath);
-  }
-  // Try client
-  else if (fs.existsSync('client')) {
-    const clientPath = path.join(process.cwd(), 'client');
-    const clientDirs = fs.readdirSync(clientPath);
-    console.log('Contents of client directory:', clientDirs);
+  // Serve static files from the static/client/build directory
+  app.use(express.static(staticBuildPath));
+  
+  // Handle React routing, return all requests to React app
+  app.get('*', function(req, res) {
+    res.sendFile(path.join(staticBuildPath, 'index.html'));
+  });
+} 
+// Fallback to client/build
+else if (fs.existsSync(path.join(__dirname, 'client/build/index.html'))) {
+  console.log('Falling back to client/build');
+  
+  const clientBuildPath = path.join(__dirname, 'client/build');
+  
+  // Serve static files from the client/build directory
+  app.use(express.static(clientBuildPath));
+  
+  // Handle React routing, return all requests to React app
+  app.get('*', function(req, res) {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
+}
+// Error if no build found
+else {
+  console.error('ERROR: No build directory found');
+  
+  // Print directory structure for debugging
+  console.log('Directory structure:');
+  function listDirRecursive(dir, level = 0) {
+    const indent = ' '.repeat(level * 2);
+    const items = fs.readdirSync(dir);
     
-    if (clientDirs.includes('build')) {
-      buildPath = path.join(clientPath, 'build');
-      indexHtmlPath = path.join(buildPath, 'index.html');
-      console.log('Found build in client directory:', buildPath);
+    for (const item of items) {
+      const fullPath = path.join(dir, item);
+      const stats = fs.statSync(fullPath);
+      
+      console.log(`${indent}- ${item}${stats.isDirectory() ? '/' : ''}`);
+      
+      if (stats.isDirectory() && level < 2) {
+        listDirRecursive(fullPath, level + 1);
+      }
     }
   }
-}
-
-// Check if we found the build directory
-if (fs.existsSync(indexHtmlPath)) {
-  console.log('Found index.html at:', indexHtmlPath);
-} else {
-  console.error('Could not find index.html in any location!');
-  console.log('Current structure:');
+  
   try {
-    const cwd = process.cwd();
-    console.log('Working directory:', cwd);
-    const dirs = fs.readdirSync(cwd);
-    console.log('Top level directories:', dirs);
-    
-    if (dirs.includes('client')) {
-      const clientContents = fs.readdirSync(path.join(cwd, 'client'));
-      console.log('Client directory contents:', clientContents);
-    }
+    listDirRecursive(__dirname);
   } catch (err) {
-    console.error('Error examining directories:', err);
+    console.error('Error listing directory structure:', err);
   }
+  
+  // Setup a simple error page
+  app.use(express.static(path.join(__dirname, 'public')));
+  app.get('*', function(req, res) {
+    res.status(500).send('Build not found. Please check the server logs.');
+  });
 }
-
-// Serve static files from the React app
-app.use(express.static(buildPath));
-
-// Handle React routing, return all requests to React app
-app.get('*', function(req, res) {
-  if (fs.existsSync(indexHtmlPath)) {
-    res.sendFile(indexHtmlPath);
-  } else {
-    res.status(500).send('React build not found. Please check server logs.');
-  }
-});
 
 const port = process.env.PORT || 10000;
 app.listen(port, '0.0.0.0', () => {

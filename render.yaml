@@ -3,9 +3,11 @@ services:
     name: painter
     env: node
     buildCommand: bash ./build.sh
-    startCommand: cd .. && npm install && node server.js
+    startCommand: npm install && node server.js
     envVars:
       - key: PORT
         value: 10000
       - key: NODE_ENV
-        value: production 
+        value: production
+      - key: NODE_VERSION
+        value: 18.17.0 

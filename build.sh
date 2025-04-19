@@ -1,40 +1,30 @@
 #!/bin/bash
 
-# Print environment information
-echo "=== Environment Information ==="
-echo "Node version: $(node --version)"
-echo "NPM version: $(npm --version)"
+# Print debugging information
 echo "Current directory: $(pwd)"
-echo "=============================="
+echo "Directory contents:"
+ls -la
 
-# Install dependencies and build
-echo "Installing dependencies..."
+# Install dependencies in the client folder
 cd client
-npm install || {
-    echo "Failed to install dependencies"
-    exit 1
-}
+echo "Installing client dependencies..."
+npm install
 
+# Build the React app
 echo "Building React app..."
-npm run build || {
-    echo "Failed to build React app"
-    exit 1
-}
+npm run build
 
-# Verify build directory exists
-if [ ! -d "build" ]; then
-    echo "React build directory not found"
-    exit 1
+# Verify build was created
+echo "Checking build directory..."
+if [ -d "build" ]; then
+  echo "Build directory exists. Contents:"
+  ls -la build
+else
+  echo "Build directory not found!"
+  exit 1
 fi
 
-# Install serve globally
-echo "Installing serve..."
-npm install -g serve || {
-    echo "Failed to install serve"
-    exit 1
-}
+# Go back to the root
+cd ..
 
-# Start the server
-echo "Starting server..."
-cd build
-serve -s . -l 3000 
+echo "Build process completed successfully." 

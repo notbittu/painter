@@ -1,11 +1,10 @@
 {
   "name": "painter",
   "version": "1.0.0",
-  "description": "Painter application",
+  "description": "Painter API",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "build": "mkdir -p build && cd client && npm install && npm run build && cd .. && cp -r client/build/* build/"
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +13,6 @@
     "express": "^4.18.2"
   },
   "engines": {
-    "node": "16.x"
+    "node": "18.x"
   }
 }

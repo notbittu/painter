@@ -2,7 +2,7 @@ services:
   - type: web
     name: painter
     env: node
-    buildCommand: bash ./build.sh
+    buildCommand: cd client && npm install && npm run build
     startCommand: npm install && node server.js
     envVars:
       - key: PORT

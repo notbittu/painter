@@ -1,15 +1,68 @@
-# Paint Home - AI-Powered Wall Color Visualization
+# Painter App
 
-Paint Home is a web application that helps users visualize how different paint colors will look on their walls using AI-powered color extraction and visualization techniques.
+A modern web application built with React and Flask.
+
+## Project Structure
+
+```
+painter/
+├── client/          # React frontend
+├── app.py          # Flask backend
+├── Procfile        # Deployment configuration
+└── requirements.txt # Python dependencies
+```
+
+## Setup
+
+1. **Backend Setup**
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows:
+.\venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+2. **Frontend Setup**
+```bash
+# Navigate to client directory
+cd client
+
+# Install dependencies
+npm install
+
+# Start development server
+npm start
+```
+
+3. **Running the Application**
+```bash
+# Start backend server
+python app.py
+
+# In another terminal, start frontend
+cd client
+npm start
+```
+
+## Deployment
+
+The application is configured for deployment on Render.com. Just push to GitHub and Render will:
+1. Install dependencies
+2. Build the React app
+3. Serve the application using Gunicorn
 
 ## Features
 
-- **Image Upload**: Upload or capture a photo of your wall directly from your device
-- **AI Color Suggestions**: Get intelligent color recommendations based on your uploaded image
-- **Color Palette**: Choose from a curated selection of paint colors
-- **Complementary Colors**: View algorithmically generated complementary colors
-- **Realistic Preview**: See how selected colors will look on your wall with realistic shading and lighting simulation
-- **Responsive Design**: Works on desktop and mobile devices
+- Modern React frontend
+- Efficient static file serving with WhiteNoise
+- Easy deployment configuration
 
 ## Technologies Used
 
@@ -17,75 +70,6 @@ Paint Home is a web application that helps users visualize how different paint c
 - **Backend**: Python Flask API
 - **Computer Vision**: OpenCV
 - **Image Processing**: Pillow, NumPy
-- **Deployment**: Render.com
-
-## Project Structure
-
-```
-.
-├── app.py                  # Main entry point for Render.com
-├── Procfile                # Render.com deployment config
-├── requirements.txt        # Python dependencies
-├── client/                 # React frontend
-│   ├── public/             # Public assets
-│   ├── src/                # React source code
-│   │   ├── components/     # React components
-│   │   ├── App.js          # Main React component
-│   │   └── index.js        # React entry point
-│   └── build/              # Production build output
-└── server/                 # Flask backend
-    ├── app.py              # Flask application
-    ├── uploads/            # User uploaded images
-    └── utils/              # Utility modules
-        └── ai_color.py     # AI color extraction and application
-```
-
-## Development Setup
-
-### Backend
-
-1. Create a virtual environment
-   ```
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-2. Install dependencies
-   ```
-   pip install -r requirements.txt
-   ```
-
-3. Run the Flask server
-   ```
-   python app.py
-   ```
-
-### Frontend
-
-1. Navigate to the client directory
-   ```
-   cd client
-   ```
-
-2. Install dependencies
-   ```
-   npm install
-   ```
-
-3. Start the development server
-   ```
-   npm start
-   ```
-
-## Deployment
-
-This application is designed to be easily deployed to [Render.com](https://render.com) through these steps:
-
-1. Push the code to GitHub
-2. Connect Render to your GitHub repository
-3. Create a new Web Service on Render with the following settings:
-   - Build Command: `pip install -r requirements.txt && cd client && npm install && npm run build`
-   - Start Command: `gunicorn app:application`
 
 ## How It Works
 

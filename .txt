@@ -1,5 +1,0 @@
-[33mcommit 326305b18efbc6bb88af29071b7b8ecb807044d0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
-Author: notbittu <ankitsen.in@gmail.com>
-Date:   Sat Apr 19 19:21:31 2025 +0530
-
-    Update Procfile and requirements.txt for deployment configuration

@@ -6,6 +6,9 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, 'static', 'client', 'build')
 
+# Create directories if they don't exist
+os.makedirs(STATIC_DIR, exist_ok=True)
+
 app = Flask(__name__, static_folder=STATIC_DIR)
 app.wsgi_app = WhiteNoise(app.wsgi_app, root=STATIC_DIR)
 
@@ -14,11 +17,18 @@ app.wsgi_app = WhiteNoise(app.wsgi_app, root=STATIC_DIR)
 @app.route('/<path:path>')
 def serve(path):
     try:
+        print(f"Requested path: {path}")
+        print(f"Static directory: {STATIC_DIR}")
+        print(f"Directory exists: {os.path.exists(STATIC_DIR)}")
+        if os.path.exists(STATIC_DIR):
+            print(f"Contents of static directory: {os.listdir(STATIC_DIR)}")
+        
         if path != "" and os.path.exists(os.path.join(STATIC_DIR, path)):
             return send_from_directory(STATIC_DIR, path)
         else:
             return send_from_directory(STATIC_DIR, 'index.html')
     except Exception as e:
+        print(f"Error serving file: {str(e)}")
         return jsonify({"error": str(e), "static_dir": STATIC_DIR}), 500
 
 # API endpoint for color detection

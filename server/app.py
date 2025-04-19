@@ -3,9 +3,13 @@ import os
 from werkzeug.utils import secure_filename
 from utils.ai_color import extract_colors, apply_color_to_image
 from flask_cors import CORS
+from whitenoise import WhiteNoise
 
 app = Flask(__name__, static_folder='../client/build')
 CORS(app)  # Enable CORS for all routes
+
+# Configure WhiteNoise
+app.wsgi_app = WhiteNoise(app.wsgi_app, root='../client/build')
 
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size

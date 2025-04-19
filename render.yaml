@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: painter
+    env: node
+    buildCommand: |
+      cd client
+      npm install
+      npm run build
+      cd ..
+      mkdir -p static/client
+      cp -r client/build static/client/build
+    startCommand: serve -s static/client/build -l $PORT
+    envVars:
+      - key: NODE_VERSION
+        value: 18.17.0
+      - key: NODE_ENV
+        value: production 

@@ -3,17 +3,10 @@
   "version": "1.0.0",
   "description": "Painter application",
   "main": "index.js",
-  "scripts": {
-    "build": "cd client && npm install && npm run build && cd .. && mkdir -p static/client && cp -r client/build static/client/build",
-    "start": "serve -s static/client/build -l $PORT"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "@types/react-dom": "^19.1.2"
-  },
   "dependencies": {
-    "@types/react": "^19.1.2"
+    "serve": "^14.2.1"
   }
 }

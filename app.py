@@ -21,6 +21,24 @@ def serve(path):
     except Exception as e:
         return jsonify({"error": str(e), "static_dir": STATIC_DIR}), 500
 
+# API endpoint for color detection
+@app.route('/api/detect-colors', methods=['POST'])
+def detect_colors():
+    try:
+        # For now, return some sample colors
+        # In production, you would implement actual color detection logic
+        return jsonify({
+            "colors": [
+                "#4a6da7",
+                "#f50057",
+                "#00bcd4",
+                "#ff9800",
+                "#4caf50"
+            ]
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # Configure for both local and production
 app.debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
 

@@ -18,11 +18,14 @@ WORKDIR /app
 # Install serve globally
 RUN npm install -g serve
 
-# Copy the built React app
-COPY --from=build /app/client/build /app/build
+# Create the static directory structure
+RUN mkdir -p /app/static/client/build
+
+# Copy the built React app to the static directory
+COPY --from=build /app/client/build/ /app/static/client/build/
 
 # Expose the port
 EXPOSE 3000
 
 # Run the application
-CMD ["serve", "-s", "build", "-l", "3000"] 
+CMD ["serve", "-s", "static/client/build", "-l", "3000"] 

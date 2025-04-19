@@ -1,5 +1,18 @@
-from server.app import app
+from flask import Flask, send_from_directory
+from whitenoise import WhiteNoise
 import os
+
+app = Flask(__name__, static_folder='client/build')
+app.wsgi_app = WhiteNoise(app.wsgi_app, root='client/build')
+
+# Serve React App
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 # Configure for both local and production
 app.debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
@@ -8,4 +21,4 @@ app.debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
 if __name__ == "__main__":
     # For local development
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=app.debug)

@@ -40,7 +40,6 @@ yarn-error.log
 
 # Build
 client/build/
-static/
 
 # Environment variables
 .env
@@ -52,7 +51,6 @@ static/
 # Misc
 .DS_Store
 *.log
-*.txt
 
 # Uploaded files
 /server/uploads/*
@@ -62,15 +60,12 @@ static/
 logs
 *.log
 
-# IDE specific files
-.idea/
-.vscode/
-*.swp
-*.swo
-
 # OS
 .DS_Store
 Thumbs.db
 
-# Keep runtime.txt
-!runtime.txt 
+# Keep runtime.txt and static directory structure
+!runtime.txt
+!static/
+!static/client/
+!static/client/build/ 

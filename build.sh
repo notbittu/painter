@@ -14,6 +14,12 @@ mkdir -p static/client/build || {
     exit 1
 }
 
+# Verify directory creation
+if [ ! -d "static/client/build" ]; then
+    echo "Static directory not created successfully"
+    exit 1
+fi
+
 # Install dependencies and build
 echo "Installing dependencies..."
 cd client
@@ -27,6 +33,12 @@ npm run build || {
     echo "Failed to build React app"
     exit 1
 }
+
+# Verify build directory exists
+if [ ! -d "build" ]; then
+    echo "React build directory not found"
+    exit 1
+fi
 
 # Copy the build files to the static directory
 echo "Copying build files..."

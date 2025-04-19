@@ -2,11 +2,16 @@
   "name": "painter",
   "version": "1.0.0",
   "description": "Painter application",
-  "main": "index.js",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "cd client && npm install && npm run build",
+    "install": "npm install && cd client && npm install"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "serve": "^14.2.1"
+    "express": "^4.18.2"
   }
 }

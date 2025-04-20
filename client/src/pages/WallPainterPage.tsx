@@ -20,7 +20,7 @@ const WallPainterPage: React.FC = () => {
   const handleColorSelect = (color: ColorSuggestion) => {
     setSelectedColor(color);
     // Color selection is handled inside WallColorAnalyzer component
-    console.log(`Selected color: ${color.hexCode}`);
+    console.log(`Selected color: ${color.hex}`);
   };
   
   return (

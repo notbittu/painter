@@ -391,7 +391,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
         
         await navigator.share({
           title: 'My Wall Color Preview',
-          text: `Check out this wall color: ${selectedColor?.name} (${selectedColor?.hexCode})`,
+          text: `Check out this wall color: ${selectedColor?.name} (${selectedColor?.hex})`,
           files: [file]
         });
       } catch (err) {
@@ -1182,18 +1182,18 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                     sx={{ 
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
-                      transform: selectedColor?.hexCode === color.hexCode ? 'scale(1.05)' : 'scale(1)',
-                      boxShadow: selectedColor?.hexCode === color.hexCode ? '0 8px 16px rgba(0,0,0,0.1)' : '',
+                      transform: selectedColor?.hex === color.hex ? 'scale(1.05)' : 'scale(1)',
+                      boxShadow: selectedColor?.hex === color.hex ? '0 8px 16px rgba(0,0,0,0.1)' : '',
                       borderRadius: '12px',
                       overflow: 'hidden',
-                      border: selectedColor?.hexCode === color.hexCode ? `2px solid ${theme.palette.primary.main}` : 'none',
+                      border: selectedColor?.hex === color.hex ? `2px solid ${theme.palette.primary.main}` : 'none',
                     }}
                     onClick={() => handleColorSelect(color)}
                   >
                     <Box
                       sx={{
                         height: '100px',
-                        backgroundColor: color.hexCode,
+                        backgroundColor: color.hex,
                       }}
                     ></Box>
                     <CardContent>
@@ -1202,13 +1202,13 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Typography variant="body2" color="textSecondary">
-                          {color.hexCode}
+                          {color.hex}
                         </Typography>
                         <IconButton 
                           size="small" 
                           onClick={(e) => {
                             e.stopPropagation();
-                            copyColorCode(color.hexCode);
+                            copyColorCode(color.hex);
                           }}
                         >
                           <CopyIcon fontSize="small" />
@@ -1256,7 +1256,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                     width: 50, 
                     height: 50, 
                     borderRadius: '12px', 
-                    backgroundColor: selectedColor.hexCode,
+                    backgroundColor: selectedColor.hex,
                     mr: 2,
                     border: '2px solid white',
                     boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
@@ -1265,11 +1265,11 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 <Box>
                   <Typography variant="h6">{selectedColor.name}</Typography>
                   <Typography variant="body2" color="textSecondary">
-                    {selectedColor.hexCode}
+                    {selectedColor.hex}
                     <IconButton 
                       size="small" 
                       sx={{ ml: 1 }}
-                      onClick={() => copyColorCode(selectedColor.hexCode)}
+                      onClick={() => copyColorCode(selectedColor.hex)}
                     >
                       {copied ? <CheckIcon fontSize="small" /> : <CopyIcon fontSize="small" />}
                     </IconButton>
@@ -1299,7 +1299,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                           width: 30, 
                           height: 30, 
                           borderRadius: '6px', 
-                          backgroundColor: match.hexCode,
+                          backgroundColor: match.hex,
                           mr: 2
                         }} 
                       />
@@ -1328,13 +1328,13 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 3 }}>
                 {similarColors.length > 0 ? (
                   similarColors.map((color, index) => (
-                    <Tooltip title={`${color.name} - ${color.hexCode}`} key={index}>
+                    <Tooltip title={`${color.name} - ${color.hex}`} key={index}>
                       <Box
                         sx={{
                           width: '50px',
                           height: '50px',
                           borderRadius: '10px',
-                          backgroundColor: color.hexCode,
+                          backgroundColor: color.hex,
                           cursor: 'pointer',
                           transition: 'all 0.2s ease',
                           border: '2px solid white',

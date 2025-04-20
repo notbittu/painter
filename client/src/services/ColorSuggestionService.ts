@@ -27,6 +27,7 @@ export interface ColorPreviewOptions {
   finish: 'matte' | 'eggshell' | 'satin' | 'semi-gloss' | 'high-gloss';
   showTexture: boolean; // Whether to show wall texture in preview
   lightingEffect: 'natural' | 'warm' | 'cool' | 'bright' | 'dim'; // Lighting simulation
+  shadowTracking?: boolean; // Added for shadow tracking feature
 }
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || '';
@@ -36,7 +37,8 @@ export const defaultPreviewOptions: ColorPreviewOptions = {
   intensity: 1.0,
   finish: 'matte',
   showTexture: true,
-  lightingEffect: 'natural'
+  lightingEffect: 'natural',
+  shadowTracking: true
 };
 
 /**

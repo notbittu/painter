@@ -113,4 +113,6 @@ class ColorSuggestionService {
   }
 }
 
-export default new ColorSuggestionService(); 
+// Create an instance first, then export it
+const colorSuggestionService = new ColorSuggestionService();
+export default colorSuggestionService; 

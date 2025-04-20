@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, ChangeEvent, SyntheticEvent } from 'react';
 import {
   Box,
   Typography,
@@ -335,18 +335,17 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
   };
   
   // Enhanced intensity control with more granular options
-  const handleIntensityChange = (event: Event, value: number | number[]) => {
-    const newIntensity = value as number;
+  const handleIntensityChange = (e: Event, newValue: number | number[]) => {
     setPreviewOptions({
       ...previewOptions,
-      intensity: newIntensity
+      intensity: newValue as number
     });
     
     // Only regenerate if we've moved by at least 5% to avoid too many calls
-    if (Math.abs(newIntensity - previewOptions.intensity) >= 5 && selectedColor && wallImage) {
+    if (Math.abs((newValue as number) - previewOptions.intensity) >= 5 && selectedColor && wallImage) {
       generatePreview(selectedColor, {
         ...previewOptions,
-        intensity: newIntensity
+        intensity: newValue as number
       });
     }
   };
@@ -470,7 +469,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 id="finish-type"
                 value={previewOptions.finish}
                 label="Finish Type"
-                onChange={(e) => {
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   const newFinish = e.target.value as string;
                   setPreviewOptions({
                     ...previewOptions,
@@ -503,7 +502,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 id="lighting"
                 value={previewOptions.lighting}
                 label="Lighting"
-                onChange={(e) => {
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   const newLighting = e.target.value as string;
                   setPreviewOptions({
                     ...previewOptions,
@@ -536,7 +535,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
           <ToggleButtonGroup
             value={previewOptions.blendMode}
             exclusive
-            onChange={(e, newBlendMode) => {
+            onChange={(e: SyntheticEvent, newBlendMode: string | null) => {
               if (newBlendMode) {
                 setPreviewOptions({
                   ...previewOptions,
@@ -764,7 +763,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   }
                 }}
                 value={previewOptions.intensity}
-                onChange={(e, newValue) => {
+                onChange={(e: Event, newValue: number | number[]) => {
                   setPreviewOptions({
                     ...previewOptions,
                     intensity: newValue as number
@@ -831,7 +830,10 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               </Typography>
               <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
                 {selectedColor.hex.toUpperCase()}
-                <IconButton size="small" onClick={() => copyColorCode(selectedColor.hex)}>
+                <IconButton size="small" onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  copyColorCode(selectedColor.hex);
+                }}>
                   {copied ? <CheckIcon fontSize="small" /> : <CopyIcon fontSize="small" />}
                 </IconButton>
                 {selectedColor.rgb && (
@@ -840,7 +842,10 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                       label="RGB" 
                   size="small"
                       sx={{ ml: 1, fontSize: '0.7rem', height: 20 }}
-                      onClick={() => copyColorCode(selectedColor.rgb || '')}
+                      onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        copyColorCode(selectedColor.rgb || '');
+                      }}
                     />
                   </Tooltip>
                 )}
@@ -1206,7 +1211,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                         </Typography>
                         <IconButton 
                           size="small" 
-                          onClick={(e) => {
+                          onClick={(e: React.MouseEvent) => {
                             e.stopPropagation();
                             copyColorCode(color.hex);
                           }}
@@ -1269,7 +1274,10 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                     <IconButton 
                       size="small" 
                       sx={{ ml: 1 }}
-                      onClick={() => copyColorCode(selectedColor.hex)}
+                      onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        copyColorCode(selectedColor.hex);
+                      }}
                     >
                       {copied ? <CheckIcon fontSize="small" /> : <CopyIcon fontSize="small" />}
                     </IconButton>

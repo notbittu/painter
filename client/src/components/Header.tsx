@@ -29,17 +29,17 @@ const Header: React.FC = () => {
   const location = useLocation();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  
+
   const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
-  
+
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
   
   const isWallPainter = location.pathname.includes('/wall-painter');
-  
+
   return (
     <AppBar 
       position="static" 
@@ -59,16 +59,32 @@ const Header: React.FC = () => {
                 fontSize: '2rem'
               }} 
             />
-            <Typography
-              variant="h6"
-              noWrap
+          <Typography
+            variant="h6"
+            noWrap
               component="div"
-              sx={{
-                fontWeight: 700,
-                letterSpacing: '.1rem',
+            sx={{
+              fontWeight: 700,
+              letterSpacing: '.1rem',
                 color: 'white',
-                textDecoration: 'none',
-                cursor: 'pointer'
+              textDecoration: 'none',
+                cursor: 'pointer',
+                position: 'relative',
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: -3,
+                  left: 0,
+                  width: '100%',
+                  height: 3,
+                  background: 'linear-gradient(90deg, #ffffff, rgba(255,255,255,0.5), #ffffff)',
+                  backgroundSize: '200% 100%',
+                  animation: 'shine 3s infinite linear',
+                },
+                '@keyframes shine': {
+                  '0%': { backgroundPosition: '-100% 0' },
+                  '100%': { backgroundPosition: '100% 0' },
+                },
               }}
               onClick={() => navigate('/')}
             >
@@ -119,7 +135,7 @@ const Header: React.FC = () => {
           </Box>
 
           {isMobile ? (
-            <IconButton 
+            <IconButton
               size="large"
               aria-label="menu"
               color="inherit"
@@ -147,7 +163,7 @@ const Header: React.FC = () => {
               >
                 Try Wall Visualizer
               </Button>
-            </Box>
+          </Box>
           )}
         </Toolbar>
       </Container>

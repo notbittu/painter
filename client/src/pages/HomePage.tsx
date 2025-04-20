@@ -132,9 +132,11 @@ const HomePage: React.FC = () => {
         <Box sx={{
           py: { xs: 8, md: 12 },
           position: 'relative',
-          backgroundImage: 'linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(236,72,153,0.1) 100%)',
+          backgroundImage: 'linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(236,72,153,0.2) 100%)',
           borderRadius: '24px',
           overflow: 'hidden',
+          boxShadow: '0 15px 50px rgba(0, 0, 0, 0.1)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
         }}>
           <Container maxWidth="lg">
             <Grid container spacing={4} alignItems="center">
@@ -150,6 +152,12 @@ const HomePage: React.FC = () => {
                     WebkitTextFillColor: 'transparent',
                     mb: 2,
                     position: 'relative',
+                    animation: 'pulse 3s infinite',
+                    '@keyframes pulse': {
+                      '0%': { opacity: 0.8 },
+                      '50%': { opacity: 1 },
+                      '100%': { opacity: 0.8 },
+                    },
                   }}
                 >
                   Visualize Your Dream Walls
@@ -157,7 +165,12 @@ const HomePage: React.FC = () => {
                 <Typography
                   variant="h5"
                   color="text.secondary"
-                  sx={{ mb: 4, maxWidth: '600px', lineHeight: 1.5 }}
+                  sx={{ 
+                    mb: 4, 
+                    maxWidth: '600px', 
+                    lineHeight: 1.5,
+                    textShadow: '1px 1px 2px rgba(255,255,255,0.8)',
+                  }}
                 >
                   Capture or upload photos of your walls and see exactly how they'll look with our AI-powered color visualizer
                 </Typography>
@@ -185,11 +198,43 @@ const HomePage: React.FC = () => {
                   Try Wall Visualizer
                 </Button>
               </Grid>
+              <Grid item xs={12} md={6} sx={{ display: { xs: 'none', md: 'block' } }}>
+                <Box
+                  sx={{
+                    position: 'relative',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: '10%',
+                      left: '10%',
+                      width: '80%',
+                      height: '80%',
+                      background: 'radial-gradient(circle, rgba(99,102,241,0.3) 0%, rgba(236,72,153,0.3) 100%)',
+                      filter: 'blur(30px)',
+                      borderRadius: '50%',
+                      zIndex: -1,
+                    }
+                  }}
+                >
+                  <img 
+                    src="/images/wall-preview.png" 
+                    alt="Wall Color Visualization" 
+                    style={{ 
+                      maxWidth: '100%', 
+                      height: 'auto',
+                      borderRadius: '16px',
+                      boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+                      border: '5px solid white',
+                      transform: 'rotate(2deg)',
+                    }} 
+                  />
+                </Box>
+              </Grid>
             </Grid>
           </Container>
         </Box>
 
-        {/* Features Section */}
+        {/* Key Features Section */}
         <Box 
           sx={{ 
             py: 12,
@@ -217,28 +262,28 @@ const HomePage: React.FC = () => {
               position: 'relative',
               display: 'inline-block',
               px: 4,
-              background: 'linear-gradient(90deg, #6366f1, #10b981)',
+              background: 'linear-gradient(90deg, #6366f1, #ec4899)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               mx: 'auto',
               width: 'fit-content',
             }}
           >
-            Powerful Drawing Tools
+            Advanced Visualization Features
           </Typography>
           
           <Typography
-                variant="body1" 
-                color="textSecondary" 
-                textAlign="center" 
-                sx={{ 
-                  mb: 8,
-                  maxWidth: '750px',
-                  mx: 'auto',
-                  fontSize: '1.1rem',
-                }}
-              >
-                Everything you need to annotate and enhance your photos with an intuitive, easy-to-use interface
+            variant="body1" 
+            color="textSecondary" 
+            textAlign="center" 
+            sx={{ 
+              mb: 8,
+              maxWidth: '750px',
+              mx: 'auto',
+              fontSize: '1.1rem',
+            }}
+          >
+            Experience cutting-edge technology that brings your walls to life with stunning realism
           </Typography>
 
           <Grid container spacing={5}>
@@ -287,7 +332,7 @@ const HomePage: React.FC = () => {
               >
                 <Box 
                   className="icon-container"
-                          sx={{
+                  sx={{
                     mb: 3, 
                     width: '80px',
                     height: '80px',
@@ -299,9 +344,9 @@ const HomePage: React.FC = () => {
                     transition: 'transform 0.3s ease',
                   }}
                 >
-                  <CameraIcon color="primary" sx={{ fontSize: 40 }} />
-                    </Box>
-                <Typography 
+                  <FormatColorFillIcon color="primary" sx={{ fontSize: 40 }} />
+                </Box>
+                <Typography
                   variant="h5" 
                   component="h3" 
                   gutterBottom
@@ -310,14 +355,14 @@ const HomePage: React.FC = () => {
                     color: theme.palette.primary.main,
                   }}
                 >
-                  Capture Images
-                    </Typography>
+                  AI Color Suggestions
+                </Typography>
                 <Typography variant="body1" color="textSecondary" textAlign="center">
-                  Take photos directly with your device camera or upload existing ones from your gallery
-                    </Typography>
+                  Our AI analyzes your walls and suggests the perfect colors that complement your space
+                </Typography>
               </Paper>
             </Grid>
-            
+
             <Grid 
               item 
               xs={12} 
@@ -375,22 +420,22 @@ const HomePage: React.FC = () => {
                     transition: 'transform 0.3s ease',
                   }}
                 >
-                  <BrushIcon sx={{ fontSize: 40, color: '#ec4899' }} />
-        </Box>
-      <Typography
+                  <PaletteIcon sx={{ fontSize: 40, color: '#ec4899' }} />
+                </Box>
+                <Typography
                   variant="h5" 
                   component="h3" 
                   gutterBottom
-                  sx={{ 
+                  sx={{
                     fontWeight: 700,
                     color: '#ec4899',
                   }}
                 >
-                  Creative Drawing
+                  Shadow Tracking
                 </Typography>
                 <Typography variant="body1" color="textSecondary" textAlign="center">
-                  Use brushes of different sizes and vibrant colors to express your creativity exactly how you want
-          </Typography>
+                  Advanced technology preserves natural shadows and lighting for realistic color visualization
+                </Typography>
               </Paper>
             </Grid>
             
@@ -405,7 +450,7 @@ const HomePage: React.FC = () => {
             >
               <Paper 
                 elevation={0}
-                sx={{ 
+                sx={{
                   p: 4, 
                   height: '100%', 
                   display: 'flex', 
@@ -451,7 +496,7 @@ const HomePage: React.FC = () => {
                     transition: 'transform 0.3s ease',
                   }}
                 >
-                  <SaveAltIcon sx={{ fontSize: 40, color: '#10b981' }} />
+                  <CameraIcon sx={{ fontSize: 40, color: '#10b981' }} />
                 </Box>
                 <Typography 
                   variant="h5" 
@@ -462,11 +507,11 @@ const HomePage: React.FC = () => {
                     color: '#10b981',
                   }}
                 >
-                  Instant Saving
-                  </Typography>
+                  Vision 360°
+                </Typography>
                 <Typography variant="body1" color="textSecondary" textAlign="center">
-                  Download your masterpiece instantly to share with friends or use in your projects
-                  </Typography>
+                  Capture multiple views of your room for a complete visualization of how colors flow through your space
+                </Typography>
               </Paper>
             </Grid>
           </Grid>
@@ -480,7 +525,7 @@ const HomePage: React.FC = () => {
             borderRadius: '24px',
             position: 'relative',
             overflow: 'hidden',
-            background: 'rgba(255, 255, 255, 0.7)',
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(236,72,153,0.1) 100%)',
             backdropFilter: 'blur(20px)',
             boxShadow: '0 20px 80px rgba(0, 0, 0, 0.07)',
             border: '1px solid rgba(255, 255, 255, 0.8)',
@@ -491,7 +536,17 @@ const HomePage: React.FC = () => {
               left: 0,
               width: '100%',
               height: '100%',
-              background: 'radial-gradient(circle at top right, rgba(99, 102, 241, 0.1), transparent 70%)',
+              background: 'radial-gradient(circle at top right, rgba(99, 102, 241, 0.2), transparent 70%)',
+              zIndex: -1,
+            },
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+              width: '100%',
+              height: '100%',
+              background: 'radial-gradient(circle at bottom left, rgba(236, 72, 153, 0.2), transparent 70%)',
               zIndex: -1,
             },
           }}
@@ -507,12 +562,12 @@ const HomePage: React.FC = () => {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            Ready to Start Creating?
+            Ready to Transform Your Walls?
           </Typography>
           
           <Typography 
             variant="h6" 
-      sx={{
+            sx={{
               mb: 4, 
               maxWidth: 700, 
               mx: 'auto',
@@ -520,45 +575,45 @@ const HomePage: React.FC = () => {
               fontWeight: 400,
             }}
           >
-            Jump in and create your first masterpiece in seconds – no sign-up required!
-            </Typography>
+            See your space in a whole new light with our powerful AI color visualization tool
+          </Typography>
           
-            <Button
+          <Button
             component={RouterLink}
-            to="/editor"
-              variant="contained"
-            color="primary"
-              size="large"
-            startIcon={<PaletteIcon />}
-              sx={{
+            to="/wall-painter"
+            variant="contained"
+            size="large"
+            startIcon={<FormatColorFillIcon />}
+            sx={{
               px: 6, 
               py: 2,
               fontSize: '1.1rem',
               fontWeight: 600,
               borderRadius: '12px',
+              backgroundImage: 'linear-gradient(90deg, #6366f1, #ec4899)',
               boxShadow: '0 10px 25px rgba(99, 102, 241, 0.4)',
               transition: 'all 0.3s ease',
-                '&:hover': {
+              '&:hover': {
                 boxShadow: '0 15px 30px rgba(99, 102, 241, 0.5)',
                 transform: 'translateY(-5px) scale(1.05)',
-                },
-              }}
-            >
-            Open Editor Now
-            </Button>
+              },
+            }}
+          >
+            Try Wall Visualizer
+          </Button>
           
           <Box sx={{ mt: 6, display: 'flex', justifyContent: 'center', gap: 5, flexWrap: 'wrap' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <TouchAppIcon sx={{ color: theme.palette.primary.main }} />
-              <Typography variant="body2" color="textSecondary">Easy to Use</Typography>
+              <CameraIcon sx={{ color: theme.palette.primary.main }} />
+              <Typography variant="body2" color="textSecondary">Take Photos</Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <PaletteIcon sx={{ color: theme.palette.secondary.main }} />
-              <Typography variant="body2" color="textSecondary">Vibrant Colors</Typography>
+              <Typography variant="body2" color="textSecondary">Get Color Suggestions</Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <SaveAltIcon sx={{ color: '#10b981' }} />
-              <Typography variant="body2" color="textSecondary">Save & Share</Typography>
+              <FormatColorFillIcon sx={{ color: '#10b981' }} />
+              <Typography variant="body2" color="textSecondary">Visualize Your Walls</Typography>
             </Box>
           </Box>
         </Box>

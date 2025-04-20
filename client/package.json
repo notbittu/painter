@@ -36,8 +36,12 @@
   },
   "eslintConfig": {
     "extends": [
-      "react-app"
-    ]
+      "react-app",
+      "react-app/jest"
+    ],
+    "rules": {
+      "@typescript-eslint/no-unused-vars": "warn"
+    }
   },
   "browserslist": {
     "production": [

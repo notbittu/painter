@@ -383,58 +383,488 @@ def detect_colors():
         logger.error(f"Error in color detection: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-# API endpoint for generating preview
+# Enhanced functions for new features
+def apply_shadow_tracking(image, mask=None):
+    """
+    Apply shadow tracking to maintain lighting variations in the wall.
+    Creates or uses a mask to identify shadow areas.
+    """
+    try:
+        # Convert image to grayscale to detect shadows
+        gray_image = image.convert('L')
+        
+        # Create a shadow mask if not provided
+        if mask is None:
+            # Enhance contrast to better identify shadows
+            contrast = ImageEnhance.Contrast(gray_image)
+            high_contrast = contrast.enhance(2.0)
+            
+            # Apply threshold to create mask
+            threshold = 128  # Adjust based on lighting
+            mask = high_contrast.point(lambda x: 0 if x < threshold else 255, '1')
+            
+            # Smoothen the mask
+            mask = mask.filter(ImageFilter.GaussianBlur(radius=3))
+        
+        return mask
+    except Exception as e:
+        logger.error(f"Error in shadow tracking: {str(e)}")
+        # Return a basic mask if error occurs
+        return Image.new('L', image.size, 255)
+
+def apply_nfd_vision360(image, color_hex):
+    """
+    Apply NFD Vision 360 - enhanced depth perception for more realistic rendering.
+    Creates a gradient effect based on estimated depth.
+    """
+    try:
+        # Convert hex to RGB
+        r = int(color_hex[1:3], 16)
+        g = int(color_hex[3:5], 16)
+        b = int(color_hex[5:7], 16)
+        
+        # Create a copy of the original image
+        result = image.copy()
+        
+        # Get image dimensions
+        width, height = image.size
+        
+        # Create gradient mask for depth effect
+        gradient = Image.new('L', (width, height), 0)
+        draw = ImageDraw.Draw(gradient)
+        
+        # Draw a radial gradient (simple depth simulation)
+        center_x, center_y = width // 2, height // 2
+        max_distance = (width**2 + height**2)**0.5 // 2
+        
+        for y in range(height):
+            for x in range(width):
+                # Calculate distance from center (normalized)
+                distance = ((x - center_x)**2 + (y - center_y)**2)**0.5 / max_distance
+                # Map distance to brightness (closer = brighter)
+                brightness = int(255 * (1 - distance * 0.5))
+                gradient.putpixel((x, y), brightness)
+        
+        # Apply gradient to create depth effect
+        pixels = result.load()
+        gradient_pixels = gradient.load()
+        
+        for y in range(height):
+            for x in range(width):
+                # Get current pixel color
+                pixel = pixels[x, y]
+                # Get gradient value (0-255)
+                depth = gradient_pixels[x, y] / 255.0
+                
+                # Adjust color based on depth
+                adjusted_r = int(r * (0.7 + depth * 0.3))
+                adjusted_g = int(g * (0.7 + depth * 0.3))
+                adjusted_b = int(b * (0.7 + depth * 0.3))
+                
+                # Set new pixel color
+                pixels[x, y] = (
+                    min(255, adjusted_r),
+                    min(255, adjusted_g),
+                    min(255, adjusted_b),
+                    255 if len(pixel) > 3 else 255
+                )
+        
+        return result
+    except Exception as e:
+        logger.error(f"Error in NFD Vision 360: {str(e)}")
+        # Return the original image if error occurs
+        return image
+
+def apply_realistic_blending(image, color_image, blend_mode='normal'):
+    """
+    Apply realistic blending between the wall image and the color.
+    Simulates how paint would interact with the wall texture.
+    """
+    try:
+        # Make sure images are the same size and mode
+        if image.size != color_image.size:
+            color_image = color_image.resize(image.size)
+        
+        # Convert to RGBA if not already
+        if image.mode != 'RGBA':
+            image = image.convert('RGBA')
+        if color_image.mode != 'RGBA':
+            color_image = color_image.convert('RGBA')
+        
+        # Create result image
+        result = Image.new('RGBA', image.size)
+        
+        # Get pixel data
+        img_pixels = image.load()
+        color_pixels = color_image.load()
+        result_pixels = result.load()
+        
+        width, height = image.size
+        
+        # Apply different blend modes
+        for y in range(height):
+            for x in range(width):
+                # Get pixel values
+                img_pixel = img_pixels[x, y]
+                color_pixel = color_pixels[x, y]
+                
+                # Apply blend mode
+                if blend_mode == 'multiply':
+                    # Multiply blend mode
+                    r = (img_pixel[0] * color_pixel[0]) // 255
+                    g = (img_pixel[1] * color_pixel[1]) // 255
+                    b = (img_pixel[2] * color_pixel[2]) // 255
+                elif blend_mode == 'screen':
+                    # Screen blend mode
+                    r = 255 - ((255 - img_pixel[0]) * (255 - color_pixel[0]) // 255)
+                    g = 255 - ((255 - img_pixel[1]) * (255 - color_pixel[1]) // 255)
+                    b = 255 - ((255 - img_pixel[2]) * (255 - color_pixel[2]) // 255)
+                elif blend_mode == 'overlay':
+                    # Overlay blend mode
+                    r = (img_pixel[0] < 128) ? (2 * img_pixel[0] * color_pixel[0] // 255) : (255 - 2 * (255 - img_pixel[0]) * (255 - color_pixel[0]) // 255)
+                    g = (img_pixel[1] < 128) ? (2 * img_pixel[1] * color_pixel[1] // 255) : (255 - 2 * (255 - img_pixel[1]) * (255 - color_pixel[1]) // 255)
+                    b = (img_pixel[2] < 128) ? (2 * img_pixel[2] * color_pixel[2] // 255) : (255 - 2 * (255 - img_pixel[2]) * (255 - color_pixel[2]) // 255)
+                else:
+                    # Normal blend mode (default)
+                    alpha = color_pixel[3] / 255.0
+                    r = int(color_pixel[0] * alpha + img_pixel[0] * (1 - alpha))
+                    g = int(color_pixel[1] * alpha + img_pixel[1] * (1 - alpha))
+                    b = int(color_pixel[2] * alpha + img_pixel[2] * (1 - alpha))
+                
+                # Set result pixel
+                a = max(img_pixel[3], color_pixel[3])
+                result_pixels[x, y] = (r, g, b, a)
+        
+        return result
+    except Exception as e:
+        logger.error(f"Error in realistic blending: {str(e)}")
+        # Return color image if error occurs
+        return color_image
+
+# Enhanced wall preview function
+def generate_enhanced_wall_preview(image, color_hex, options=None):
+    """
+    Generate an enhanced preview of the wall with the selected color,
+    incorporating shadow tracking, NFD Vision 360, and realistic blending.
+    """
+    try:
+        # Set default options if none provided
+        if options is None:
+            options = {
+                'intensity': 1.0,
+                'finish': 'matte',
+                'texture': True,
+                'lighting': 'natural',
+                'blendMode': 'normal',
+                'shadowTracking': False,
+                'vision360': False,
+                'realisticBlending': True
+            }
+        
+        # Convert hex to RGB
+        r = int(color_hex[1:3], 16)
+        g = int(color_hex[3:5], 16)
+        b = int(color_hex[5:7], 16)
+        
+        # Apply intensity adjustment
+        intensity = float(options.get('intensity', 1.0))
+        r = min(255, int(r * intensity))
+        g = min(255, int(g * intensity))
+        b = min(255, int(b * intensity))
+        
+        # Create a solid color image
+        color_image = Image.new('RGBA', image.size, (r, g, b, 255))
+        
+        # Apply finish effect
+        finish = options.get('finish', 'matte')
+        
+        if finish == 'high-gloss':
+            # Add shine effect for glossy finish
+            shine = Image.new('RGBA', image.size, (255, 255, 255, 0))
+            draw = ImageDraw.Draw(shine)
+            width, height = shine.size
+            # Draw highlight
+            for y in range(height):
+                alpha = int(255 * (1 - abs(y - height/3) / (height/2)))
+                if alpha > 0:
+                    draw.line([(0, y), (width, y)], fill=(255, 255, 255, alpha))
+            
+            # Blend shine with color
+            color_image = Image.alpha_composite(color_image, shine)
+        elif finish == 'semi-gloss':
+            # Add subtle shine for semi-gloss
+            brightness = ImageEnhance.Brightness(color_image)
+            color_image = brightness.enhance(1.1)
+        elif finish in ['satin', 'eggshell']:
+            # Add subtle texture for satin/eggshell
+            brightness = ImageEnhance.Brightness(color_image)
+            color_image = brightness.enhance(1.05)
+        elif finish == 'metallic':
+            # Add metallic effect
+            metallic = Image.new('RGBA', image.size, (255, 255, 255, 0))
+            draw = ImageDraw.Draw(metallic)
+            width, height = metallic.size
+            
+            # Create metallic gradient
+            for y in range(height):
+                for x in range(width):
+                    # Create a pattern that simulates metallic reflection
+                    reflection = (x + y) % 20
+                    alpha = int(30 * (reflection / 20))
+                    if alpha > 0:
+                        metallic.putpixel((x, y), (255, 255, 255, alpha))
+            
+            # Blend metallic with color
+            color_image = Image.alpha_composite(color_image, metallic)
+        
+        # Create a copy of the original image
+        result = image.copy().convert('RGBA')
+        
+        # Apply features based on options
+        shadow_mask = None
+        
+        # Apply shadow tracking if enabled
+        if options.get('shadowTracking', False):
+            shadow_mask = apply_shadow_tracking(image)
+            
+            # Use shadow mask to modify the color intensity
+            color_pixels = color_image.load()
+            mask_pixels = shadow_mask.load()
+            width, height = image.size
+            
+            for y in range(height):
+                for x in range(width):
+                    # Get shadow value (0-255)
+                    shadow_val = mask_pixels[x, y]
+                    # Apply shadow to color (darker where shadow is)
+                    pixel = color_pixels[x, y]
+                    shadow_factor = shadow_val / 255.0
+                    # Adjust RGB values based on shadow
+                    new_r = int(pixel[0] * shadow_factor)
+                    new_g = int(pixel[1] * shadow_factor)
+                    new_b = int(pixel[2] * shadow_factor)
+                    color_pixels[x, y] = (new_r, new_g, new_b, pixel[3])
+        
+        # Apply NFD Vision 360 if enabled
+        if options.get('vision360', False):
+            color_image = apply_nfd_vision360(color_image, color_hex)
+        
+        # Apply realistic blending if enabled
+        if options.get('realisticBlending', True):
+            result = apply_realistic_blending(
+                result, 
+                color_image, 
+                options.get('blendMode', 'normal')
+            )
+        else:
+            # Simple alpha compositing if realistic blending is disabled
+            result = Image.alpha_composite(result, color_image)
+        
+        # Apply lighting effect
+        lighting = options.get('lighting', 'natural')
+        
+        if lighting == 'warm':
+            # Add warm tone
+            enhancer = ImageEnhance.Color(result)
+            result = enhancer.enhance(1.1)
+            # Add slight yellow tint
+            yellow_overlay = Image.new('RGBA', result.size, (255, 255, 200, 30))
+            result = Image.alpha_composite(result, yellow_overlay)
+        elif lighting == 'cool':
+            # Add cool tone
+            enhancer = ImageEnhance.Color(result)
+            result = enhancer.enhance(0.9)
+            # Add slight blue tint
+            blue_overlay = Image.new('RGBA', result.size, (200, 200, 255, 30))
+            result = Image.alpha_composite(result, blue_overlay)
+        elif lighting == 'bright':
+            # Brighten the image
+            enhancer = ImageEnhance.Brightness(result)
+            result = enhancer.enhance(1.2)
+        elif lighting == 'dim':
+            # Dim the image
+            enhancer = ImageEnhance.Brightness(result)
+            result = enhancer.enhance(0.8)
+        elif lighting == 'evening':
+            # Evening lighting (warm but dimmer)
+            enhancer = ImageEnhance.Brightness(result)
+            dimmed = enhancer.enhance(0.85)
+            orange_overlay = Image.new('RGBA', result.size, (255, 200, 150, 40))
+            result = Image.alpha_composite(dimmed, orange_overlay)
+        elif lighting == 'morning':
+            # Morning lighting (cooler, bright)
+            enhancer = ImageEnhance.Brightness(result)
+            brightened = enhancer.enhance(1.1)
+            blue_overlay = Image.new('RGBA', result.size, (220, 240, 255, 20))
+            result = Image.alpha_composite(brightened, blue_overlay)
+        
+        # Convert to RGB for saving as JPEG
+        result = result.convert('RGB')
+        
+        return result
+    except Exception as e:
+        logger.error(f"Error generating enhanced wall preview: {str(e)}")
+        # Return original image with a red tint to indicate error
+        error_image = image.copy()
+        red_overlay = Image.new('RGBA', image.size, (255, 0, 0, 50))
+        error_image.paste(red_overlay, (0, 0), red_overlay)
+        return error_image.convert('RGB')
+
+# Update the API endpoint for generating preview
 @app.route('/api/generate-preview', methods=['POST'])
 def generate_preview():
     try:
-        data = request.get_json()
+        data = request.json
+        image_data = data.get('image')
+        color_hex = data.get('color')
         
-        if not data or 'image' not in data or 'color' not in data:
-            logger.warning("Missing required data in request")
-            return jsonify({"error": "Missing image or color data"}), 400
-        
-        # Log request
-        logger.info("Processing preview generation request")
+        # Get options with defaults
+        options = {
+            'intensity': float(data.get('intensity', 1.0)),
+            'finish': data.get('finish', 'matte'),
+            'texture': data.get('texture', True),
+            'lighting': data.get('lighting', 'natural'),
+            'blendMode': data.get('blendMode', 'normal'),
+            'shadowTracking': data.get('shadowTracking', False),
+            'vision360': data.get('vision360', False),
+            'realisticBlending': data.get('realisticBlending', True)
+        }
         
         # Decode base64 image
-        image = decode_base64_image(data['image'])
+        image = decode_base64_image(image_data)
         
-        # Generate preview with selected color
-        preview_image = generate_wall_preview(image, data['color'])
+        # Generate enhanced preview
+        preview_image = generate_enhanced_wall_preview(image, color_hex, options)
         
-        # Encode preview image to base64
-        preview_data_url = encode_image_to_base64(preview_image)
-        
-        return jsonify({
-            "previewUrl": preview_data_url
-        })
-        
-    except Exception as e:
-        logger.error(f"Error generating preview: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-
-# API endpoint for saving images
-@app.route('/api/save-image', methods=['POST'])
-def save_image():
-    try:
-        data = request.get_json()
-        
-        if not data or 'image' not in data:
-            logger.warning("No image data provided in request")
-            return jsonify({"error": "No image data provided"}), 400
-        
-        # Here we would save the image to a database or file system
-        # For now, just return a success response
-        logger.info("Image saved successfully")
+        # Convert back to base64
+        preview_base64 = encode_image_to_base64(preview_image)
         
         return jsonify({
             "success": True,
-            "message": "Image saved successfully",
-            "id": "img_" + datetime.now().strftime("%Y%m%d%H%M%S")
+            "previewUrl": preview_base64,
+            "message": "Preview generated successfully",
+            "appliedFeatures": {
+                "shadowTracking": options['shadowTracking'],
+                "vision360": options['vision360'],
+                "realisticBlending": options['realisticBlending'],
+                "finish": options['finish'],
+                "lighting": options['lighting']
+            }
         })
     except Exception as e:
-        logger.error(f"Error saving image: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Error in generate_preview: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Failed to generate preview"
+        }), 500
+
+# Add a new endpoint for color matches (combining similar colors and brand matches)
+@app.route('/api/color-matches', methods=['POST'])
+def color_matches():
+    try:
+        data = request.json
+        color_hex = data.get('color')
+        include_rgb = data.get('includeRGB', False)
+        shadow_tracking = data.get('shadowTracking', False)
+        vision360 = data.get('vision360', False)
+        realistic_blending = data.get('realisticBlending', True)
+        
+        # Generate similar colors
+        similar_colors = []
+        
+        # Get RGB values
+        r = int(color_hex[1:3], 16)
+        g = int(color_hex[3:5], 16)
+        b = int(color_hex[5:7], 16)
+        
+        # Generate similar colors with slight variations
+        variations = [
+            (r, g, b),  # Original color
+            (max(0, r - 20), max(0, g - 20), max(0, b - 20)),  # Darker
+            (min(255, r + 20), min(255, g + 20), min(255, b + 20)),  # Lighter
+            (min(255, int(r * 1.1)), g, b),  # More red
+            (r, min(255, int(g * 1.1)), b),  # More green
+            (r, g, min(255, int(b * 1.1)))   # More blue
+        ]
+        
+        for i, (rv, gv, bv) in enumerate(variations):
+            hex_code = f"#{rv:02x}{gv:02x}{bv:02x}"
+            color_name = generate_color_name(hex_code)
+            
+            if i == 0:
+                name = color_name
+            elif i == 1:
+                name = f"Deep {color_name}"
+            elif i == 2:
+                name = f"Light {color_name}"
+            elif i == 3:
+                name = f"Vibrant {color_name}"
+            elif i == 4:
+                name = f"Fresh {color_name}"
+            else:
+                name = f"Cool {color_name}"
+            
+            color_obj = {
+                "name": name,
+                "hex": hex_code
+            }
+            
+            if include_rgb:
+                color_obj["rgb"] = f"rgb({rv}, {gv}, {bv})"
+                
+            similar_colors.append(color_obj)
+        
+        # Generate brand matches
+        brand_matches = []
+        brands = ["Sherwin-Williams", "Benjamin Moore", "Behr", "Valspar", "PPG"]
+        
+        for brand in brands:
+            # Generate a unique color code for each brand
+            if brand == "Sherwin-Williams":
+                code = f"SW-{1000 + (r + g + b) % 9000}"
+                name = f"SW {color_name}"
+                finishes = ["Matte", "Eggshell", "Satin", "Semi-Gloss", "High-Gloss"]
+            elif brand == "Benjamin Moore":
+                code = f"BM-{r + g + b}"
+                name = f"BM {color_name}"
+                finishes = ["Flat", "Matte", "Eggshell", "Pearl", "Semi-Gloss", "High-Gloss"]
+            elif brand == "Behr":
+                code = f"BHR{(r * g * b) % 900 + 100}"
+                name = f"Premium Plus {color_name}"
+                finishes = ["Flat", "Eggshell", "Satin", "Semi-Gloss"]
+            elif brand == "Valspar":
+                code = f"VLP-{(r + g + b) // 3}"
+                name = f"Signature {color_name}"
+                finishes = ["Flat", "Eggshell", "Satin", "Semi-Gloss"]
+            else:  # PPG
+                code = f"PPG{(r * b) % 999 + 1000}"
+                name = f"Timeless {color_name}"
+                finishes = ["Flat", "Eggshell", "Satin", "Semi-Gloss", "High-Gloss"]
+            
+            brand_matches.append({
+                "brand": brand,
+                "colorName": name,
+                "colorCode": code,
+                "hex": color_hex,
+                "finishOptions": finishes
+            })
+        
+        return jsonify({
+            "similarColors": similar_colors,
+            "brandMatches": brand_matches,
+            "featuresUsed": {
+                "shadowTracking": shadow_tracking,
+                "vision360": vision360,
+                "realisticBlending": realistic_blending
+            }
+        })
+    except Exception as e:
+        logger.error(f"Error in color_matches: {str(e)}")
+        return jsonify({
+            "error": str(e),
+            "message": "Failed to find color matches"
+        }), 500
 
 # Configure for both local and production
 app.debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'

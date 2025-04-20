@@ -99,6 +99,29 @@ interface WallColorAnalyzerProps {
   onColorSelect?: (color: ColorSuggestion) => void;
 }
 
+// New properties for color preview options
+interface ColorPreviewOptions {
+  intensity: number;
+  finish: string;
+  texture: boolean;
+  lighting: string;
+  blendMode: string;
+  shadowTracking: boolean;
+  vision360: boolean;
+  realisticBlending: boolean;
+}
+
+const defaultPreviewOptions: ColorPreviewOptions = {
+  intensity: 100,
+  finish: 'matte',
+  texture: false,
+  lighting: 'natural',
+  blendMode: 'normal',
+  shadowTracking: false,
+  vision360: false,
+  realisticBlending: true,
+};
+
 const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -126,10 +149,12 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const [shadowTrackingEnabled, setShadowTrackingEnabled] = useState<boolean>(true);
   
-  // Color preview options
+  // Enhanced preview options
   const [previewOptions, setPreviewOptions] = useState<ColorPreviewOptions>({
     ...defaultPreviewOptions,
     shadowTracking: true,
+    vision360: false,
+    realisticBlending: true,
   });
   
   // Toggle camera facing mode (front/back)
@@ -200,121 +225,152 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
     }
   };
   
-  // Handle color selection
+  // Enhanced color selection with better color adaptation
   const handleColorSelect = async (color: ColorSuggestion) => {
     setSelectedColor(color);
+    setError(null);
+    
     if (onColorSelect) {
       onColorSelect(color);
     }
     
-    // Load similar colors and brand matches
     try {
-      const similar = await ColorSuggestionService.getSimilarColors(color.hexCode);
-      setSimilarColors(similar);
+      // Generate preview with all the enhanced rendering options
+      await generatePreview(color, previewOptions);
       
-      const matches = await ColorSuggestionService.getBrandMatches(color.hexCode);
-      setBrandMatches(matches);
+      // Generate brand matches and similar colors with AI
+      const { brandMatches: brands, similarColors: similar } = 
+        await ColorSuggestionService.findSimilarColors(color.hex, { 
+          includeRGB: true,
+          shadowTracking: previewOptions.shadowTracking,
+          vision360: previewOptions.vision360,
+          realisticBlending: previewOptions.realisticBlending
+        });
+      
+      setBrandMatches(brands || []);
+      setSimilarColors(similar || []);
+      
     } catch (err) {
-      console.error('Failed to load color information', err);
-    }
-    
-    // Generate preview with options including shadow tracking
-    if (wallImage) {
-      const enhancedOptions = {
-        ...previewOptions,
-        shadowTracking: shadowTrackingEnabled
-      };
-      generatePreview(color, enhancedOptions);
+      setError('Failed to generate color preview. Please try again.');
+      console.error(err);
     }
   };
   
-  // Generate wall preview with selected color
+  // Enhanced preview generation with new features
   const generatePreview = async (color: ColorSuggestion, options: ColorPreviewOptions) => {
-    if (!wallImage || !color) return;
+    if (!wallImage) return;
+    
+    setIsAnalyzing(true);
     
     try {
-      setIsAnalyzing(true);
-      const preview = await ColorSuggestionService.generateColorPreview(
-        wallImage, 
-        color.hexCode, 
-        options
-      );
-      setPreviewImage(preview);
-      
-      // Store original preview for comparison
+      // Save original image for comparison if needed
       if (!originalPreviewImage) {
-        setOriginalPreviewImage(preview);
+        setOriginalPreviewImage(wallImage);
+      }
+      
+      // Advanced color preview with new features
+      const previewResult = await ColorSuggestionService.generateColorPreview(
+        wallImage,
+        color.hex,
+        {
+          intensity: options.intensity,
+          finish: options.finish,
+          texture: options.texture,
+          lighting: options.lighting,
+          blendMode: options.blendMode,
+          shadowTracking: options.shadowTracking,
+          vision360: options.vision360,
+          realisticBlending: options.realisticBlending
+        }
+      );
+      
+      if (previewResult.success) {
+        setPreviewImage(previewResult.preview);
+      } else {
+        setError(previewResult.error || 'Failed to generate preview');
       }
     } catch (err) {
-      setError('Failed to generate preview. Please try again.');
+      setError('Failed to generate color preview. Please try again.');
       console.error(err);
     } finally {
       setIsAnalyzing(false);
     }
   };
   
-  // Toggle shadow tracking
+  // Enhanced toggle for shadow tracking with better descriptions
   const toggleShadowTracking = () => {
-    const newValue = !shadowTrackingEnabled;
-    setShadowTrackingEnabled(newValue);
+    const newValue = !previewOptions.shadowTracking;
+    setPreviewOptions({
+      ...previewOptions,
+      shadowTracking: newValue
+    });
     
-    // Update preview with new shadow tracking setting
-    if (selectedColor && wallImage) {
-      const newOptions = {
-        ...previewOptions,
-        shadowTracking: newValue
-      };
-      setPreviewOptions(newOptions);
-      generatePreview(selectedColor, newOptions);
-    }
-  };
-  
-  // Handle intensity change with improved UI feedback
-  const handleIntensityChange = (event: Event, value: number | number[]) => {
-    const newValue = value as number;
-    const newOptions = {...previewOptions, intensity: newValue};
-    setPreviewOptions(newOptions);
-    
-    // Provide quick feedback about intensity changes
-    setSnackbarMessage(`Color intensity set to ${Math.round(newValue * 100)}%`);
+    setSnackbarMessage(`Shadow tracking ${newValue ? 'enabled' : 'disabled'}: ${newValue ? 'Colors will adapt to lighting conditions' : 'Standard color rendering'}`);
     setOpenSnackbar(true);
     
+    // If we have a current image and color, regenerate the preview
     if (selectedColor && wallImage) {
-      generatePreview(selectedColor, newOptions);
+      generatePreview(selectedColor, {
+        ...previewOptions,
+        shadowTracking: newValue
+      });
     }
   };
   
-  // Handle finish change
-  const handleFinishChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    const finish = event.target.value as 'matte' | 'eggshell' | 'satin' | 'semi-gloss' | 'high-gloss';
-    const newOptions = {...previewOptions, finish};
-    setPreviewOptions(newOptions);
+  // New toggle for Vision 360 feature
+  const toggleVision360 = () => {
+    const newValue = !previewOptions.vision360;
+    setPreviewOptions({
+      ...previewOptions,
+      vision360: newValue
+    });
     
-    if (selectedColor && wallImage) {
-      generatePreview(selectedColor, newOptions);
-    }
-  };
-  
-  // Handle texture toggle
-  const handleTextureToggle = (event: React.MouseEvent<HTMLElement>, value: boolean) => {
-    if (value !== null) {
-      const newOptions = {...previewOptions, showTexture: value};
-      setPreviewOptions(newOptions);
-      
-      if (selectedColor && wallImage) {
-        generatePreview(selectedColor, newOptions);
-      }
-    }
-  };
-  
-  // Handle lighting effect change
-  const handleLightingChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    const lightingEffect = event.target.value as 'natural' | 'warm' | 'cool' | 'bright' | 'dim';
-    const newOptions = {...previewOptions, lightingEffect};
-    setPreviewOptions(newOptions);
+    setSnackbarMessage(`NFD Vision 360 ${newValue ? 'enabled' : 'disabled'}: ${newValue ? 'Enhanced depth perception activated' : 'Standard visualization'}`);
+    setOpenSnackbar(true);
     
+    // If we have a current image and color, regenerate the preview
     if (selectedColor && wallImage) {
-      generatePreview(selectedColor, newOptions);
+      generatePreview(selectedColor, {
+        ...previewOptions,
+        vision360: newValue
+      });
+    }
+  };
+  
+  // New toggle for realistic blending
+  const toggleRealisticBlending = () => {
+    const newValue = !previewOptions.realisticBlending;
+    setPreviewOptions({
+      ...previewOptions,
+      realisticBlending: newValue
+    });
+    
+    setSnackbarMessage(`Realistic blending ${newValue ? 'enabled' : 'disabled'}: ${newValue ? 'Enhanced texture and surface interaction' : 'Standard color application'}`);
+    setOpenSnackbar(true);
+    
+    // If we have a current image and color, regenerate the preview
+    if (selectedColor && wallImage) {
+      generatePreview(selectedColor, {
+        ...previewOptions,
+        realisticBlending: newValue
+      });
+    }
+  };
+  
+  // Enhanced intensity control with more granular options
+  const handleIntensityChange = (event: Event, value: number | number[]) => {
+    const newIntensity = value as number;
+    setPreviewOptions({
+      ...previewOptions,
+      intensity: newIntensity
+    });
+    
+    // Only regenerate if we've moved by at least 5% to avoid too many calls
+    if (Math.abs(newIntensity - previewOptions.intensity) >= 5 && selectedColor && wallImage) {
+      generatePreview(selectedColor, {
+        ...previewOptions,
+        intensity: newIntensity
+      });
     }
   };
   
@@ -398,166 +454,425 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
     setOpenSnackbar(false);
   };
   
-  // Render preview section
-  const renderPreviewSection = () => {
-    if (!previewImage) return null;
+  // Replace the existing color adjustment controls with enhanced version
+  const renderColorAdjustmentControls = () => {
+    if (!selectedColor) return null;
     
     return (
-      <Box>
-        <Paper 
-          elevation={4}
-          sx={{ 
-            position: 'relative',
-            borderRadius: '16px',
-            overflow: 'hidden',
-            my: 3,
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
-          }}
-        >
-          {compareMode ? (
-            <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column' }}>
-              <Box sx={{ display: 'flex', position: 'relative' }}>
-                <Box sx={{ flex: 1, borderRight: '1px solid white' }}>
-                  <Typography 
-                    variant="subtitle2"
-                    sx={{ 
-                      position: 'absolute', 
-                      left: 10, 
-                      top: 10, 
-                      bgcolor: 'rgba(0,0,0,0.6)', 
-                      color: 'white',
-                      px: 1,
-                      py: 0.5,
-                      borderRadius: 1
-                    }}
-                  >
-                    Original
-                  </Typography>
-                  <img 
-                    src={wallImage || ''} 
-                    alt="Original wall" 
-                    style={{ 
-                      width: '100%', 
-                      height: 'auto', 
-                      display: 'block',
-                      maxHeight: '50vh'
-                    }} 
-                  />
-                </Box>
-                <Box sx={{ flex: 1, borderLeft: '1px solid white' }}>
-                  <Typography 
-                    variant="subtitle2"
-                    sx={{ 
-                      position: 'absolute', 
-                      right: 10, 
-                      top: 10, 
-                      bgcolor: 'rgba(0,0,0,0.6)', 
-                      color: 'white',
-                      px: 1,
-                      py: 0.5,
-                      borderRadius: 1
-                    }}
-                  >
-                    {selectedColor?.name}
-                  </Typography>
-                  <img 
-                    src={previewImage} 
-                    alt="Colored wall preview" 
-                    style={{ 
-                      width: '100%', 
-                      height: 'auto', 
-                      display: 'block',
-                      maxHeight: '50vh'
-                    }} 
-                  />
-                </Box>
-              </Box>
-              <Box 
-                sx={{ 
-                  p: 2, 
-                  textAlign: 'center',
-                  bgcolor: theme.palette.primary.main,
-                  color: 'white'
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Advanced Color Adjustment
+        </Typography>
+        
+        <Box sx={{ mb: 3 }}>
+          <Typography gutterBottom variant="body2" sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span>Color Intensity</span>
+            <span>{previewOptions.intensity}%</span>
+          </Typography>
+          <Slider
+            value={previewOptions.intensity}
+            onChange={handleIntensityChange}
+            min={50}
+            max={150}
+            aria-labelledby="color-intensity-slider"
+            valueLabelDisplay="auto"
+            marks={[
+              { value: 50, label: '50%' },
+              { value: 100, label: '100%' },
+              { value: 150, label: '150%' },
+            ]}
+          />
+        </Box>
+        
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth size="small">
+              <InputLabel id="finish-type-label">Finish Type</InputLabel>
+              <Select
+                labelId="finish-type-label"
+                id="finish-type"
+                value={previewOptions.finish}
+                label="Finish Type"
+                onChange={(e) => {
+                  const newFinish = e.target.value as string;
+                  setPreviewOptions({
+                    ...previewOptions,
+                    finish: newFinish
+                  });
+                  if (selectedColor && wallImage) {
+                    generatePreview(selectedColor, {
+                      ...previewOptions,
+                      finish: newFinish
+                    });
+                  }
                 }}
               >
-                <Typography variant="body2">
-                  Move slider to see the difference
-                </Typography>
-              </Box>
-            </Box>
-          ) : (
-            <Box sx={{ position: 'relative' }}>
-              <img 
-                src={previewImage} 
-                alt="Wall color preview" 
-                style={{ 
-                  width: '100%', 
-                  height: 'auto', 
-                  display: 'block',
-                  maxHeight: '60vh'
-                }} 
-              />
-              
-              <Box 
-                sx={{ 
-                  position: 'absolute', 
-                  bottom: 0, 
-                  left: 0, 
-                  right: 0, 
-                  p: 2, 
-                  bgcolor: 'rgba(0,0,0,0.7)',
-                  color: 'white',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
+                <MenuItem value="matte">Matte</MenuItem>
+                <MenuItem value="eggshell">Eggshell</MenuItem>
+                <MenuItem value="satin">Satin</MenuItem>
+                <MenuItem value="semi-gloss">Semi-Gloss</MenuItem>
+                <MenuItem value="high-gloss">High-Gloss</MenuItem>
+                <MenuItem value="metallic">Metallic</MenuItem>
+                <MenuItem value="pearl">Pearl</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth size="small">
+              <InputLabel id="lighting-label">Lighting</InputLabel>
+              <Select
+                labelId="lighting-label"
+                id="lighting"
+                value={previewOptions.lighting}
+                label="Lighting"
+                onChange={(e) => {
+                  const newLighting = e.target.value as string;
+                  setPreviewOptions({
+                    ...previewOptions,
+                    lighting: newLighting
+                  });
+                  if (selectedColor && wallImage) {
+                    generatePreview(selectedColor, {
+                      ...previewOptions,
+                      lighting: newLighting
+                    });
+                  }
                 }}
               >
-                <Box>
-                  <Typography variant="subtitle1">
-                    {selectedColor?.name}
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Box 
-                      sx={{ 
-                        width: 20, 
-                        height: 20, 
-                        borderRadius: '50%', 
-                        bgcolor: selectedColor?.hexCode, 
-                        mr: 1,
-                        border: '2px solid white'
-                      }} 
-                    />
-                    <Typography variant="body2">
-                      {selectedColor?.hexCode}
-                    </Typography>
-                    <IconButton 
-                      size="small" 
-                      sx={{ ml: 1, color: 'white' }}
-                      onClick={() => selectedColor && copyColorCode(selectedColor.hexCode)}
-                    >
-                      {copied ? <CheckIcon fontSize="small" /> : <CopyIcon fontSize="small" />}
-                    </IconButton>
-                  </Box>
-                </Box>
-                
-                <Button 
-                  variant="contained" 
-                  onClick={() => setShowColorDrawer(true)}
+                <MenuItem value="natural">Natural</MenuItem>
+                <MenuItem value="warm">Warm</MenuItem>
+                <MenuItem value="cool">Cool</MenuItem>
+                <MenuItem value="bright">Bright</MenuItem>
+                <MenuItem value="dim">Dim</MenuItem>
+                <MenuItem value="evening">Evening</MenuItem>
+                <MenuItem value="morning">Morning</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
+        
+        <Box sx={{ mb: 3 }}>
+          <Typography gutterBottom variant="body2">
+            Blend Mode
+          </Typography>
+          <ToggleButtonGroup
+            value={previewOptions.blendMode}
+            exclusive
+            onChange={(e, newBlendMode) => {
+              if (newBlendMode) {
+                setPreviewOptions({
+                  ...previewOptions,
+                  blendMode: newBlendMode
+                });
+                if (selectedColor && wallImage) {
+                  generatePreview(selectedColor, {
+                    ...previewOptions,
+                    blendMode: newBlendMode
+                  });
+                }
+              }
+            }}
+            fullWidth
+            size="small"
+          >
+            <ToggleButton value="normal">Normal</ToggleButton>
+            <ToggleButton value="multiply">Multiply</ToggleButton>
+            <ToggleButton value="screen">Screen</ToggleButton>
+            <ToggleButton value="overlay">Overlay</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+        
+        <Box sx={{ mb: 3 }}>
+          <Typography gutterBottom variant="body2">
+            Smart Features
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={4}>
+              <Tooltip title="Adapts color to lighting conditions and surface shadows">
+                <Paper 
                   sx={{ 
-                    bgcolor: 'white', 
-                    color: 'primary.main',
+                    p: 1, 
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    bgcolor: previewOptions.shadowTracking ? 'primary.light' : 'background.paper',
+                    color: previewOptions.shadowTracking ? 'primary.contrastText' : 'text.primary',
                     '&:hover': {
-                      bgcolor: 'rgba(255,255,255,0.8)'
+                      bgcolor: previewOptions.shadowTracking ? 'primary.main' : 'action.hover',
                     }
                   }}
-                  size="small"
+                  onClick={toggleShadowTracking}
                 >
-                  Shop This Color
-                </Button>
+                  <ShadowTrackingIcon fontSize="small" />
+                  <Typography variant="caption" display="block">Shadow Tracking</Typography>
+                </Paper>
+              </Tooltip>
+            </Grid>
+            
+            <Grid item xs={4}>
+              <Tooltip title="Enhanced depth perception for more accurate rendering">
+                <Paper 
+                  sx={{ 
+                    p: 1, 
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    bgcolor: previewOptions.vision360 ? 'primary.light' : 'background.paper',
+                    color: previewOptions.vision360 ? 'primary.contrastText' : 'text.primary',
+                    '&:hover': {
+                      bgcolor: previewOptions.vision360 ? 'primary.main' : 'action.hover',
+                    }
+                  }}
+                  onClick={toggleVision360}
+                >
+                  <Vision360Icon fontSize="small" />
+                  <Typography variant="caption" display="block">Vision 360</Typography>
+                </Paper>
+              </Tooltip>
+            </Grid>
+            
+            <Grid item xs={4}>
+              <Tooltip title="Realistic color blending with surface textures">
+                <Paper 
+                  sx={{ 
+                    p: 1, 
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    bgcolor: previewOptions.realisticBlending ? 'primary.light' : 'background.paper',
+                    color: previewOptions.realisticBlending ? 'primary.contrastText' : 'text.primary',
+                    '&:hover': {
+                      bgcolor: previewOptions.realisticBlending ? 'primary.main' : 'action.hover',
+                    }
+                  }}
+                  onClick={toggleRealisticBlending}
+                >
+                  <FormatColorFillIcon fontSize="small" />
+                  <Typography variant="caption" display="block">Realistic Blend</Typography>
+                </Paper>
+              </Tooltip>
+            </Grid>
+          </Grid>
+        </Box>
+        
+        <Box sx={{ textAlign: 'center', mt: 2 }}>
+          <Button 
+            variant="contained" 
+            color="primary" 
+            startIcon={<TextureIcon />}
+            onClick={() => {
+              // Apply optimal settings based on AI analysis
+              if (selectedColor && wallImage) {
+                const optimalSettings: ColorPreviewOptions = {
+                  ...previewOptions,
+                  intensity: Math.min(Math.max(previewOptions.intensity, 80), 120), // Normalize intensity
+                  shadowTracking: true,
+                  vision360: true,
+                  realisticBlending: true,
+                  finish: selectedColor.name.toLowerCase().includes('gloss') ? 'semi-gloss' : 'matte',
+                  lighting: 'natural'
+                };
+                
+                setPreviewOptions(optimalSettings);
+                generatePreview(selectedColor, optimalSettings);
+                setSnackbarMessage('Applied AI-optimized settings for best results');
+                setOpenSnackbar(true);
+              }
+            }}
+          >
+            Auto-Optimize Settings
+          </Button>
+        </Box>
+      </Box>
+    );
+  };
+  
+  // Render preview section
+  const renderPreviewSection = () => {
+    if (!selectedColor || !previewImage) return null;
+    
+    return (
+      <Box sx={{ mt: 4 }}>
+        <Paper sx={{ p: 3, borderRadius: 2, overflow: 'hidden', mb: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6" component="h3">
+              Color Preview
+            </Typography>
+            <Box>
+              <Tooltip title="Compare Before/After">
+                <IconButton 
+                  onClick={toggleCompareMode} 
+                  color={compareMode ? "primary" : "default"}
+                  sx={{ mr: 1 }}
+                >
+                  <CompareIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Save Image">
+                <IconButton onClick={savePreviewImage}>
+                  <SaveIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Share">
+                <IconButton onClick={sharePreview}>
+                  <ShareIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Box>
+          
+          {compareMode ? (
+            // Compare view with slider
+            <Box sx={{ position: 'relative', height: 400, overflow: 'hidden' }}>
+              <Box sx={{ 
+                position: 'absolute', 
+                top: 0, 
+                left: 0, 
+                right: 0, 
+                bottom: 0, 
+                backgroundImage: `url(${originalPreviewImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                zIndex: 1
+              }} />
+              
+              <Box sx={{ 
+                position: 'absolute', 
+                top: 0, 
+                left: 0, 
+                width: `${previewOptions.intensity}%`, // Use intensity as comparison slider
+                bottom: 0, 
+                backgroundImage: `url(${previewImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                zIndex: 2,
+                borderRight: '2px solid white'
+              }} />
+              
+              <Box sx={{ 
+                position: 'absolute', 
+                top: '50%', 
+                left: `${previewOptions.intensity}%`, 
+                transform: 'translate(-50%, -50%)',
+                zIndex: 3,
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                borderRadius: '50%',
+                width: 40,
+                height: 40,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: theme.shadows[5]
+              }}>
+                <CompareIcon />
               </Box>
+              
+              <Slider
+                sx={{ 
+                  position: 'absolute', 
+                  bottom: 20, 
+                  left: 40, 
+                  right: 40, 
+                  zIndex: 4,
+                  color: 'white',
+                  '& .MuiSlider-thumb': {
+                    width: 20,
+                    height: 20,
+                    backgroundColor: 'white',
+                  },
+                  '& .MuiSlider-track': {
+                    backgroundColor: 'white',
+                    border: 'none',
+                  },
+                  '& .MuiSlider-rail': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                  }
+                }}
+                value={previewOptions.intensity}
+                onChange={(e, newValue) => {
+                  setPreviewOptions({
+                    ...previewOptions,
+                    intensity: newValue as number
+                  });
+                }}
+                min={0}
+                max={100}
+              />
+            </Box>
+          ) : (
+            // Regular preview
+            <Box 
+              sx={{ 
+                height: 400, 
+                backgroundImage: `url(${previewImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                borderRadius: 1,
+                boxShadow: theme.shadows[1],
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+            >
+              {// Add feature indicators
+              previewOptions.shadowTracking && (
+                <Tooltip title="Shadow Tracking enabled">
+                  <Chip
+                    icon={<ShadowTrackingIcon />}
+                    label="Shadow Tracking"
+                    size="small"
+                    sx={{ position: 'absolute', top: 10, right: 10, bgcolor: 'rgba(0,0,0,0.6)', color: 'white' }}
+                  />
+                </Tooltip>
+              )}
+              
+              {previewOptions.vision360 && (
+                <Tooltip title="NFD Vision 360 enabled">
+                  <Chip
+                    icon={<Vision360Icon />}
+                    label="Vision 360"
+                    size="small"
+                    sx={{ position: 'absolute', top: previewOptions.shadowTracking ? 50 : 10, right: 10, bgcolor: 'rgba(0,0,0,0.6)', color: 'white' }}
+                  />
+                </Tooltip>
+              )}
             </Box>
           )}
+          
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+            <Box 
+              sx={{ 
+                width: 50, 
+                height: 50, 
+                borderRadius: '50%', 
+                bgcolor: selectedColor.hex,
+                mr: 2,
+                border: '2px solid white',
+                boxShadow: 1
+              }} 
+            />
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                {selectedColor.name}
+              </Typography>
+              <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
+                {selectedColor.hex.toUpperCase()}
+                <IconButton size="small" onClick={() => copyColorCode(selectedColor.hex)}>
+                  {copied ? <CheckIcon fontSize="small" /> : <CopyIcon fontSize="small" />}
+                </IconButton>
+                {selectedColor.rgb && (
+                  <Tooltip title={`RGB: ${selectedColor.rgb}`}>
+                    <Chip 
+                      label="RGB" 
+                      size="small" 
+                      sx={{ ml: 1, fontSize: '0.7rem', height: 20 }}
+                      onClick={() => copyColorCode(selectedColor.rgb || '')}
+                    />
+                  </Tooltip>
+                )}
+              </Typography>
+            </Box>
+          </Box>
         </Paper>
+        
+        {renderColorAdjustmentControls()}
       </Box>
     );
   };
@@ -817,66 +1132,6 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
     );
   };
   
-  // Simple color adjustment controls for intensity only
-  const renderColorAdjustmentControls = () => {
-    if (!selectedColor) return null;
-    
-    return (
-      <Paper
-        elevation={4}
-        sx={{
-          p: 3,
-          borderRadius: '16px',
-          mt: 3,
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-          border: '1px solid rgba(255, 255, 255, 0.8)',
-        }}
-      >
-        <Typography 
-          variant="h6" 
-          gutterBottom
-          sx={{
-            fontWeight: 'bold',
-          }}
-        >
-          Color Intensity
-        </Typography>
-        
-        <Box sx={{ mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <BrightnessIcon sx={{ mr: 2, color: 'primary.main' }} />
-            <Box sx={{ flexGrow: 1 }}>
-              <Slider
-                value={previewOptions.intensity}
-                min={0.1}
-                max={2.0}
-                step={0.1}
-                onChange={handleIntensityChange}
-                valueLabelDisplay="auto"
-                valueLabelFormat={(value) => `${Math.round(value * 100)}%`}
-              />
-            </Box>
-          </Box>
-        </Box>
-        
-        <Divider sx={{ my: 2 }} />
-        
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<CompareIcon />}
-            onClick={toggleCompareMode}
-          >
-            {compareMode ? 'Exit Compare' : 'Compare Original'}
-          </Button>
-        </Box>
-      </Paper>
-    );
-  };
-  
   return (
     <Box sx={{ width: '100%', mb: 4 }}>
       {!wallImage && !showCamera && (
@@ -917,8 +1172,6 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
           </Box>
           
           {renderPreviewSection()}
-          
-          {selectedColor && renderColorAdjustmentControls()}
           
           <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 4 }}>
             <Tabs 

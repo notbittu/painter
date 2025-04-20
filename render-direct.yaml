@@ -1,14 +1,13 @@
 services:
   - type: web
     name: painter-api
-    env: node
-    buildCommand: |
-      rm -f Dockerfile render-build.sh debug-build.sh build.sh
-      rm -rf static
-      npm install
-    startCommand: npm start
+    runtime: python
+    buildCommand: bash render-deploy.sh
+    startCommand: python app.py
     envVars:
       - key: PORT
         value: 10000
-      - key: NODE_ENV
-        value: production 
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.9.0 

@@ -1,3 +1,6 @@
+// DEPRECATED - DO NOT USE - Use app.py instead
+// This file is kept for reference but should not be used in production
+
 const http = require('http');
 const port = process.env.PORT || 10000;
 

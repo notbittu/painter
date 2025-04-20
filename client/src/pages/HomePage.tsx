@@ -1,314 +1,724 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef } from 'react';
 import {
   Box,
+  Container, 
+  Typography, 
   Button,
-  Card,
-  CardActionArea,
-  CardContent,
-  CardMedia,
-  Container,
   Grid,
-  Typography,
+  Paper, 
   useTheme,
+  useMediaQuery
 } from '@mui/material';
-import FormatPaintIcon from '@mui/icons-material/FormatPaint';
-import ColorLensIcon from '@mui/icons-material/ColorLens';
-import WallpaperIcon from '@mui/icons-material/Wallpaper';
+import { 
+  CameraAlt as CameraIcon, 
+  Upload as UploadIcon, 
+  Brush as BrushIcon,
+  Palette as PaletteIcon,
+  SaveAlt as SaveAltIcon,
+  TouchApp as TouchAppIcon,
+  FormatColorFill as WallPainterIcon
+} from '@mui/icons-material';
+import { Link as RouterLink } from 'react-router-dom';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
-// Sample colors for trending palettes
-const trendingColors = [
-  ['#F3F8FF', '#DEECFF', '#C6CFFF', '#E8D3FF'],
-  ['#97FEED', '#43919B', '#73A9AD', '#BDD9BF'],
-  ['#E29578', '#FFDDD2', '#EDF6F9', '#83C5BE'],
-  ['#5F0F40', '#9A031E', '#FB8B24', '#E36414'],
-];
+// Animation CSS keyframes
+const animateBubble = `
+@keyframes animate-bubble {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+    border-radius: 0;
+  }
+  100% {
+    transform: translateY(-1000px) rotate(720deg);
+    opacity: 0;
+    border-radius: 50%;
+  }
+}
+`;
 
-// Sample room images
-const roomImages = [
-  {
-    title: 'Modern Living Room',
-    image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&auto=format',
-    description: 'Minimalist design with neutral tones and subtle accents.',
-  },
-  {
-    title: 'Cozy Bedroom',
-    image: 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=500&auto=format',
-    description: 'Warm colors create a perfect sanctuary for relaxation.',
-  },
-  {
-    title: 'Elegant Kitchen',
-    image: 'https://images.unsplash.com/photo-1556912998-c57cc6b63cd7?w=500&auto=format',
-    description: 'Bold colors balance with bright spaces for a modern look.',
-  },
-];
-
-const HomePage = () => {
+const HomePage: React.FC = () => {
   const theme = useTheme();
-  const navigate = useNavigate();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const animationRef = useRef<HTMLDivElement>(null);
+  
+  // Animation setup for floating bubbles
+  useEffect(() => {
+    const colors = ['#6366f1', '#ec4899', '#3b82f6', '#10b981', '#f59e0b'];
+    const bubbleContainer = animationRef.current;
+    
+    if (bubbleContainer) {
+      // Create bubble elements
+      for (let i = 0; i < 15; i++) {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.style.cssText = `
+          position: absolute;
+          bottom: -100px;
+          width: ${Math.random() * 40 + 20}px;
+          height: ${Math.random() * 40 + 20}px;
+          background: ${colors[Math.floor(Math.random() * colors.length)]};
+          border-radius: 50%;
+          opacity: 0.4;
+          animation: animate-bubble ${Math.random() * 10 + 15}s linear infinite;
+          left: ${Math.random() * 100}%;
+          animation-delay: ${Math.random() * 5}s;
+        `;
+        bubbleContainer.appendChild(bubble);
+      }
+    }
+    
+    // Cleanup
+    return () => {
+      if (bubbleContainer) {
+        const bubbles = bubbleContainer.querySelectorAll('.bubble');
+        bubbles.forEach(bubble => bubble.remove());
+      }
+    };
+  }, []);
 
   return (
-    <Box>
-      {/* Hero Section */}
+    <Box 
+      sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        minHeight: '100vh',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Animated background bubbles */}
       <Box
+        ref={animationRef}
         sx={{
-          position: 'relative',
-          height: '80vh',
-          display: 'flex',
-          alignItems: 'center',
-          backgroundImage: 'url(https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=1920&q=80)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          color: 'white',
-          '&::before': {
+          position: 'absolute', 
+          top: 0, 
+          left: 0, 
+          width: '100%', 
+          height: '100%', 
+          overflow: 'hidden',
+          zIndex: -1,
+          '&::after': {
             content: '""',
             position: 'absolute',
-            top: 0,
-            left: 0,
             width: '100%',
             height: '100%',
-            backgroundColor: 'rgba(0,0,0,0.5)',
+            background: 'linear-gradient(135deg, rgba(238, 242, 255, 0.8) 0%, rgba(248, 250, 252, 0.8) 100%)',
+          },
+          '& .bubble': {
+            animation: 'animate-bubble',
           },
         }}
+      />
+      
+      {/* Global keyframes */}
+      <style>{animateBubble}</style>
+      
+      <Header />
+      
+      {/* Main Content */}
+      <Box 
+        component="main" 
+        sx={{ 
+          flexGrow: 1, 
+          pt: { xs: 12, sm: 14 },
+          pb: { xs: 8, sm: 10 },
+          position: 'relative',
+          zIndex: 1,
+        }}
       >
-        <Container sx={{ position: 'relative', zIndex: 1 }}>
-          <Typography
-            variant="h1"
-            component="h1"
-            sx={{
-              fontWeight: 700,
-              fontSize: { xs: '2.5rem', md: '4rem' },
-              maxWidth: '800px',
-              mb: 2,
+        {/* Hero Section */}
+        <Container maxWidth="lg">
+          <Box 
+            sx={{ 
+              textAlign: 'center',
+              mb: 10,
+              position: 'relative',
             }}
           >
-            Transform Your Space With Perfect Colors
-          </Typography>
-          <Typography
-            variant="h5"
-            component="p"
-            sx={{
-              maxWidth: '600px',
-              mb: 4,
+            {/* Decorative element */}
+            <Box
+              sx={{
+                position: 'absolute',
+                top: '-80px',
+                right: { xs: '-180px', md: '-120px' },
+                width: '300px',
+                height: '300px',
+                background: 'radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%)',
+                borderRadius: '50%',
+                filter: 'blur(60px)',
+                zIndex: -1,
+              }}
+            />
+            
+            <Typography
+              variant="h1"
+              component="h1"
+              sx={{
+                  fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4rem' },
+                  fontWeight: 800,
+                  mb: 3,
+                  background: 'linear-gradient(90deg, #6366f1, #ec4899, #10b981)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  animation: 'gradient 8s ease infinite',
+                  '@keyframes gradient': {
+                    '0%': { backgroundPosition: '0% 50%' },
+                    '50%': { backgroundPosition: '100% 50%' },
+                    '100%': { backgroundPosition: '0% 50%' },
+                  },
+                  backgroundSize: '200% 200%',
+                  textShadow: '0 2px 15px rgba(99, 102, 241, 0.2)',
+                }}
+              >
+                Draw on Your Photos
+              </Typography>
+            
+            <Typography
+              variant="h5"
+                component="h2" 
+                color="textSecondary"
+              sx={{
+                  mb: 5,
+                  maxWidth: '800px',
+                  mx: 'auto',
+                  px: 2,
+                  fontSize: { xs: '1.1rem', sm: '1.3rem' },
+                  lineHeight: 1.6,
+                  opacity: 0,
+                  animation: 'fadeInUp 1s ease forwards 0.5s',
+                  '@keyframes fadeInUp': {
+                    '0%': { opacity: 0, transform: 'translateY(20px)' },
+                    '100%': { opacity: 1, transform: 'translateY(0)' },
+                  },
+                }}
+              >
+                Capture, upload, and unleash your creativity with our intuitive painting tools
+              </Typography>
+
+            {/* New Feature Banner */}
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                mb: 5,
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(236, 72, 153, 0.08))',
+                border: '1px solid rgba(99, 102, 241, 0.2)',
+                backdropFilter: 'blur(10px)',
+                animation: 'pulse 2s infinite',
+                '@keyframes pulse': {
+                  '0%': { boxShadow: '0 0 0 0 rgba(99, 102, 241, 0.4)' },
+                  '70%': { boxShadow: '0 0 0 15px rgba(99, 102, 241, 0)' },
+                  '100%': { boxShadow: '0 0 0 0 rgba(99, 102, 241, 0)' },
+                },
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 2,
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box
+                  sx={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'linear-gradient(135deg, #6366f1, #ec4899)',
+                    boxShadow: '0 8px 16px rgba(99, 102, 241, 0.3)',
+                  }}
+                >
+                  <WallPainterIcon sx={{ color: 'white', fontSize: 30 }} />
+                </Box>
+                <Box sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
+                  <Typography variant="h6" component="h3" fontWeight="bold">
+                    NEW! AI Wall Color Visualizer
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    See how different paint colors would look on your walls using AI
+                  </Typography>
+                </Box>
+              </Box>
+              <Button
+                component={RouterLink}
+                to="/wall-painter"
+                variant="contained"
+                color="primary"
+                size="large"
+                startIcon={<WallPainterIcon />}
+                sx={{ 
+                  px: 3, 
+                  py: 1.2,
+                  borderRadius: '10px',
+                  backgroundImage: 'linear-gradient(to right, #6366f1, #ec4899)',
+                  boxShadow: '0 8px 16px rgba(99, 102, 241, 0.3)',
+                  '&:hover': {
+                    boxShadow: '0 12px 20px rgba(99, 102, 241, 0.4)',
+                    transform: 'translateY(-3px)',
+                  },
+                  transition: 'all 0.3s ease',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Try It Now
+              </Button>
+            </Paper>
+            
+            <Grid 
+              container 
+              spacing={3} 
+              justifyContent="center"
+              sx={{
+                opacity: 0,
+                animation: 'fadeInUp 1s ease forwards 0.8s',
+              }}
+            >
+              <Grid item>
+                <Button
+                  component={RouterLink}
+                  to="/editor/camera"
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  startIcon={<CameraIcon />}
+                  sx={{ 
+                    px: 4, 
+                    py: 1.8,
+                    fontSize: '1.1rem',
+                    boxShadow: '0 8px 20px rgba(99, 102, 241, 0.3)',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      boxShadow: '0 12px 25px rgba(99, 102, 241, 0.4)',
+                      transform: 'translateY(-5px)',
+                    },
+                  }}
+                >
+                  Use Camera
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  component={RouterLink}
+                  to="/editor/upload"
+                  variant="outlined"
+                  color="primary"
+                  size="large"
+                  startIcon={<UploadIcon />}
+                  sx={{ 
+                    px: 4, 
+                    py: 1.8,
+                    fontSize: '1.1rem',
+                    borderWidth: '2px',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      borderWidth: '2px',
+                      transform: 'translateY(-5px)',
+                    },
+                  }}
+                >
+                  Upload Photo
+                </Button>
+              </Grid>
+            </Grid>
+            
+            {/* Decorative circles */}
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: '-30px',
+                left: { xs: '-100px', md: '0' },
+                width: '200px',
+                height: '200px',
+                background: 'radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, rgba(236, 72, 153, 0.05) 100%)',
+                borderRadius: '50%',
+                filter: 'blur(40px)',
+                zIndex: -1,
+              }}
+            />
+          </Box>
+
+          {/* Features Section */}
+          <Box 
+            sx={{ 
+              py: 12,
+              position: 'relative',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '1px',
+                height: '100%',
+                background: 'linear-gradient(to bottom, transparent, rgba(99, 102, 241, 0.3), transparent)',
+                display: { xs: 'none', md: 'block' },
+              },
             }}
           >
-            Discover premium paints and expert color solutions for your home
-          </Typography>
-          <Box>
-            <Button
-              variant="contained"
-              size="large"
+            <Typography 
+              variant="h2" 
+              component="h3" 
+              textAlign="center" 
+              gutterBottom
+              sx={{
+                mb: 2,
+                position: 'relative',
+                display: 'inline-block',
+                px: 4,
+                background: 'linear-gradient(90deg, #6366f1, #10b981)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                mx: 'auto',
+                width: 'fit-content',
+              }}
+            >
+              Powerful Drawing Tools
+              </Typography>
+            
+            <Typography
+                variant="body1" 
+                color="textSecondary" 
+                textAlign="center" 
+                sx={{ 
+                  mb: 8,
+                  maxWidth: '750px',
+                  mx: 'auto',
+                  fontSize: '1.1rem',
+                }}
+              >
+                Everything you need to annotate and enhance your photos with an intuitive, easy-to-use interface
+            </Typography>
+
+            <Grid container spacing={5}>
+              <Grid 
+                item 
+                xs={12} 
+                md={4}
+                sx={{
+                  opacity: 0,
+                  animation: 'fadeInUp 1s ease forwards',
+                }}
+              >
+                <Paper 
+                  elevation={0}
+                  sx={{ 
+                    p: 4, 
+                    height: '100%', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center',
+                    borderRadius: '24px',
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(240, 240, 250, 0.9)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-10px)',
+                      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+                      '& .icon-container': {
+                        transform: 'scale(1.1)',
+                      },
+                    },
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '8px',
+                      background: 'linear-gradient(90deg, #6366f1, #3b82f6)',
+                      borderRadius: '24px 24px 0 0',
+                    },
+                  }}
+                >
+                  <Box 
+                    className="icon-container"
+                            sx={{
+                      mb: 3, 
+                      width: '80px',
+                      height: '80px',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(59, 130, 246, 0.1))',
+                      transition: 'transform 0.3s ease',
+                    }}
+                  >
+                    <CameraIcon color="primary" sx={{ fontSize: 40 }} />
+                      </Box>
+                  <Typography 
+                    variant="h5" 
+                    component="h3" 
+                    gutterBottom
+                    sx={{ 
+                      fontWeight: 700,
+                      color: theme.palette.primary.main,
+                    }}
+                  >
+                    Capture Images
+                      </Typography>
+                  <Typography variant="body1" color="textSecondary" textAlign="center">
+                    Take photos directly with your device camera or upload existing ones from your gallery
+                      </Typography>
+                </Paper>
+              </Grid>
+              
+              <Grid 
+                item 
+                xs={12} 
+                md={4}
+                sx={{
+                  opacity: 0,
+                  animation: 'fadeInUp 1s ease forwards 0.3s',
+                }}
+              >
+                <Paper 
+                  elevation={0}
+                  sx={{ 
+                    p: 4, 
+                    height: '100%', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center',
+                    borderRadius: '24px',
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(240, 240, 250, 0.9)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-10px)',
+                      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+                      '& .icon-container': {
+                        transform: 'scale(1.1)',
+                      },
+                    },
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '8px',
+                      background: 'linear-gradient(90deg, #ec4899, #ef4444)',
+                      borderRadius: '24px 24px 0 0',
+                    },
+                  }}
+                >
+                  <Box 
+                    className="icon-container"
+                    sx={{ 
+                      mb: 3, 
+                      width: '80px',
+                      height: '80px',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(239, 68, 68, 0.1))',
+                      transition: 'transform 0.3s ease',
+                    }}
+                  >
+                    <BrushIcon sx={{ fontSize: 40, color: '#ec4899' }} />
+      </Box>
+        <Typography
+                    variant="h5" 
+                    component="h3" 
+                    gutterBottom
+                    sx={{ 
+                      fontWeight: 700,
+                      color: '#ec4899',
+                    }}
+                  >
+                    Creative Drawing
+                  </Typography>
+                  <Typography variant="body1" color="textSecondary" textAlign="center">
+                    Use brushes of different sizes and vibrant colors to express your creativity exactly how you want
+        </Typography>
+                </Paper>
+              </Grid>
+              
+              <Grid 
+                item 
+                xs={12} 
+                md={4}
+                sx={{
+                  opacity: 0,
+                  animation: 'fadeInUp 1s ease forwards 0.6s',
+                }}
+              >
+                <Paper 
+                  elevation={0}
+                  sx={{ 
+                    p: 4, 
+                    height: '100%', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center',
+                    borderRadius: '24px',
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(240, 240, 250, 0.9)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-10px)',
+                      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+                      '& .icon-container': {
+                        transform: 'scale(1.1)',
+                      },
+                    },
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '8px',
+                      background: 'linear-gradient(90deg, #10b981, #059669)',
+                      borderRadius: '24px 24px 0 0',
+                    },
+                  }}
+                >
+                  <Box 
+                    className="icon-container"
+                    sx={{ 
+                      mb: 3, 
+                      width: '80px',
+                      height: '80px',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1))',
+                      transition: 'transform 0.3s ease',
+                    }}
+                  >
+                    <SaveAltIcon sx={{ fontSize: 40, color: '#10b981' }} />
+                  </Box>
+                  <Typography 
+                    variant="h5" 
+                    component="h3" 
+                    gutterBottom
+                    sx={{ 
+                      fontWeight: 700,
+                      color: '#10b981',
+                    }}
+                  >
+                    Instant Saving
+                    </Typography>
+                  <Typography variant="body1" color="textSecondary" textAlign="center">
+                    Download your masterpiece instantly to share with friends or use in your projects
+                    </Typography>
+                </Paper>
+              </Grid>
+            </Grid>
+          </Box>
+          
+          {/* Call to Action */}
+          <Box
+            sx={{
+              py: 10,
+              textAlign: 'center',
+              borderRadius: '24px',
+              position: 'relative',
+              overflow: 'hidden',
+              background: 'rgba(255, 255, 255, 0.7)',
+              backdropFilter: 'blur(20px)',
+              boxShadow: '0 20px 80px rgba(0, 0, 0, 0.07)',
+              border: '1px solid rgba(255, 255, 255, 0.8)',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: 'radial-gradient(circle at top right, rgba(99, 102, 241, 0.1), transparent 70%)',
+                zIndex: -1,
+              },
+            }}
+          >
+            <Typography 
+              variant="h3" 
+              component="h3" 
+              gutterBottom
+              sx={{
+                fontWeight: 700,
+                background: 'linear-gradient(90deg, #6366f1, #ec4899)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              Ready to Start Creating?
+            </Typography>
+            
+            <Typography 
+              variant="h6" 
+        sx={{
+                mb: 4, 
+                maxWidth: 700, 
+                mx: 'auto',
+                color: theme.palette.text.secondary,
+                fontWeight: 400,
+              }}
+            >
+              Jump in and create your first masterpiece in seconds – no sign-up required!
+              </Typography>
+            
+              <Button
+              component={RouterLink}
+              to="/editor"
+                variant="contained"
               color="primary"
-              sx={{ mr: 2, px: 4, py: 1.5 }}
-              onClick={() => navigate('/room-visualizer')}
-            >
-              Try Room Visualizer
-            </Button>
-            <Button
-              variant="outlined"
-              size="large"
-              sx={{ px: 4, py: 1.5, borderColor: 'white', color: 'white' }}
-              onClick={() => navigate('/color-picker')}
-            >
-              Explore Colors
-            </Button>
+                size="large"
+              startIcon={<PaletteIcon />}
+                sx={{
+                px: 6, 
+                py: 2,
+                fontSize: '1.1rem',
+                fontWeight: 600,
+                borderRadius: '12px',
+                boxShadow: '0 10px 25px rgba(99, 102, 241, 0.4)',
+                transition: 'all 0.3s ease',
+                  '&:hover': {
+                  boxShadow: '0 15px 30px rgba(99, 102, 241, 0.5)',
+                  transform: 'translateY(-5px) scale(1.05)',
+                  },
+                }}
+              >
+              Open Editor Now
+              </Button>
+            
+            <Box sx={{ mt: 6, display: 'flex', justifyContent: 'center', gap: 5, flexWrap: 'wrap' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <TouchAppIcon sx={{ color: theme.palette.primary.main }} />
+                <Typography variant="body2" color="textSecondary">Easy to Use</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <PaletteIcon sx={{ color: theme.palette.secondary.main }} />
+                <Typography variant="body2" color="textSecondary">Vibrant Colors</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <SaveAltIcon sx={{ color: '#10b981' }} />
+                <Typography variant="body2" color="textSecondary">Save & Share</Typography>
+              </Box>
+            </Box>
           </Box>
         </Container>
       </Box>
-
-      {/* Features Section */}
-      <Container sx={{ py: 8 }}>
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={4}>
-            <Box sx={{ textAlign: 'center', p: 3 }}>
-              <FormatPaintIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
-              <Typography variant="h5" component="h2" gutterBottom>
-                Premium Paint Collection
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                High-quality paints that provide excellent coverage, durability, and vibrant colors that last for years.
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Box sx={{ textAlign: 'center', p: 3 }}>
-              <ColorLensIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
-              <Typography variant="h5" component="h2" gutterBottom>
-                Expert Color Matching
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Advanced color technology to help you find the perfect shade or match an existing color with precision.
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Box sx={{ textAlign: 'center', p: 3 }}>
-              <WallpaperIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
-              <Typography variant="h5" component="h2" gutterBottom>
-                Virtual Room Visualizer
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                See how colors look in your space before you paint with our cutting-edge visualization technology.
-              </Typography>
-            </Box>
-          </Grid>
-        </Grid>
-      </Container>
-
-      {/* Trending Colors Section */}
-      <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
-        <Container>
-          <Typography variant="h4" component="h2" align="center" gutterBottom>
-            Trending Color Palettes
-          </Typography>
-          <Typography
-            variant="subtitle1"
-            color="text.secondary"
-            align="center"
-            sx={{ mb: 6, maxWidth: 700, mx: 'auto' }}
-          >
-            Discover the latest color trends and find inspiration for your next painting project.
-          </Typography>
-
-          <Grid container spacing={4}>
-            {trendingColors.map((palette, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
-                <Card sx={{ height: '100%', borderRadius: 2, boxShadow: 2 }}>
-                  <CardActionArea>
-                    <Box sx={{ p: 2 }}>
-                      <Box sx={{ display: 'flex', mb: 2 }}>
-                        {palette.map((color, i) => (
-                          <Box
-                            key={i}
-                            sx={{
-                              width: 50,
-                              height: 50,
-                              bgcolor: color,
-                              borderRadius: i === 0 ? '8px 0 0 8px' : i === palette.length - 1 ? '0 8px 8px 0' : 0,
-                              border: `1px solid ${theme.palette.divider}`,
-                              ml: i > 0 ? '-1px' : 0,
-                            }}
-                          />
-                        ))}
-                      </Box>
-                      <Typography variant="h6" component="h3">
-                        {index === 0
-                          ? 'Serene Blues'
-                          : index === 1
-                          ? 'Coastal Greens'
-                          : index === 2
-                          ? 'Sunset Pastels'
-                          : 'Vibrant Warmth'}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {index === 0
-                          ? 'Calming blues for bedrooms and offices'
-                          : index === 1
-                          ? 'Fresh greens inspired by nature'
-                          : index === 2
-                          ? 'Soft tones for living spaces'
-                          : 'Bold accents for statement walls'}
-                      </Typography>
-                    </Box>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Container>
-      </Box>
-
-      {/* Room Inspiration Section */}
-      <Container sx={{ py: 8 }}>
-        <Typography variant="h4" component="h2" align="center" gutterBottom>
-          Room Inspiration Gallery
-        </Typography>
-        <Typography
-          variant="subtitle1"
-          color="text.secondary"
-          align="center"
-          sx={{ mb: 6, maxWidth: 700, mx: 'auto' }}
-        >
-          Explore beautiful room designs and find ideas for your own space.
-        </Typography>
-
-        <Grid container spacing={4}>
-          {roomImages.map((room, index) => (
-            <Grid item xs={12} md={4} key={index}>
-              <Card sx={{ height: '100%', borderRadius: 2, boxShadow: 3 }}>
-                <CardActionArea>
-                  <CardMedia
-                    component="img"
-                    height="240"
-                    image={room.image}
-                    alt={room.title}
-                  />
-                  <CardContent>
-                    <Typography variant="h6" component="h3" gutterBottom>
-                      {room.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {room.description}
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-
-        <Box sx={{ textAlign: 'center', mt: 6 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            onClick={() => navigate('/inspirations')}
-          >
-            View More Inspirations
-          </Button>
-        </Box>
-      </Container>
-
-      {/* CTA Section */}
-      <Box
-        sx={{
-          bgcolor: 'primary.main',
-          color: 'white',
-          py: 8,
-          mt: 4,
-        }}
-      >
-        <Container>
-          <Grid container spacing={4} alignItems="center">
-            <Grid item xs={12} md={8}>
-              <Typography variant="h4" component="h2" gutterBottom>
-                Ready to transform your space?
-              </Typography>
-              <Typography variant="subtitle1" sx={{ mb: 2, opacity: 0.9 }}>
-                Try our virtual room visualizer today and see how different colors look in your own space.
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
-              <Button
-                variant="contained"
-                size="large"
-                sx={{
-                  px: 4,
-                  py: 1.5,
-                  bgcolor: 'white',
-                  color: 'primary.main',
-                  '&:hover': {
-                    bgcolor: 'rgba(255,255,255,0.9)',
-                  },
-                }}
-                onClick={() => navigate('/room-visualizer')}
-              >
-                Get Started Now
-              </Button>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
+      
+      <Footer />
     </Box>
   );
 };

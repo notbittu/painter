@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 import {
   AppBar,
   Box,
@@ -7,146 +7,191 @@ import {
   IconButton,
   Typography,
   Menu,
-  Container,
-  Button,
   MenuItem,
   useMediaQuery,
   useTheme,
+  Button,
+  Badge,
 } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import ColorLensIcon from '@mui/icons-material/ColorLens';
+import { 
+  Menu as MenuIcon, 
+  Brush as BrushIcon, 
+  Home as HomeIcon,
+  FormatColorFill as WallPainterIcon,
+  NewReleases as NewIcon
+} from '@mui/icons-material';
 
-const pages = [
-  { title: 'Color Picker', path: '/color-picker' },
-  { title: 'Room Visualizer', path: '/room-visualizer' },
-  { title: 'Collections', path: '/collections' },
-  { title: 'Products', path: '/products' },
-  { title: 'Inspiration', path: '/inspirations' },
-];
-
-const Header = () => {
-  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
+const Header: React.FC = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget);
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const location = useLocation();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  
+  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
   };
-
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
+  
+  const handleMenuClose = () => {
+    setAnchorEl(null);
   };
-
+  
+  const isEditor = location.pathname.includes('/editor');
+  const isWallPainter = location.pathname.includes('/wall-painter');
+  
   return (
-    <AppBar position="static" color="default" elevation={0} sx={{ borderBottom: '1px solid #eaeaea' }}>
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          {/* Logo for larger screens */}
-          <ColorLensIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, color: 'primary.main' }} />
-          <Typography
-            variant="h6"
-            noWrap
-            component={RouterLink}
-            to="/"
-            sx={{
-              mr: 2,
-              display: { xs: 'none', md: 'flex' },
-              fontWeight: 700,
-              letterSpacing: '.1rem',
-              color: 'primary.main',
-              textDecoration: 'none',
+    <AppBar 
+      position="fixed" 
+      color="default" 
+      elevation={0}
+      sx={{ 
+        backgroundColor: 'background.paper',
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        zIndex: theme.zIndex.drawer + 1,
+      }}
+    >
+      <Toolbar>
+        <RouterLink to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}>
+          <BrushIcon color="primary" sx={{ mr: 1 }} />
+          <Typography 
+            variant="h6" 
+            color="textPrimary" 
+            sx={{ 
+              fontWeight: 600,
+              display: { xs: 'none', sm: 'block' }
             }}
           >
-            PAINTER
+            Painter
           </Typography>
-
-          {/* Mobile menu */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+        </RouterLink>
+        
+        <Box sx={{ flexGrow: 1 }} />
+        
+        {isMobile ? (
+          <>
             <IconButton
-              size="large"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
+              edge="end"
               color="inherit"
+              aria-label="menu"
+              onClick={handleMenuOpen}
             >
               <MenuIcon />
             </IconButton>
             <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
               keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: 'block', md: 'none' },
+            >
+              <MenuItem 
+                component={RouterLink} 
+                to="/"
+                onClick={handleMenuClose}
+                selected={location.pathname === '/'}
+              >
+                <HomeIcon fontSize="small" sx={{ mr: 1 }} />
+                Home
+              </MenuItem>
+              <MenuItem 
+                component={RouterLink} 
+                to="/editor"
+                onClick={handleMenuClose}
+                selected={isEditor}
+              >
+                <BrushIcon fontSize="small" sx={{ mr: 1 }} />
+                Editor
+              </MenuItem>
+              <MenuItem 
+                component={RouterLink} 
+                to="/wall-painter"
+                onClick={handleMenuClose}
+                selected={isWallPainter}
+              >
+                <WallPainterIcon fontSize="small" sx={{ mr: 1 }} />
+                Wall Painter
+                <NewIcon 
+                  sx={{ 
+                    ml: 0.5, 
+                    color: theme.palette.secondary.main, 
+                    fontSize: '0.8rem'
+                  }} 
+                />
+              </MenuItem>
+            </Menu>
+          </>
+        ) : (
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              component={RouterLink}
+              to="/"
+              color={location.pathname === '/' ? 'primary' : 'inherit'}
+              startIcon={<HomeIcon />}
+              sx={{ 
+                fontWeight: location.pathname === '/' ? 600 : 400,
+                borderRadius: '8px',
               }}
             >
-              {pages.map((page) => (
-                <MenuItem 
-                  key={page.title} 
-                  onClick={handleCloseNavMenu}
-                  component={RouterLink}
-                  to={page.path}
+              Home
+            </Button>
+            <Button
+              component={RouterLink}
+              to="/editor"
+              color={isEditor ? 'primary' : 'inherit'}
+              startIcon={<BrushIcon />}
+              sx={{ 
+                fontWeight: isEditor ? 600 : 400,
+                borderRadius: '8px',
+              }}
+            >
+              Editor
+            </Button>
+            <Button
+              component={RouterLink}
+              to="/wall-painter"
+              color={isWallPainter ? 'primary' : 'inherit'}
+              startIcon={
+                <Badge
+                  badgeContent={
+                    <NewIcon sx={{ fontSize: '0.8rem', color: theme.palette.secondary.main }} />
+                  }
+                  overlap="circular"
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  sx={{
+                    '& .MuiBadge-badge': {
+                      backgroundColor: 'transparent',
+                      transform: 'scale(0.8) translate(50%, -50%)',
+                    }
+                  }}
                 >
-                  <Typography textAlign="center">{page.title}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-
-          {/* Logo for mobile screens */}
-          <ColorLensIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1, color: 'primary.main' }} />
-          <Typography
-            variant="h6"
-            noWrap
-            component={RouterLink}
-            to="/"
-            sx={{
-              flexGrow: 1,
-              display: { xs: 'flex', md: 'none' },
-              fontWeight: 700,
-              letterSpacing: '.1rem',
-              color: 'primary.main',
-              textDecoration: 'none',
-            }}
-          >
-            PAINTER
-          </Typography>
-
-          {/* Desktop menu */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
-            {pages.map((page) => (
-              <Button
-                key={page.title}
-                component={RouterLink}
-                to={page.path}
-                onClick={handleCloseNavMenu}
-                sx={{ my: 2, mx: 1, color: 'text.primary', display: 'block' }}
-              >
-                {page.title}
-              </Button>
-            ))}
-          </Box>
-
-          {/* Action buttons */}
-          <Box sx={{ flexGrow: 0 }}>
-            <Button variant="outlined" sx={{ mr: 1 }}>
-              Log In
-            </Button>
-            <Button variant="contained" color="primary" sx={{ display: { xs: 'none', sm: 'inline-flex' } }}>
-              Get Started
+                  <WallPainterIcon />
+                </Badge>
+              }
+              sx={{ 
+                fontWeight: isWallPainter ? 600 : 400,
+                borderRadius: '8px',
+                position: 'relative',
+                '&::after': isWallPainter ? {} : {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: 6,
+                  left: 0,
+                  right: 0,
+                  height: 2,
+                  background: 'linear-gradient(90deg, #6366f1, #ec4899)',
+                  borderRadius: '2px',
+                  transform: 'scaleX(0.8)',
+                  opacity: 0.8,
+                }
+              }}
+            >
+              Wall Painter
             </Button>
           </Box>
-        </Toolbar>
-      </Container>
+        )}
+      </Toolbar>
     </AppBar>
   );
 };

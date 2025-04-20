@@ -1,20 +1,63 @@
-# Painter App
+# Painter
 
-A modern web application built with React and Flask.
+A modern web application for drawing on photos built with React and Flask.
+
+## Features
+
+- **Take Photos**: Capture images with your device camera
+- **Upload Images**: Use existing photos from your device
+- **Drawing Tools**: Draw on your images with customizable brush size and colors
+- **Eraser**: Remove parts of your drawing
+- **Undo & Clear**: Easily fix mistakes or start over
+- **Fullscreen Mode**: Immersive editing experience
+- **Save & Download**: Save your creations to your device
+- **Mobile Friendly**: Works on phones, tablets and desktop
+
+## Tech Stack
+
+### Frontend
+- React 18 with TypeScript
+- Material UI for components
+- React Router for navigation
+- React Konva for canvas drawing
+- React Webcam for camera access
+- Error boundaries for graceful error handling
+- Code splitting with lazy loading
+
+### Backend
+- Python Flask
+- WhiteNoise for static file serving
+- Flask-CORS for cross-origin support
+- Logging for debugging and monitoring
 
 ## Project Structure
 
 ```
 painter/
 ├── client/          # React frontend
-├── app.py          # Flask backend
-├── Procfile        # Deployment configuration
+│   ├── build/       # Built frontend files
+│   ├── public/      # Static assets
+│   └── src/         # Source code
+│       ├── components/  # Reusable UI components
+│       ├── context/     # React contexts
+│       ├── pages/       # Page components
+│       ├── types/       # TypeScript types
+│       └── utils/       # Helper functions
+├── app.py           # Flask backend
+├── Procfile         # Deployment configuration
 └── requirements.txt # Python dependencies
 ```
 
-## Setup
+## Setup & Development
 
-1. **Backend Setup**
+### Prerequisites
+
+- Node.js 18+
+- Python 3.9+
+- pip
+
+### Backend Setup
+
 ```bash
 # Create virtual environment
 python -m venv venv
@@ -29,7 +72,8 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-2. **Frontend Setup**
+### Frontend Setup
+
 ```bash
 # Navigate to client directory
 cd client
@@ -41,9 +85,10 @@ npm install
 npm start
 ```
 
-3. **Running the Application**
+### Running the Application
+
 ```bash
-# Start backend server
+# Start backend server (from project root)
 python app.py
 
 # In another terminal, start frontend
@@ -53,32 +98,34 @@ npm start
 
 ## Deployment
 
-The application is configured for deployment on Render.com. Just push to GitHub and Render will:
-1. Install dependencies
-2. Build the React app
-3. Serve the application using Gunicorn
+The application is configured for deployment on Render.com. Pushing to the connected GitHub repository will automatically trigger a deployment.
 
-## Features
+### Manual Deployment Steps
 
-- Modern React frontend
-- Efficient static file serving with WhiteNoise
-- Easy deployment configuration
+1. Build the React frontend:
+   ```bash
+   cd client
+   npm run build
+   ```
 
-## Technologies Used
+2. Copy the build files to the static directory:
+   ```bash
+   mkdir -p ../static/client
+   cp -r build ../static/client/
+   ```
 
-- **Frontend**: ReactJS with Material UI
-- **Backend**: Python Flask API
-- **Computer Vision**: OpenCV
-- **Image Processing**: Pillow, NumPy
+3. Deploy the Flask app with the prebuilt frontend files.
 
-## How It Works
+## API Endpoints
 
-1. **Image Upload**: Users upload a wall image through the web interface
-2. **Color Extraction**: The system extracts dominant colors from the image
-3. **Color Selection**: Users can choose from AI-suggested colors, predefined palettes, or complementary colors
-4. **Color Application**: The selected color is applied to the wall with edge detection for realistic shading
-5. **Visualization**: Users can toggle between original and colored views to compare the results
+- `GET /api/health` - Health check endpoint
+- `POST /api/detect-colors` - Detect colors in an image
+- `POST /api/save-image` - Save an image (placeholder functionality)
 
 ## License
 
 MIT
+
+## Credits
+
+Created by [your name/organization]

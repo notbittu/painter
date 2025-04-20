@@ -2,10 +2,11 @@
   "name": "painter",
   "version": "1.0.0",
   "description": "Painter API",
-  "main": "app.py",
+  "main": "app.js",
   "scripts": {
-    "start": "python app.py",
-    "start:node": "node server.js",
+    "start": "python app.py || node app.js",
+    "start:node": "node app.js",
+    "start:old": "node server.js",
     "build": "cd client && npm install && npm run build"
   },
   "keywords": [],

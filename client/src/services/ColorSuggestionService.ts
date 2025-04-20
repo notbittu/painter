@@ -48,11 +48,13 @@ class ColorSuggestionService {
   /**
    * Analyze the wall image and suggest colors
    * @param imageData Base64 string of the image
+   * @param shadowTracking Whether to preserve shadows in the analysis
    */
-  public async analyzeWallImage(imageData: string): Promise<ColorAnalysisResult> {
+  public async analyzeWallImage(imageData: string, shadowTracking: boolean = true): Promise<ColorAnalysisResult> {
     try {
       const response = await axios.post(`${API_BASE_URL}/api/detect-colors`, {
-        image: imageData
+        image: imageData,
+        shadowTracking: shadowTracking
       });
       
       return response.data;
@@ -82,7 +84,8 @@ class ColorSuggestionService {
         intensity: options.intensity,
         finish: options.finish,
         showTexture: options.showTexture,
-        lightingEffect: options.lightingEffect
+        lightingEffect: options.lightingEffect,
+        shadowTracking: options.shadowTracking
       });
       
       return response.data.previewUrl;

@@ -268,7 +268,7 @@ class ColorSuggestionService {
     
     // Generate more realistic brand names and color codes
     return [
-      {
+      { 
         brand: 'Sherwin-Williams',
         colorName: this.getBrandSpecificName(colorName, 'Sherwin-Williams'),
         colorCode: this.generateBrandCode('SW', colorHex),
@@ -338,7 +338,7 @@ class ColorSuggestionService {
     // Generate more sophisticated fallback data for testing
     return {
       dominantColors: [
-        {
+        { 
           name: 'Soft White',
           hex: '#F5F5F5',
           rgb: 'rgb(245, 245, 245)',

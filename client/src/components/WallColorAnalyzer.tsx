@@ -237,7 +237,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
   const generatePreview = async (color: ColorSuggestion, options: ColorPreviewOptions) => {
     if (!wallImage) return;
     
-    setIsAnalyzing(true);
+      setIsAnalyzing(true);
     
     try {
       // Save original image for comparison if needed
@@ -247,7 +247,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
       
       // Advanced color preview with new features
       const previewResult = await ColorSuggestionService.generateColorPreview(
-        wallImage,
+        wallImage, 
         color.hex,
         {
           intensity: options.intensity,
@@ -326,7 +326,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
     setOpenSnackbar(true);
     
     // If we have a current image and color, regenerate the preview
-    if (selectedColor && wallImage) {
+      if (selectedColor && wallImage) {
       generatePreview(selectedColor, {
         ...previewOptions,
         realisticBlending: newValue
@@ -532,7 +532,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
         <Box sx={{ mb: 3 }}>
           <Typography gutterBottom variant="body2">
             Blend Mode
-          </Typography>
+                  </Typography>
           <ToggleButtonGroup
             value={previewOptions.blendMode}
             exclusive
@@ -558,7 +558,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
             <ToggleButton value="screen">Screen</ToggleButton>
             <ToggleButton value="overlay">Overlay</ToggleButton>
           </ToggleButtonGroup>
-        </Box>
+                </Box>
         
         <Box sx={{ mb: 3 }}>
           <Typography gutterBottom variant="body2">
@@ -568,7 +568,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
             <Grid item xs={4}>
               <Tooltip title="Adapts color to lighting conditions and surface shadows">
                 <Paper 
-                  sx={{ 
+                    sx={{ 
                     p: 1, 
                     textAlign: 'center',
                     cursor: 'pointer',
@@ -610,9 +610,9 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
             <Grid item xs={4}>
               <Tooltip title="Realistic color blending with surface textures">
                 <Paper 
-                  sx={{ 
+                sx={{ 
                     p: 1, 
-                    textAlign: 'center',
+                  textAlign: 'center',
                     cursor: 'pointer',
                     bgcolor: previewOptions.realisticBlending ? 'primary.light' : 'background.paper',
                     color: previewOptions.realisticBlending ? 'primary.contrastText' : 'text.primary',
@@ -672,7 +672,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6" component="h3">
               Color Preview
-            </Typography>
+                </Typography>
             <Box>
               <Tooltip title="Compare Before/After">
                 <IconButton 
@@ -693,17 +693,17 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   <ShareIcon />
                 </IconButton>
               </Tooltip>
+              </Box>
             </Box>
-          </Box>
           
           {compareMode ? (
             // Compare view with slider
             <Box sx={{ position: 'relative', height: 400, overflow: 'hidden' }}>
               <Box sx={{ 
-                position: 'absolute', 
+                  position: 'absolute', 
                 top: 0, 
-                left: 0, 
-                right: 0, 
+                  left: 0, 
+                  right: 0, 
                 bottom: 0, 
                 backgroundImage: `url(${originalPreviewImage})`,
                 backgroundSize: 'cover',
@@ -734,7 +734,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 borderRadius: '50%',
                 width: 40,
                 height: 40,
-                display: 'flex',
+                  display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 boxShadow: theme.shadows[5]
@@ -743,7 +743,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               </Box>
               
               <Slider
-                sx={{ 
+                      sx={{ 
                   position: 'absolute', 
                   bottom: 20, 
                   left: 40, 
@@ -751,8 +751,8 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   zIndex: 4,
                   color: 'white',
                   '& .MuiSlider-thumb': {
-                    width: 20,
-                    height: 20,
+                        width: 20, 
+                        height: 20, 
                     backgroundColor: 'white',
                   },
                   '& .MuiSlider-track': {
@@ -810,12 +810,12 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   />
                 </Tooltip>
               )}
-            </Box>
+                  </Box>
           )}
-          
+                
           <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
             <Box 
-              sx={{ 
+                  sx={{ 
                 width: 50, 
                 height: 50, 
                 borderRadius: '50%', 
@@ -838,15 +838,15 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   <Tooltip title={`RGB: ${selectedColor.rgb}`}>
                     <Chip 
                       label="RGB" 
-                      size="small" 
+                  size="small"
                       sx={{ ml: 1, fontSize: '0.7rem', height: 20 }}
                       onClick={() => copyColorCode(selectedColor.rgb || '')}
                     />
                   </Tooltip>
                 )}
               </Typography>
+              </Box>
             </Box>
-          </Box>
         </Paper>
         
         {renderColorAdjustmentControls()}

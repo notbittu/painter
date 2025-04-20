@@ -521,9 +521,9 @@ def apply_realistic_blending(image, color_image, blend_mode='normal'):
                     b = 255 - ((255 - img_pixel[2]) * (255 - color_pixel[2]) // 255)
                 elif blend_mode == 'overlay':
                     # Overlay blend mode
-                    r = (img_pixel[0] < 128) ? (2 * img_pixel[0] * color_pixel[0] // 255) : (255 - 2 * (255 - img_pixel[0]) * (255 - color_pixel[0]) // 255)
-                    g = (img_pixel[1] < 128) ? (2 * img_pixel[1] * color_pixel[1] // 255) : (255 - 2 * (255 - img_pixel[1]) * (255 - color_pixel[1]) // 255)
-                    b = (img_pixel[2] < 128) ? (2 * img_pixel[2] * color_pixel[2] // 255) : (255 - 2 * (255 - img_pixel[2]) * (255 - color_pixel[2]) // 255)
+                    r = (2 * img_pixel[0] * color_pixel[0] // 255) if img_pixel[0] < 128 else (255 - 2 * (255 - img_pixel[0]) * (255 - color_pixel[0]) // 255)
+                    g = (2 * img_pixel[1] * color_pixel[1] // 255) if img_pixel[1] < 128 else (255 - 2 * (255 - img_pixel[1]) * (255 - color_pixel[1]) // 255)
+                    b = (2 * img_pixel[2] * color_pixel[2] // 255) if img_pixel[2] < 128 else (255 - 2 * (255 - img_pixel[2]) * (255 - color_pixel[2]) // 255)
                 else:
                     # Normal blend mode (default)
                     alpha = color_pixel[3] / 255.0

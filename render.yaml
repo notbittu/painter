@@ -1,11 +1,11 @@
 services:
   - type: web
     name: painter-api
-    env: node
-    buildCommand: npm install
-    startCommand: npm start
+    env: python
+    buildCommand: bash render-deploy.sh
+    startCommand: python app.py
     envVars:
       - key: PORT
         value: 10000
-      - key: NODE_ENV
+      - key: FLASK_ENV
         value: production 

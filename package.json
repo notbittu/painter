@@ -2,9 +2,11 @@
   "name": "painter",
   "version": "1.0.0",
   "description": "Painter API",
-  "main": "server.js",
+  "main": "app.py",
   "scripts": {
-    "start": "node server.js"
+    "start": "python app.py",
+    "start:node": "node server.js",
+    "build": "cd client && npm install && npm run build"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +15,7 @@
     "express": "^4.18.2"
   },
   "engines": {
-    "node": "18.x"
+    "node": "18.x",
+    "python": "3.9.x"
   }
 }

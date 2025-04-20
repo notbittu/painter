@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: painter-api
+    env: node
+    buildCommand: |
+      rm -f Dockerfile render-build.sh debug-build.sh build.sh
+      rm -rf static
+      npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production 

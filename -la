@@ -1,0 +1,10 @@
+[35mDockerfile[m[36m:[mRUN mkdir -p /app/[1;31mstatic/client/build[m
+[35mDockerfile[m[36m:[mCOPY --from=build /app/client/build/ /app/[1;31mstatic/client/build[m/
+[35mDockerfile[m[36m:[mRUN if [ -f "/app/[1;31mstatic/client/build[m/index.html" ]; then \
+[35mDockerfile[m[36m:[mCMD ["serve", "-s", "[1;31mstatic/client/build[m", "-l", "3000"] 
+[35mdebug-build.sh[m[36m:[mgrep -r "[1;31mstatic/client/build[m" --include="*.json" --include="*.js" --include="*.sh" .
+[35mrender-build.sh[m[36m:[mmkdir -p [1;31mstatic/client/build[m
+[35mrender-build.sh[m[36m:[mcp -r client/build/* [1;31mstatic/client/build[m/
+[35mrender-build.sh[m[36m:[mif [ -d "[1;31mstatic/client/build[m" ]; then
+[35mrender-build.sh[m[36m:[m  echo "Contents of [1;31mstatic/client/build[m:"
+[35mrender-build.sh[m[36m:[m  ls -la [1;31mstatic/client/build[m

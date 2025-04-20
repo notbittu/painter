@@ -1,7 +1,7 @@
 {
-  "name": "painter",
+  "name": "paint-home",
   "version": "1.0.0",
-  "description": "Painter API",
+  "description": "AI-powered wall color visualization app",
   "main": "app.js",
   "scripts": {
     "start": "python app.py || node app.js",

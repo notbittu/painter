@@ -69,9 +69,6 @@ import ColorSuggestionService, {
 } from '../services/ColorSuggestionService';
 import { generateId } from '../utils/helpers';
 
-// Import the Golden Peahen background
-import GoldenPeahenBg from '../assets/golden-peahen-bg.png';
-
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -488,11 +485,8 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
             bottom: -80,
             width: 180,
             height: 180,
-            backgroundImage: `url(${GoldenPeahenBg})`,
-            backgroundSize: 'contain',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'right bottom',
-            opacity: 0.2,
+            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.15), rgba(99, 102, 241, 0.1) 70%)',
+            borderRadius: '50%',
             zIndex: 0,
             pointerEvents: 'none',
           }
@@ -735,7 +729,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
     );
   };
   
-  // Render the main welcome screen with Golden Peahen background
+  // Render the main welcome screen with gradient background
   const renderWelcomeScreen = () => {
     return (
       <Grow in={!wallImage && !showCamera}>
@@ -758,11 +752,8 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               right: -50,
               width: 250,
               height: 250,
-              backgroundImage: `url(${GoldenPeahenBg})`,
-              backgroundSize: 'contain',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'top right',
-              opacity: 0.15,
+              background: 'radial-gradient(circle, rgba(249, 115, 22, 0.15), rgba(236, 72, 153, 0.1) 70%)',
+              borderRadius: '50%',
               zIndex: 0,
               transform: 'rotate(10deg)',
               pointerEvents: 'none',
@@ -774,11 +765,8 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               left: -70,
               width: 200,
               height: 200,
-              backgroundImage: `url(${GoldenPeahenBg})`,
-              backgroundSize: 'contain',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'bottom left',
-              opacity: 0.1,
+              background: 'radial-gradient(circle, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.05) 70%)',
+              borderRadius: '50%',
               zIndex: 0,
               transform: 'rotate(190deg)',
               pointerEvents: 'none',

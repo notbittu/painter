@@ -38,16 +38,15 @@ const Header: React.FC = () => {
     setAnchorEl(null);
   };
   
-  const isEditor = location.pathname.includes('/editor');
   const isWallPainter = location.pathname.includes('/wall-painter');
   
   return (
     <AppBar 
       position="static" 
       sx={{ 
-        backgroundColor: 'background.paper',
-        color: 'text.primary',
-        boxShadow: 1,
+        background: 'linear-gradient(135deg, rgba(99,102,241,0.9) 0%, rgba(236,72,153,0.9) 100%)',
+        color: 'white',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
       }}
     >
       <Container maxWidth="xl">
@@ -55,7 +54,7 @@ const Header: React.FC = () => {
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <FormatColorFillIcon 
               sx={{ 
-                color: 'primary.main',
+                color: 'white',
                 mr: 1,
                 fontSize: '2rem'
               }} 
@@ -67,7 +66,7 @@ const Header: React.FC = () => {
               sx={{
                 fontWeight: 700,
                 letterSpacing: '.1rem',
-                color: 'primary.main',
+                color: 'white',
                 textDecoration: 'none',
                 cursor: 'pointer'
               }}
@@ -81,9 +80,11 @@ const Header: React.FC = () => {
             <Button
               onClick={() => navigate('/')}
               sx={{ 
-                color: location.pathname === '/' ? 'primary.main' : 'text.primary',
+                color: 'white',
                 fontWeight: location.pathname === '/' ? 'bold' : 'normal',
-                mx: 1
+                mx: 1,
+                opacity: location.pathname === '/' ? 1 : 0.8,
+                '&:hover': { opacity: 1 }
               }}
             >
               Home
@@ -92,31 +93,28 @@ const Header: React.FC = () => {
             <Button
               onClick={() => navigate('/wall-painter')}
               sx={{ 
-                color: location.pathname === '/wall-painter' ? 'primary.main' : 'text.primary',
+                color: 'white',
                 fontWeight: location.pathname === '/wall-painter' ? 'bold' : 'normal',
                 mx: 1,
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                opacity: location.pathname === '/wall-painter' ? 1 : 0.8,
+                '&:hover': { opacity: 1 }
               }}
             >
               Wall Color Visualizer
               <Chip 
                 label="New" 
                 size="small" 
-                color="primary" 
-                sx={{ ml: 1, height: 20, fontSize: '0.625rem' }} 
+                sx={{ 
+                  ml: 1, 
+                  height: 20, 
+                  fontSize: '0.625rem',
+                  bgcolor: 'white',
+                  color: 'primary.main',
+                  fontWeight: 'bold'
+                }} 
               />
-            </Button>
-            
-            <Button
-              onClick={() => navigate('/color-gallery')}
-              sx={{ 
-                color: location.pathname === '/color-gallery' ? 'primary.main' : 'text.primary',
-                fontWeight: location.pathname === '/color-gallery' ? 'bold' : 'normal',
-                mx: 1
-              }}
-            >
-              Color Gallery
             </Button>
           </Box>
 
@@ -133,15 +131,18 @@ const Header: React.FC = () => {
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Button
                 variant="contained"
-                color="primary"
-                startIcon={<FormatColorFillIcon />}
                 onClick={() => navigate('/wall-painter')}
                 sx={{ 
                   borderRadius: '20px',
                   px: 2.5,
                   py: 1,
                   textTransform: 'none',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  bgcolor: 'white',
+                  color: 'primary.main',
+                  '&:hover': {
+                    bgcolor: 'rgba(255,255,255,0.9)',
+                  }
                 }}
               >
                 Try Wall Visualizer

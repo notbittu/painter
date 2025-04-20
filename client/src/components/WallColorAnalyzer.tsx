@@ -99,29 +99,6 @@ interface WallColorAnalyzerProps {
   onColorSelect?: (color: ColorSuggestion) => void;
 }
 
-// New properties for color preview options
-interface ColorPreviewOptions {
-  intensity: number;
-  finish: string;
-  texture: boolean;
-  lighting: string;
-  blendMode: string;
-  shadowTracking: boolean;
-  vision360: boolean;
-  realisticBlending: boolean;
-}
-
-const defaultPreviewOptions: ColorPreviewOptions = {
-  intensity: 100,
-  finish: 'matte',
-  texture: false,
-  lighting: 'natural',
-  blendMode: 'normal',
-  shadowTracking: false,
-  vision360: false,
-  realisticBlending: true,
-};
-
 const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));

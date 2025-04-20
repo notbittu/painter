@@ -29,7 +29,10 @@ import {
   SwipeableDrawer,
   TextField,
   ToggleButton,
-  ToggleButtonGroup
+  ToggleButtonGroup,
+  Zoom,
+  FormControlLabel,
+  Switch
 } from '@mui/material';
 import {
   CameraAlt as CameraIcon,
@@ -51,7 +54,11 @@ import {
   ZoomIn as ZoomInIcon,
   PhotoCamera as PhotoCameraIcon,
   Save as SaveIcon,
-  Share as ShareIcon
+  Share as ShareIcon,
+  FlipCameraAndroid as FlipCameraIcon,
+  ViewInAr as Vision360Icon,
+  Brightness4 as ShadowTrackingIcon,
+  Panorama as PanoramaIcon
 } from '@mui/icons-material';
 import Webcam from 'react-webcam';
 import ColorSuggestionService, { 
@@ -61,6 +68,9 @@ import ColorSuggestionService, {
   defaultPreviewOptions
 } from '../services/ColorSuggestionService';
 import { generateId } from '../utils/helpers';
+
+// Import the Golden Peahen background
+import GoldenPeahenBg from '../assets/golden-peahen-bg.png';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -115,17 +125,55 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
   const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
   
+  // Camera settings
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+  const [vision360Mode, setVision360Mode] = useState<boolean>(false);
+  const [vision360Images, setVision360Images] = useState<string[]>([]);
+  const [shadowTrackingEnabled, setShadowTrackingEnabled] = useState<boolean>(true);
+  
   // Color preview options
-  const [previewOptions, setPreviewOptions] = useState<ColorPreviewOptions>(defaultPreviewOptions);
+  const [previewOptions, setPreviewOptions] = useState<ColorPreviewOptions>({
+    ...defaultPreviewOptions,
+    shadowTracking: true,
+  });
+  
+  // Toggle camera facing mode (front/back)
+  const toggleCameraFacingMode = () => {
+    setFacingMode(facingMode === 'user' ? 'environment' : 'user');
+  };
   
   // Handle camera capture
   const handleCapture = () => {
     if (webcamRef.current) {
-      const imageSrc = webcamRef.current.getScreenshot();
+      const imageSrc = webcamRef.current.getScreenshot({
+        width: 1280,
+        height: 720
+      });
+      
       if (imageSrc) {
-        setWallImage(imageSrc);
-        setShowCamera(false);
-        analyzeWallImage(imageSrc);
+        if (vision360Mode && vision360Images.length < 4) {
+          // In 360 mode, collect multiple images
+          const updatedImages = [...vision360Images, imageSrc];
+          setVision360Images(updatedImages);
+          
+          if (updatedImages.length === 4) {
+            // If we've collected all needed images, process them
+            setShowCamera(false);
+            setWallImage(updatedImages[0]); // Use the first image as primary
+            analyzeWallImage(updatedImages[0], updatedImages);
+            setSnackbarMessage("360° view captured successfully!");
+            setOpenSnackbar(true);
+          } else {
+            // Prompt for next image
+            setSnackbarMessage(`Image ${updatedImages.length} of 4 captured. Please move to another wall.`);
+            setOpenSnackbar(true);
+          }
+        } else {
+          // Normal mode, single image
+          setWallImage(imageSrc);
+          setShowCamera(false);
+          analyzeWallImage(imageSrc);
+        }
       } else {
         setError('Failed to capture image. Please try again.');
       }
@@ -134,9 +182,32 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
   
   // Handle file upload
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      try {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    try {
+      if (vision360Mode && files.length >= 4) {
+        // Handle multiple files for 360 mode
+        const imagePromises = Array.from(files).slice(0, 4).map(file => {
+          return new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              if (event.target?.result) {
+                resolve(event.target.result as string);
+              }
+            };
+            reader.readAsDataURL(file);
+          });
+        });
+        
+        const images = await Promise.all(imagePromises);
+        setVision360Images(images);
+        setWallImage(images[0]); // Use first image as primary
+        analyzeWallImage(images[0], images);
+        
+      } else {
+        // Handle single file upload
+        const file = files[0];
         const reader = new FileReader();
         reader.onload = async (event) => {
           if (event.target?.result) {
@@ -146,9 +217,9 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
           }
         };
         reader.readAsDataURL(file);
-      } catch (error) {
-        setError('Failed to load image. Please try a different file.');
       }
+    } catch (error) {
+      setError('Failed to load image. Please try a different file.');
     }
   };
   
@@ -158,12 +229,17 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
   };
   
   // Analyze wall image
-  const analyzeWallImage = async (imageData: string) => {
+  const analyzeWallImage = async (imageData: string, additionalImages: string[] = []) => {
     setIsAnalyzing(true);
     setError(null);
     
     try {
-      const result = await ColorSuggestionService.analyzeWallImage(imageData);
+      // Enhanced with the new shadowTracking parameter
+      const result = await ColorSuggestionService.analyzeWallImage(
+        imageData, 
+        shadowTrackingEnabled,
+        additionalImages
+      );
       setColorResult(result);
     } catch (err) {
       setError('Failed to analyze the wall. Please try again.');
@@ -191,9 +267,13 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
       console.error('Failed to load color information', err);
     }
     
-    // Generate preview with default options
+    // Generate preview with options including shadow tracking
     if (wallImage) {
-      generatePreview(color, previewOptions);
+      const enhancedOptions = {
+        ...previewOptions,
+        shadowTracking: shadowTrackingEnabled
+      };
+      generatePreview(color, enhancedOptions);
     }
   };
   
@@ -203,7 +283,12 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
     
     try {
       setIsAnalyzing(true);
-      const preview = await ColorSuggestionService.generateColorPreview(wallImage, color.hexCode, options);
+      const preview = await ColorSuggestionService.generateColorPreview(
+        wallImage, 
+        color.hexCode, 
+        options,
+        vision360Mode ? vision360Images : []
+      );
       setPreviewImage(preview);
       
       // Store original preview for comparison
@@ -218,11 +303,47 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
     }
   };
   
-  // Handle intensity change
+  // Toggle shadow tracking
+  const toggleShadowTracking = () => {
+    const newValue = !shadowTrackingEnabled;
+    setShadowTrackingEnabled(newValue);
+    
+    // Update preview with new shadow tracking setting
+    if (selectedColor && wallImage) {
+      const newOptions = {
+        ...previewOptions,
+        shadowTracking: newValue
+      };
+      setPreviewOptions(newOptions);
+      generatePreview(selectedColor, newOptions);
+    }
+  };
+  
+  // Toggle Vision 360 mode
+  const toggleVision360Mode = () => {
+    const newMode = !vision360Mode;
+    setVision360Mode(newMode);
+    
+    if (newMode) {
+      // Clear existing 360 images when enabling
+      setVision360Images([]);
+      setSnackbarMessage("Vision 360° mode enabled. Capture multiple walls for a complete view.");
+      setOpenSnackbar(true);
+    } else {
+      // Clear the collection when disabling
+      setVision360Images([]);
+    }
+  };
+  
+  // Handle intensity change with improved UI feedback
   const handleIntensityChange = (event: Event, value: number | number[]) => {
     const newValue = value as number;
     const newOptions = {...previewOptions, intensity: newValue};
     setPreviewOptions(newOptions);
+    
+    // Provide quick feedback about intensity changes
+    setSnackbarMessage(`Color intensity set to ${Math.round(newValue * 100)}%`);
+    setOpenSnackbar(true);
     
     if (selectedColor && wallImage) {
       generatePreview(selectedColor, newOptions);
@@ -343,112 +464,270 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
     setOpenSnackbar(false);
   };
   
-  // Render the color adjustment controls
+  // Render the color adjustment controls with improved visibility
   const renderColorAdjustmentControls = () => {
     if (!selectedColor) return null;
     
     return (
       <Paper
-        elevation={3}
+        elevation={4}
         sx={{
           p: 3,
           borderRadius: '16px',
           mt: 3,
-          background: 'rgba(255, 255, 255, 0.9)',
+          background: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(10px)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          border: '1px solid rgba(255, 255, 255, 0.8)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            right: -80,
+            bottom: -80,
+            width: 180,
+            height: 180,
+            backgroundImage: `url(${GoldenPeahenBg})`,
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right bottom',
+            opacity: 0.2,
+            zIndex: 0,
+            pointerEvents: 'none',
+          }
         }}
       >
-        <Typography variant="h6" gutterBottom>
-          Adjustment Controls
+        <Typography 
+          variant="h6" 
+          gutterBottom
+          sx={{
+            background: 'linear-gradient(90deg, #6366f1, #ec4899)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            fontWeight: 'bold',
+            textShadow: '0 2px 8px rgba(0,0,0,0.05)',
+          }}
+        >
+          Color Adjustment Controls
         </Typography>
         
-        <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <BrightnessIcon sx={{ mr: 1, color: 'primary.main' }} />
-            <Typography variant="body2">Color Intensity</Typography>
+        <Box sx={{ mb: 3, position: 'relative', zIndex: 1 }}>
+          {/* Intensity Control with Improved Visibility */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            mb: 1,
+            p: 2, 
+            borderRadius: '12px',
+            bgcolor: 'rgba(99, 102, 241, 0.05)',
+            border: '1px solid rgba(99, 102, 241, 0.2)', 
+          }}>
+            <BrightnessIcon sx={{ mr: 2, color: 'primary.main', fontSize: 28 }} />
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography variant="body2" fontWeight="medium" gutterBottom>
+                Color Intensity
+              </Typography>
+              <Slider
+                value={previewOptions.intensity}
+                min={0.1}
+                max={2.0}
+                step={0.1}
+                onChange={handleIntensityChange}
+                valueLabelDisplay="auto"
+                valueLabelFormat={(value) => `${Math.round(value * 100)}%`}
+                sx={{ 
+                  '& .MuiSlider-thumb': {
+                    height: 24,
+                    width: 24,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                    '&:hover, &.Mui-focusVisible': {
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                    },
+                    '&::before': {
+                      boxShadow: '0 0 4px 8px rgba(99, 102, 241, 0.1)',
+                    },
+                  },
+                  '& .MuiSlider-track': {
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundImage: 'linear-gradient(to right, #6366f1, #ec4899)',
+                  },
+                  '& .MuiSlider-rail': {
+                    height: 8,
+                    borderRadius: 4,
+                    opacity: 0.2,
+                  },
+                }}
+              />
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                Drag the slider to adjust how vibrant the paint appears on your wall
+              </Typography>
+            </Box>
           </Box>
-          <Slider
-            value={previewOptions.intensity}
-            min={0.1}
-            max={2.0}
-            step={0.1}
-            onChange={handleIntensityChange}
-            valueLabelDisplay="auto"
-            valueLabelFormat={(value) => `${Math.round(value * 100)}%`}
-            sx={{ mb: 2 }}
-          />
           
-          <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Finish</InputLabel>
-                <Select
-                  value={previewOptions.finish}
-                  label="Finish"
-                  onChange={handleFinishChange}
-                >
-                  <MenuItem value="matte">Matte</MenuItem>
-                  <MenuItem value="eggshell">Eggshell</MenuItem>
-                  <MenuItem value="satin">Satin</MenuItem>
-                  <MenuItem value="semi-gloss">Semi-Gloss</MenuItem>
-                  <MenuItem value="high-gloss">High-Gloss</MenuItem>
-                </Select>
-              </FormControl>
+          {/* Advanced Controls Section */}
+          <Grid container spacing={2} sx={{ mt: 3 }}>
+            <Grid item xs={12} sm={6}>
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  p: 2, 
+                  borderRadius: '12px',
+                  border: '1px solid rgba(0,0,0,0.08)',
+                }}
+              >
+                <FormControl fullWidth size="small">
+                  <InputLabel>Finish</InputLabel>
+                  <Select
+                    value={previewOptions.finish}
+                    label="Finish"
+                    onChange={handleFinishChange}
+                  >
+                    <MenuItem value="matte">Matte</MenuItem>
+                    <MenuItem value="eggshell">Eggshell</MenuItem>
+                    <MenuItem value="satin">Satin</MenuItem>
+                    <MenuItem value="semi-gloss">Semi-Gloss</MenuItem>
+                    <MenuItem value="high-gloss">High-Gloss</MenuItem>
+                  </Select>
+                </FormControl>
+              </Paper>
             </Grid>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Lighting</InputLabel>
-                <Select
-                  value={previewOptions.lightingEffect}
-                  label="Lighting"
-                  onChange={handleLightingChange}
-                >
-                  <MenuItem value="natural">Natural</MenuItem>
-                  <MenuItem value="warm">Warm</MenuItem>
-                  <MenuItem value="cool">Cool</MenuItem>
-                  <MenuItem value="bright">Bright</MenuItem>
-                  <MenuItem value="dim">Dim</MenuItem>
-                </Select>
-              </FormControl>
+            <Grid item xs={12} sm={6}>
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  p: 2, 
+                  borderRadius: '12px',
+                  border: '1px solid rgba(0,0,0,0.08)',
+                }}
+              >
+                <FormControl fullWidth size="small">
+                  <InputLabel>Lighting</InputLabel>
+                  <Select
+                    value={previewOptions.lightingEffect}
+                    label="Lighting"
+                    onChange={handleLightingChange}
+                  >
+                    <MenuItem value="natural">Natural</MenuItem>
+                    <MenuItem value="warm">Warm</MenuItem>
+                    <MenuItem value="cool">Cool</MenuItem>
+                    <MenuItem value="bright">Bright</MenuItem>
+                    <MenuItem value="dim">Dim</MenuItem>
+                  </Select>
+                </FormControl>
+              </Paper>
             </Grid>
           </Grid>
           
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-            <ToggleButtonGroup
-              value={previewOptions.showTexture}
-              exclusive
-              onChange={handleTextureToggle}
-              size="small"
+          {/* Enhanced Features Section */}
+          <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Paper
+              elevation={0}
+              sx={{ 
+                p: 2, 
+                borderRadius: '12px',
+                border: '1px solid rgba(0,0,0,0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between', 
+              }}
             >
-              <ToggleButton value={true}>
-                <TextureIcon sx={{ mr: 1 }} /> Show Texture
-              </ToggleButton>
-              <ToggleButton value={false}>
-                <TextureIcon sx={{ mr: 1 }} /> Hide Texture
-              </ToggleButton>
-            </ToggleButtonGroup>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <ShadowTrackingIcon sx={{ mr: 1.5, color: shadowTrackingEnabled ? 'primary.main' : 'text.secondary' }} />
+                <Box>
+                  <Typography variant="body2" fontWeight="medium">
+                    Shadow Tracking
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Intelligently preserves wall shadows
+                  </Typography>
+                </Box>
+              </Box>
+              <Switch 
+                checked={shadowTrackingEnabled} 
+                onChange={toggleShadowTracking}
+                color="primary"
+              />
+            </Paper>
+            
+            <Paper
+              elevation={0}
+              sx={{ 
+                p: 2, 
+                borderRadius: '12px',
+                border: '1px solid rgba(0,0,0,0.08)',
+                display: 'flex',
+                alignItems: 'center', 
+              }}
+            >
+              <Box sx={{ display: 'flex', flexGrow: 1, alignItems: 'center' }}>
+                <TextureIcon sx={{ mr: 1.5, color: previewOptions.showTexture ? 'primary.main' : 'text.secondary' }} />
+                <Typography variant="body2" fontWeight="medium">
+                  Wall Texture
+                </Typography>
+              </Box>
+              <ToggleButtonGroup
+                value={previewOptions.showTexture}
+                exclusive
+                onChange={handleTextureToggle}
+                size="small"
+              >
+                <ToggleButton value={true} sx={{ px: 2 }}>
+                  Show
+                </ToggleButton>
+                <ToggleButton value={false} sx={{ px: 2 }}>
+                  Hide
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Paper>
           </Box>
           
-          <Divider sx={{ my: 2 }} />
+          <Divider sx={{ my: 3 }} />
           
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          {/* Action Controls */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
             <Button
               variant="outlined"
               color="primary"
               startIcon={<CompareIcon />}
               onClick={toggleCompareMode}
-              size="small"
+              sx={{
+                borderRadius: '10px',
+                borderWidth: '2px',
+                '&:hover': {
+                  borderWidth: '2px',
+                }
+              }}
             >
               {compareMode ? 'Exit Compare' : 'Compare Original'}
             </Button>
             
-            <Box>
-              <IconButton color="primary" onClick={savePreviewImage} sx={{ mr: 1 }}>
-                <SaveIcon />
-              </IconButton>
-              <IconButton color="primary" onClick={sharePreview}>
-                <ShareIcon />
-              </IconButton>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Tooltip title="Save Image">
+                <IconButton 
+                  color="primary" 
+                  onClick={savePreviewImage}
+                  sx={{ 
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    '&:hover': { backgroundColor: 'rgba(99, 102, 241, 0.2)' }
+                  }}
+                >
+                  <SaveIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Share">
+                <IconButton 
+                  color="primary" 
+                  onClick={sharePreview}
+                  sx={{ 
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    '&:hover': { backgroundColor: 'rgba(99, 102, 241, 0.2)' }
+                  }}
+                >
+                  <ShareIcon />
+                </IconButton>
+              </Tooltip>
             </Box>
           </Box>
         </Box>
@@ -456,357 +735,384 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
     );
   };
   
-  // Render preview section
-  const renderPreviewSection = () => {
-    if (!previewImage) return null;
-    
+  // Render the main welcome screen with Golden Peahen background
+  const renderWelcomeScreen = () => {
     return (
-      <Box>
-        <Paper 
-          elevation={3}
+      <Grow in={!wallImage && !showCamera}>
+        <Paper
+          elevation={4}
           sx={{
+            p: 4,
+            borderRadius: '24px',
+            background: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(240, 240, 250, 0.9)',
             position: 'relative',
-            borderRadius: '16px',
             overflow: 'hidden',
-            my: 3
+            textAlign: 'center',
+            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: -50,
+              right: -50,
+              width: 250,
+              height: 250,
+              backgroundImage: `url(${GoldenPeahenBg})`,
+              backgroundSize: 'contain',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'top right',
+              opacity: 0.15,
+              zIndex: 0,
+              transform: 'rotate(10deg)',
+              pointerEvents: 'none',
+            },
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              bottom: -70,
+              left: -70,
+              width: 200,
+              height: 200,
+              backgroundImage: `url(${GoldenPeahenBg})`,
+              backgroundSize: 'contain',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'bottom left',
+              opacity: 0.1,
+              zIndex: 0,
+              transform: 'rotate(190deg)',
+              pointerEvents: 'none',
+            }
           }}
         >
-          {compareMode ? (
-            <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column' }}>
-              <Box sx={{ display: 'flex', position: 'relative' }}>
-                <Box sx={{ flex: 1, borderRight: '1px solid white' }}>
-                  <Typography 
-                    variant="subtitle2"
-                    sx={{ 
-                      position: 'absolute', 
-                      left: 10, 
-                      top: 10, 
-                      bgcolor: 'rgba(0,0,0,0.6)', 
-                      color: 'white',
-                      px: 1,
-                      py: 0.5,
-                      borderRadius: 1
-                    }}
-                  >
-                    Original
+          <Typography variant="h3" component="h1" gutterBottom
+            sx={{
+              background: 'linear-gradient(135deg, #6366f1, #ec4899)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontWeight: 800,
+              mb: 3,
+              position: 'relative',
+              zIndex: 1,
+              textShadow: '0 5px 15px rgba(0,0,0,0.1)',
+              letterSpacing: '-0.02em',
+              animation: 'shimmer 2.5s infinite linear',
+              '@keyframes shimmer': {
+                '0%': { backgroundPosition: '0% 50%' },
+                '50%': { backgroundPosition: '100% 50%' },
+                '100%': { backgroundPosition: '0% 50%' },
+              },
+              backgroundSize: '200% auto',
+            }}
+          >
+            Wall Color Visualizer
+          </Typography>
+          
+          <Typography 
+            variant="h6" 
+            component="h2" 
+            color="textSecondary" 
+            paragraph
+            sx={{
+              maxWidth: '800px',
+              mx: 'auto',
+              mb: 4,
+              position: 'relative',
+              zIndex: 1,
+              opacity: 0.8,
+              fontWeight: 500,
+            }}
+          >
+            Transform your space with our AI-powered tool that suggests perfect colors and shows you exactly how they'll look on your walls
+          </Typography>
+          
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: '16px',
+              background: 'rgba(99, 102, 241, 0.05)',
+              maxWidth: '800px',
+              mx: 'auto',
+              mb: 5,
+              position: 'relative',
+              zIndex: 1,
+              border: '1px solid rgba(99, 102, 241, 0.2)',
+            }}
+          >
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} md={6}>
+                <Box sx={{ mb: { xs: 2, md: 0 } }}>
+                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                    Key Features
                   </Typography>
-                  <img 
-                    src={wallImage || ''} 
-                    alt="Original wall" 
-                    style={{ 
-                      width: '100%', 
-                      height: 'auto', 
-                      display: 'block',
-                      maxHeight: '50vh'
-                    }} 
-                  />
-                </Box>
-                <Box sx={{ flex: 1, borderLeft: '1px solid white' }}>
-                  <Typography 
-                    variant="subtitle2"
-                    sx={{ 
-                      position: 'absolute', 
-                      right: 10, 
-                      top: 10, 
-                      bgcolor: 'rgba(0,0,0,0.6)', 
-                      color: 'white',
-                      px: 1,
-                      py: 0.5,
-                      borderRadius: 1
-                    }}
-                  >
-                    {selectedColor?.name}
-                  </Typography>
-                  <img 
-                    src={previewImage} 
-                    alt="Colored wall preview" 
-                    style={{ 
-                      width: '100%', 
-                      height: 'auto', 
-                      display: 'block',
-                      maxHeight: '50vh'
-                    }} 
-                  />
-                </Box>
-              </Box>
-              <Box 
-                sx={{ 
-                  p: 2, 
-                  textAlign: 'center',
-                  bgcolor: theme.palette.primary.main,
-                  color: 'white'
-                }}
-              >
-                <Typography variant="body2">
-                  Move slider to see the difference
-                </Typography>
-              </Box>
-            </Box>
-          ) : (
-            <Box sx={{ position: 'relative' }}>
-              <img 
-                src={previewImage} 
-                alt="Wall color preview" 
-                style={{ 
-                  width: '100%', 
-                  height: 'auto', 
-                  display: 'block',
-                  maxHeight: '60vh'
-                }} 
-              />
-              
-              <Box 
-                sx={{ 
-                  position: 'absolute', 
-                  bottom: 0, 
-                  left: 0, 
-                  right: 0, 
-                  p: 2, 
-                  bgcolor: 'rgba(0,0,0,0.7)',
-                  color: 'white',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}
-              >
-                <Box>
-                  <Typography variant="subtitle1">
-                    {selectedColor?.name}
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Box 
-                      sx={{ 
-                        width: 20, 
-                        height: 20, 
-                        borderRadius: '50%', 
-                        bgcolor: selectedColor?.hexCode, 
-                        mr: 1,
-                        border: '2px solid white'
-                      }} 
-                    />
-                    <Typography variant="body2">
-                      {selectedColor?.hexCode}
-                    </Typography>
-                    <IconButton 
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    <Chip 
+                      icon={<ShadowTrackingIcon fontSize="small" />} 
+                      label="Shadow Tracking" 
                       size="small" 
-                      sx={{ ml: 1, color: 'white' }}
-                      onClick={() => selectedColor && copyColorCode(selectedColor.hexCode)}
-                    >
-                      {copied ? <CheckIcon fontSize="small" /> : <CopyIcon fontSize="small" />}
-                    </IconButton>
+                      sx={{ bgcolor: 'rgba(99, 102, 241, 0.1)', fontWeight: 500 }} 
+                    />
+                    <Chip 
+                      icon={<Vision360Icon fontSize="small" />} 
+                      label="Vision 360°" 
+                      size="small" 
+                      sx={{ bgcolor: 'rgba(236, 72, 153, 0.1)', fontWeight: 500 }} 
+                    />
+                    <Chip 
+                      icon={<ColorLensIcon fontSize="small" />} 
+                      label="AI Color Suggestions" 
+                      size="small" 
+                      sx={{ bgcolor: 'rgba(249, 115, 22, 0.1)', fontWeight: 500 }} 
+                    />
                   </Box>
                 </Box>
-                
-                <Button 
-                  variant="contained" 
-                  onClick={() => setShowColorDrawer(true)}
-                  sx={{ 
-                    bgcolor: 'white', 
-                    color: 'primary.main',
-                    '&:hover': {
-                      bgcolor: 'rgba(255,255,255,0.8)'
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <FormControlLabel
+                    control={
+                      <Switch 
+                        checked={vision360Mode} 
+                        onChange={toggleVision360Mode} 
+                        color="secondary"
+                      />
                     }
-                  }}
-                  size="small"
-                >
-                  Shop This Color
-                </Button>
-              </Box>
-            </Box>
-          )}
+                    label="Enable Vision 360°"
+                    sx={{ ml: 0 }}
+                  />
+                  <Tooltip title="Capture multiple views of your room for a complete visualization">
+                    <IconButton size="small">
+                      <PanoramaIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              </Grid>
+            </Grid>
+          </Paper>
+          
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 3, 
+            justifyContent: 'center', 
+            flexWrap: 'wrap',
+            position: 'relative',
+            zIndex: 1 
+          }}>
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<CameraIcon />}
+              onClick={() => setShowCamera(true)}
+              sx={{
+                px: 4,
+                py: 2,
+                borderRadius: '14px',
+                backgroundImage: 'linear-gradient(to right, #6366f1, #ec4899)',
+                boxShadow: '0 10px 20px rgba(99, 102, 241, 0.3)',
+                '&:hover': {
+                  boxShadow: '0 15px 25px rgba(99, 102, 241, 0.4)',
+                  transform: 'translateY(-3px) scale(1.02)',
+                },
+                transition: 'all 0.3s ease',
+                fontSize: '1.1rem',
+                fontWeight: 600,
+              }}
+            >
+              {vision360Mode ? 'Start 360° Capture' : 'Take Photo'}
+            </Button>
+            
+            <Button
+              variant="outlined"
+              size="large"
+              startIcon={<UploadIcon />}
+              onClick={handleFileUploadClick}
+              sx={{
+                px: 4,
+                py: 2,
+                borderRadius: '14px',
+                borderWidth: '2px',
+                '&:hover': {
+                  borderWidth: '2px',
+                  transform: 'translateY(-3px)',
+                  boxShadow: '0 8px 15px rgba(0, 0, 0, 0.05)',
+                },
+                transition: 'all 0.3s ease',
+                fontSize: '1.1rem',
+                fontWeight: 600,
+              }}
+            >
+              {vision360Mode ? 'Upload Multiple Photos' : 'Upload Image'}
+            </Button>
+            
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept="image/*"
+              multiple={vision360Mode}
+              style={{ display: 'none' }}
+            />
+          </Box>
         </Paper>
-      </Box>
+      </Grow>
+    );
+  };
+  
+  // Render enhanced camera view with front/back toggle
+  const renderCameraView = () => {
+    return (
+      <Fade in={showCamera}>
+        <Paper
+          elevation={4}
+          sx={{
+            borderRadius: '24px',
+            overflow: 'hidden',
+            position: 'relative',
+            boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)',
+          }}
+        >
+          <Box sx={{ position: 'relative' }}>
+            <Webcam
+              audio={false}
+              ref={webcamRef}
+              screenshotFormat="image/jpeg"
+              videoConstraints={{
+                facingMode: facingMode,
+                width: 1280,
+                height: 720,
+              }}
+              style={{
+                width: '100%',
+                height: 'auto',
+                display: 'block',
+                // Fix mirroring issues for front camera
+                transform: facingMode === 'user' ? 'scaleX(-1)' : 'none',
+              }}
+              mirrored={false} // Ensure non-mirrored preview by default
+            />
+            
+            {/* Camera overlay with instructions */}
+            <Box sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              p: 2,
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)',
+              color: 'white',
+              textAlign: 'center',
+            }}>
+              <Typography variant="subtitle1" fontWeight="bold">
+                {vision360Mode 
+                  ? `Capture view ${vision360Images.length + 1} of 4` 
+                  : 'Position camera to clearly capture your wall'}
+              </Typography>
+            </Box>
+            
+            {/* Camera controls */}
+            <Box sx={{ 
+              position: 'absolute', 
+              bottom: 0, 
+              left: 0, 
+              right: 0, 
+              p: 3,
+              background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 3
+            }}>
+              {/* Front/back camera toggle */}
+              <Tooltip title={`Switch to ${facingMode === 'user' ? 'back' : 'front'} camera`}>
+                <IconButton 
+                  onClick={toggleCameraFacingMode}
+                  sx={{
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    color: 'white',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+                    width: 48,
+                    height: 48,
+                  }}
+                >
+                  <FlipCameraIcon />
+                </IconButton>
+              </Tooltip>
+              
+              {/* Capture button */}
+              <Button
+                variant="contained"
+                onClick={handleCapture}
+                sx={{
+                  bgcolor: 'white',
+                  color: '#6366f1',
+                  borderRadius: '50%',
+                  width: 80,
+                  height: 80,
+                  minWidth: 'auto',
+                  boxShadow: '0 0 0 5px rgba(255,255,255,0.3)',
+                  '&:hover': {
+                    bgcolor: 'white',
+                    transform: 'scale(1.05)',
+                  },
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <PhotoCameraIcon sx={{ fontSize: 36 }} />
+              </Button>
+              
+              {/* Cancel button */}
+              <IconButton 
+                onClick={() => setShowCamera(false)}
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+                  width: 48,
+                  height: 48,
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            
+            {/* Vision 360 progress indicator */}
+            {vision360Mode && (
+              <Box sx={{ 
+                position: 'absolute', 
+                top: 16, 
+                right: 16, 
+                bgcolor: 'rgba(0,0,0,0.6)', 
+                color: 'white',
+                borderRadius: '12px',
+                px: 2,
+                py: 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}>
+                <Vision360Icon fontSize="small" />
+                <Typography variant="body2" fontWeight="medium">
+                  {vision360Images.length}/4 views
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        </Paper>
+      </Fade>
     );
   };
   
   return (
     <Box sx={{ width: '100%', mb: 4 }}>
       {!wallImage && !showCamera && (
-        <Grow in={!wallImage && !showCamera}>
-          <Paper
-            elevation={3}
-            sx={{
-              p: 4,
-              borderRadius: '24px',
-              background: 'rgba(255, 255, 255, 0.8)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(240, 240, 250, 0.9)',
-              position: 'relative',
-              overflow: 'hidden',
-              textAlign: 'center',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: '-50px',
-                right: '-50px',
-                width: '150px',
-                height: '150px',
-                background: 'radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent 70%)',
-                borderRadius: '50%',
-                zIndex: 0,
-              },
-              '&::after': {
-                content: '""',
-                position: 'absolute',
-                bottom: '-30px',
-                left: '-30px',
-                width: '100px',
-                height: '100px',
-                background: 'radial-gradient(circle, rgba(236, 72, 153, 0.1), transparent 70%)',
-                borderRadius: '50%',
-                zIndex: 0,
-              }
-            }}
-          >
-            <Typography variant="h4" component="h2" gutterBottom
-              sx={{
-                background: 'linear-gradient(90deg, #6366f1, #ec4899)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                fontWeight: 'bold',
-                mb: 3
-              }}
-            >
-              Wall Color Analyzer
-            </Typography>
-            
-            <Typography variant="body1" color="textSecondary" paragraph>
-              Take a photo of your wall or upload an image to get AI-powered color suggestions
-            </Typography>
-            
-            <Box sx={{ display: 'flex', gap: 2, mt: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<CameraIcon />}
-                onClick={() => setShowCamera(true)}
-                sx={{
-                  px: 3,
-                  py: 1.5,
-                  borderRadius: '12px',
-                  backgroundImage: 'linear-gradient(to right, #6366f1, #ec4899)',
-                  boxShadow: '0 8px 16px rgba(99, 102, 241, 0.3)',
-                  '&:hover': {
-                    boxShadow: '0 12px 20px rgba(99, 102, 241, 0.4)',
-                    transform: 'translateY(-2px)',
-                  },
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                Take Photo
-              </Button>
-              
-              <Button
-                variant="outlined"
-                color="primary"
-                startIcon={<UploadIcon />}
-                onClick={handleFileUploadClick}
-                sx={{
-                  px: 3,
-                  py: 1.5,
-                  borderRadius: '12px',
-                  borderWidth: '2px',
-                  '&:hover': {
-                    borderWidth: '2px',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 5px 10px rgba(0, 0, 0, 0.08)',
-                  },
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                Upload Image
-              </Button>
-              
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileUpload}
-                accept="image/*"
-                style={{ display: 'none' }}
-              />
-            </Box>
-          </Paper>
-        </Grow>
+        renderWelcomeScreen()
       )}
       
       {showCamera && (
-        <Fade in={showCamera}>
-          <Paper
-            elevation={3}
-            sx={{
-              p: 2,
-              borderRadius: '24px',
-              overflow: 'hidden',
-              position: 'relative',
-            }}
-          >
-            <Box sx={{ position: 'relative' }}>
-              <Webcam
-                audio={false}
-                ref={webcamRef}
-                screenshotFormat="image/jpeg"
-                videoConstraints={{
-                  facingMode: 'environment',
-                }}
-                style={{
-                  width: '100%',
-                  borderRadius: '16px',
-                }}
-              />
-              
-              <Box sx={{ 
-                position: 'absolute', 
-                bottom: 0, 
-                left: 0, 
-                right: 0, 
-                p: 2,
-                display: 'flex',
-                justifyContent: 'center',
-                gap: 2
-              }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleCapture}
-                  sx={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                    color: theme.palette.primary.main,
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: '50%',
-                    width: 60,
-                    height: 60,
-                    minWidth: 'auto',
-                    '&:hover': {
-                      backgroundColor: 'white',
-                    }
-                  }}
-                >
-                  <PhotoCameraIcon />
-                </Button>
-                
-                <Button
-                  variant="contained"
-                  color="error"
-                  onClick={() => setShowCamera(false)}
-                  sx={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                    color: theme.palette.error.main,
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: '50%',
-                    width: 60,
-                    height: 60,
-                    minWidth: 'auto',
-                    '&:hover': {
-                      backgroundColor: 'white',
-                    }
-                  }}
-                >
-                  <CloseIcon />
-                </Button>
-              </Box>
-            </Box>
-          </Paper>
-        </Fade>
+        renderCameraView()
       )}
       
       {isAnalyzing && (

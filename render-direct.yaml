@@ -10,4 +10,6 @@ services:
       - key: FLASK_ENV
         value: production
       - key: PYTHON_VERSION
-        value: 3.9.0 
+        value: 3.9.0
+      - key: CI
+        value: false 

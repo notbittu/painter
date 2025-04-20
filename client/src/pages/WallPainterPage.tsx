@@ -4,7 +4,6 @@ import {
   Container, 
   Typography, 
   Paper,
-  Button,
   useTheme
 } from '@mui/material';
 import Header from '../components/Header';
@@ -15,10 +14,13 @@ import { InfoOutlined as InfoIcon } from '@mui/icons-material';
 
 const WallPainterPage: React.FC = () => {
   const theme = useTheme();
+  // Store selected color for future features
   const [selectedColor, setSelectedColor] = useState<ColorSuggestion | null>(null);
   
   const handleColorSelect = (color: ColorSuggestion) => {
     setSelectedColor(color);
+    // Color selection is handled inside WallColorAnalyzer component
+    console.log(`Selected color: ${color.hexCode}`);
   };
   
   return (

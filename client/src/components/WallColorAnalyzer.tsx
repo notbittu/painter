@@ -59,11 +59,18 @@ import {
   FlipCameraAndroid as FlipCameraIcon,
   ViewInAr as Vision360Icon,
   Brightness4 as ShadowTrackingIcon,
+  Brightness4 as Brightness4Icon,
   Panorama as PanoramaIcon,
   Tune as TuneIcon,
   InfoOutlined as InfoOutlinedIcon,
   RestartAlt as RestartAltIcon,
-  LightMode as LightModeIcon
+  LightMode as LightModeIcon,
+  Weekend as WeekendIcon,
+  Bed as BedIcon,
+  Kitchen as KitchenIcon,
+  Bathtub as BathtubIcon,
+  TableRestaurant as TableRestaurantIcon,
+  Laptop as LaptopIcon
 } from '@mui/icons-material';
 import Webcam from 'react-webcam';
 import ColorSuggestionService, { 
@@ -453,17 +460,19 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
     setOpenSnackbar(false);
   };
   
-  // Render color adjustment controls with enhanced UI
+  // Simplified and enhanced color adjustment controls with vibrant design
   const renderColorAdjustmentControls = () => {
     return (
       <Fade in={true} timeout={800}>
-        <Paper 
+        <Box 
           sx={{ 
             p: 3, 
             borderRadius: 3, 
             overflow: 'hidden',
             boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
             transition: 'all 0.3s ease',
+            background: 'linear-gradient(135deg, rgba(250,208,196,0.8) 0%, rgba(255,154,158,0.8) 100%)',
+            backdropFilter: 'blur(10px)',
             '&:hover': {
               boxShadow: '0 12px 28px rgba(0,0,0,0.15)',
             }
@@ -478,26 +487,28 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               alignItems: 'center', 
               gap: 1,
               fontWeight: 600,
-              color: theme.palette.primary.main
+              color: 'white',
+              textShadow: '1px 1px 2px rgba(0,0,0,0.1)'
             }}
           >
-            <TuneIcon /> Fine-Tune Visualization
+            <TuneIcon /> Adjust Colors
           </Typography>
-          
+        
           <Grid container spacing={3}>
-            {/* Intensity slider with enhanced UI */}
-            <Grid item xs={12} sm={6}>
+            {/* Intensity slider with simplified UI */}
+            <Grid item xs={12}>
               <Typography 
                 variant="subtitle2" 
                 sx={{ 
                   mb: 1, 
                   display: 'flex', 
                   alignItems: 'center',
-                  justifyContent: 'space-between' 
+                  justifyContent: 'space-between',
+                  color: 'white'
                 }}
               >
                 <span>
-                  <OpacityIcon sx={{ fontSize: '1rem', mr: 0.5, verticalAlign: 'text-bottom', opacity: 0.7 }} /> 
+                  <OpacityIcon sx={{ fontSize: '1rem', mr: 0.5, verticalAlign: 'text-bottom' }} /> 
                   Color Intensity
                 </span>
                 <Chip 
@@ -507,8 +518,8 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                     height: 20, 
                     fontSize: '0.7rem',
                     fontWeight: 600,
-                    bgcolor: alpha(theme.palette.primary.main, 0.1),
-                    color: theme.palette.primary.main,
+                    bgcolor: 'rgba(255,255,255,0.8)',
+                    color: '#ff6b6b',
                   }}
                 />
               </Typography>
@@ -524,30 +535,23 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   min={0}
                   max={100}
                   sx={{
-                    color: theme.palette.primary.main,
+                    color: 'white',
                     '& .MuiSlider-thumb': {
+                      bgcolor: 'white',
                       '&:hover, &.Mui-focusVisible': {
-                        boxShadow: `0px 0px 0px 8px ${alpha(theme.palette.primary.main, 0.16)}`
+                        boxShadow: `0px 0px 0px 8px rgba(255,255,255, 0.16)`
                       }
+                    },
+                    '& .MuiSlider-rail': {
+                      opacity: 0.3,
                     }
                   }}
                 />
               </Box>
             </Grid>
-            
-            {/* Realistic Blending toggle with enhanced UI */}
+          
+            {/* Toggles with cleaner design */}
             <Grid item xs={12} sm={6}>
-              <Typography 
-                variant="subtitle2" 
-                sx={{ 
-                  mb: 1, 
-                  display: 'flex', 
-                  alignItems: 'center' 
-                }}
-              >
-                <FormatColorFillIcon sx={{ fontSize: '1rem', mr: 0.5, verticalAlign: 'text-bottom', opacity: 0.7 }} /> 
-                Realistic Blending
-              </Typography>
               <FormControlLabel
                 control={
                   <Switch
@@ -558,43 +562,29 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                         realisticBlending: !previewOptions.realisticBlending
                       });
                     }}
-                    color="primary"
                     sx={{
+                      '& .MuiSwitch-switchBase': {
+                        color: 'white',
+                      },
                       '& .MuiSwitch-switchBase.Mui-checked': {
-                        color: theme.palette.primary.main
+                        color: 'white'
                       },
                       '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                        backgroundColor: alpha(theme.palette.primary.main, 0.5)
+                        backgroundColor: 'rgba(255,255,255,0.5)'
                       }
                     }}
                   />
                 }
                 label={
-                  <Typography variant="body2" color={previewOptions.realisticBlending ? 'primary' : 'text.secondary'}>
-                    {previewOptions.realisticBlending ? 'Enabled' : 'Disabled'}
+                  <Typography variant="body2" sx={{ color: 'white' }}>
+                    Realistic Blending
                   </Typography>
                 }
               />
-              <Tooltip title="Realistic Blending simulates how paint interacts with your wall's texture and surface">
-                <IconButton size="small" sx={{ ml: 1 }}>
-                  <InfoOutlinedIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
             </Grid>
-            
-            {/* Shadow Tracking toggle with enhanced UI */}
+        
+            {/* Shadow Tracking toggle */}
             <Grid item xs={12} sm={6}>
-              <Typography 
-                variant="subtitle2" 
-                sx={{ 
-                  mb: 1, 
-                  display: 'flex', 
-                  alignItems: 'center' 
-                }}
-              >
-                <ShadowTrackingIcon sx={{ fontSize: '1rem', mr: 0.5, verticalAlign: 'text-bottom', opacity: 0.7 }} /> 
-                Shadow Tracking
-              </Typography>
               <FormControlLabel
                 control={
                   <Switch
@@ -605,90 +595,41 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                         shadowTracking: !previewOptions.shadowTracking
                       });
                     }}
-                    color="primary"
                     sx={{
+                      '& .MuiSwitch-switchBase': {
+                        color: 'white',
+                      },
                       '& .MuiSwitch-switchBase.Mui-checked': {
-                        color: '#ffa726'
+                        color: 'white'
                       },
                       '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                        backgroundColor: alpha('#ffa726', 0.5)
+                        backgroundColor: 'rgba(255,255,255,0.5)'
                       }
                     }}
                   />
                 }
                 label={
-                  <Typography variant="body2" color={previewOptions.shadowTracking ? '#d97706' : 'text.secondary'}>
-                    {previewOptions.shadowTracking ? 'Enabled' : 'Disabled'}
+                  <Typography variant="body2" sx={{ color: 'white' }}>
+                    Shadow Tracking
                   </Typography>
                 }
               />
-              <Tooltip title="Shadow Tracking uses AI to adapt the paint color to existing shadows and lighting conditions on your wall">
-                <IconButton size="small" sx={{ ml: 1 }}>
-                  <InfoOutlinedIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Grid>
-            
-            {/* Vision 360 toggle with enhanced UI */}
-            <Grid item xs={12} sm={6}>
-              <Typography 
-                variant="subtitle2" 
-                sx={{ 
-                  mb: 1, 
-                  display: 'flex', 
-                  alignItems: 'center' 
-                }}
-              >
-                <Vision360Icon sx={{ fontSize: '1rem', mr: 0.5, verticalAlign: 'text-bottom', opacity: 0.7 }} /> 
-                Vision 360
-              </Typography>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={previewOptions.vision360}
-                    onChange={() => {
-                      setPreviewOptions({
-                        ...previewOptions,
-                        vision360: !previewOptions.vision360
-                      });
-                    }}
-                    color="primary"
-                    sx={{
-                      '& .MuiSwitch-switchBase.Mui-checked': {
-                        color: '#42a5f5'
-                      },
-                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                        backgroundColor: alpha('#42a5f5', 0.5)
-                      }
-                    }}
-                  />
-                }
-                label={
-                  <Typography variant="body2" color={previewOptions.vision360 ? '#1976d2' : 'text.secondary'}>
-                    {previewOptions.vision360 ? 'Enabled' : 'Disabled'}
-                  </Typography>
-                }
-              />
-              <Tooltip title="NFD Vision 360 analyzes your wall's depth and contours for realistic paint visualization">
-                <IconButton size="small" sx={{ ml: 1 }}>
-                  <InfoOutlinedIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
             </Grid>
           </Grid>
-          
-          {/* Lighting condition selector with enhanced UI */}
+            
+          {/* Lighting condition selector with improved UI */}
           <Box sx={{ mt: 3 }}>
             <Typography 
               variant="subtitle2" 
               sx={{ 
                 mb: 1, 
                 display: 'flex', 
-                alignItems: 'center' 
+                alignItems: 'center',
+                color: 'white' 
               }}
             >
-              <LightModeIcon sx={{ fontSize: '1rem', mr: 0.5, verticalAlign: 'text-bottom', opacity: 0.7 }} /> 
-              Lighting Condition
+              <LightModeIcon sx={{ fontSize: '1rem', mr: 0.5, verticalAlign: 'text-bottom' }} /> 
+              Lighting
             </Typography>
             <FormControl fullWidth size="small">
               <Select
@@ -696,8 +637,27 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 onChange={(e) => setLightingCondition(e.target.value as string)}
                 sx={{ 
                   borderRadius: 2,
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: alpha(theme.palette.primary.main, 0.2)
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  '.MuiOutlinedInput-notchedOutline': { 
+                    borderColor: 'rgba(255,255,255,0.3)'
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': { 
+                    borderColor: 'rgba(255,255,255,0.5)'
+                  },
+                  '& .MuiSvgIcon-root': { 
+                    color: 'white'
+                  }
+                }}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      bgcolor: 'rgba(30,30,30,0.95)',
+                      color: 'white',
+                      '& .MuiMenuItem-root:hover': {
+                        bgcolor: 'rgba(255,154,158,0.2)'
+                      }
+                    }
                   }
                 }}
               >
@@ -705,57 +665,61 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 <MenuItem value="Natural light">Natural Light</MenuItem>
                 <MenuItem value="Artificial light">Artificial Light</MenuItem>
                 <MenuItem value="Low light">Low Light</MenuItem>
-                <MenuItem value="Evening light">Evening Light</MenuItem>
               </Select>
             </FormControl>
-            <Typography variant="caption" sx={{ mt: 0.5, display: 'block', color: 'text.secondary' }}>
-              Selecting the correct lighting helps visualize how colors will appear in your actual environment
-            </Typography>
           </Box>
-          
-          {/* Actions row with enhanced buttons */}
+        
+          {/* Actions row with simplified buttons */}
           <Box sx={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
             mt: 4,
             pt: 3,
-            borderTop: `1px solid ${alpha('#000', 0.05)}`
+            borderTop: `1px solid rgba(255,255,255,0.2)`
           }}>
-            <Button
+            <Button 
               variant="outlined"
-              onClick={resetPreviewOptions}
+              onClick={() => setPreviewOptions(defaultPreviewOptions)}
               startIcon={<RestartAltIcon />}
               size="small"
               sx={{
                 borderRadius: 2,
-                textTransform: 'none',
-                px: 2
+                borderColor: 'rgba(255,255,255,0.5)',
+                color: 'white',
+                '&:hover': {
+                  borderColor: 'white',
+                  bgcolor: 'rgba(255,255,255,0.1)'
+                },
+                textTransform: 'none'
               }}
             >
-              Reset Options
+              Reset
             </Button>
             
             <Button
               variant="contained"
-              onClick={applyPreviewOptions}
+              onClick={() => {
+                if (selectedColor && wallImage) {
+                  generatePreview(selectedColor, previewOptions);
+                }
+              }}
               startIcon={<CheckIcon />}
               size="small"
               sx={{
                 borderRadius: 2,
                 textTransform: 'none',
-                px: 2,
-                boxShadow: 2,
-                background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+                bgcolor: 'rgba(255,255,255,0.8)',
+                color: '#ff6b6b',
                 '&:hover': {
-                  boxShadow: 4,
-                  background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`
+                  bgcolor: 'white',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                 }
               }}
             >
-              Apply Changes
+              Apply
             </Button>
           </Box>
-        </Paper>
+        </Box>
       </Fade>
     );
   };
@@ -1283,22 +1247,26 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
     );
   };
   
-  // Render the main welcome screen with simplified design
+  // Render the main welcome screen with colorful vibrant design
   const renderWelcomeScreen = () => {
     return (
       <Grow in={!wallImage && !showCamera}>
-        <Paper
-          elevation={4}
+        <Box
           sx={{
-            p: 4,
             borderRadius: '24px',
-            background: 'rgba(255, 255, 255, 0.9)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(240, 240, 250, 0.9)',
+            background: 'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%)',
+            backgroundSize: '400% 400%',
+            animation: 'gradient 15s ease infinite',
             position: 'relative',
             overflow: 'hidden',
             textAlign: 'center',
+            padding: 5,
             boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
+            '@keyframes gradient': {
+              '0%': { backgroundPosition: '0% 50%' },
+              '50%': { backgroundPosition: '100% 50%' },
+              '100%': { backgroundPosition: '0% 50%' },
+            },
             '&::before': {
               content: '""',
               position: 'absolute',
@@ -1306,7 +1274,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               right: -50,
               width: 250,
               height: 250,
-              background: 'radial-gradient(circle, rgba(249, 115, 22, 0.15), rgba(236, 72, 153, 0.1) 70%)',
+              background: 'radial-gradient(circle, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1) 70%)',
               borderRadius: '50%',
               zIndex: 0,
               transform: 'rotate(10deg)',
@@ -1320,7 +1288,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               left: -70,
               width: 200,
               height: 200,
-              background: 'radial-gradient(circle, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.05) 70%)',
+              background: 'radial-gradient(circle, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05) 70%)',
               borderRadius: '50%',
               zIndex: 0,
               transform: 'rotate(190deg)',
@@ -1335,24 +1303,15 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
           }}
         >
           <Zoom in={true} style={{ transitionDelay: '100ms' }}>
-            <Typography variant="h3" component="h1" gutterBottom
+            <Typography variant="h2" component="h1" gutterBottom
               sx={{
-                background: 'linear-gradient(135deg, #6366f1, #ec4899)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                color: 'white',
                 fontWeight: 800,
                 mb: 3,
                 position: 'relative',
                 zIndex: 1,
-                textShadow: '0 5px 15px rgba(0,0,0,0.1)',
+                textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
                 letterSpacing: '-0.02em',
-                animation: 'shimmer 2.5s infinite linear',
-                '@keyframes shimmer': {
-                  '0%': { backgroundPosition: '0% 50%' },
-                  '50%': { backgroundPosition: '100% 50%' },
-                  '100%': { backgroundPosition: '0% 50%' },
-                },
-                backgroundSize: '200% auto',
                 textTransform: 'uppercase',
                 fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }
               }}
@@ -1365,7 +1324,6 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
             <Typography 
               variant="h6" 
               component="h2" 
-              color="textSecondary" 
               paragraph
               sx={{
                 maxWidth: '800px',
@@ -1373,18 +1331,18 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 mb: 4,
                 position: 'relative',
                 zIndex: 1,
-                opacity: 0.8,
+                color: 'rgba(255,255,255,0.9)',
                 fontWeight: 500,
                 lineHeight: 1.6,
                 fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' }
               }}
             >
-              Transform your space with our AI-powered tool that suggests perfect colors based on your wall type and lighting conditions
+              Transform your space with our color visualization tool
             </Typography>
           </Fade>
           
           <Box sx={{ 
-            display: 'flex',
+            display: 'flex', 
             flexDirection: 'column',
             alignItems: 'center',
             gap: 3, 
@@ -1402,12 +1360,13 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   px: 6,
                   py: 2.5,
                   borderRadius: '16px',
-                  backgroundImage: 'linear-gradient(to right, #6366f1, #8b5cf6, #d946ef)',
-                  boxShadow: '0 10px 25px rgba(99, 102, 241, 0.5)',
+                  background: 'rgba(255,255,255,0.8)',
+                  color: '#ff6b6b',
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
                   '&:hover': {
-                    boxShadow: '0 15px 30px rgba(99, 102, 241, 0.6)',
+                    boxShadow: '0 15px 30px rgba(0, 0, 0, 0.2)',
                     transform: 'translateY(-5px) scale(1.03)',
-                    backgroundImage: 'linear-gradient(to right, #4f46e5, #7c3aed, #c026d3)',
+                    background: 'rgba(255,255,255,0.9)',
                   },
                   transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                   fontSize: '1.25rem',
@@ -1416,11 +1375,11 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   mb: 2
                 }}
               >
-                Get Started with Camera
+                Start Camera
               </Button>
             </Zoom>
             
-            <Typography variant="caption" color="textSecondary" sx={{ mb: 2, fontSize: '0.9rem', fontWeight: 500 }}>
+            <Typography variant="caption" sx={{ mb: 2, fontSize: '0.9rem', fontWeight: 500, color: 'white' }}>
               or
             </Typography>
             
@@ -1435,14 +1394,14 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   py: 1.5,
                   borderRadius: '14px',
                   borderWidth: '2px',
-                  borderColor: 'rgba(99, 102, 241, 0.5)',
-                  color: '#6366f1',
+                  borderColor: 'rgba(255,255,255,0.8)',
+                  color: 'white',
                   '&:hover': {
                     borderWidth: '2px',
-                    borderColor: '#6366f1',
+                    borderColor: 'white',
                     transform: 'translateY(-3px)',
-                    boxShadow: '0 8px 15px rgba(0, 0, 0, 0.05)',
-                    backgroundColor: 'rgba(99, 102, 241, 0.04)',
+                    boxShadow: '0 8px 15px rgba(0, 0, 0, 0.1)',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
                   },
                   transition: 'all 0.3s ease',
                   fontSize: '1rem',
@@ -1450,7 +1409,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   width: { xs: '100%', sm: 'auto' }
                 }}
               >
-                Upload Wall Image
+                Upload Image
               </Button>
             </Fade>
             
@@ -1465,12 +1424,12 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
           
           <Box sx={{ mt: 6, position: 'relative', zIndex: 1 }}>
             <Fade in={true} style={{ transitionDelay: '900ms' }}>
-              <Paper 
-                elevation={0} 
+              <Box 
                 sx={{ 
-                  bgcolor: 'rgba(255,255,255,0.5)', 
+                  bgcolor: 'rgba(255,255,255,0.2)', 
                   p: 2, 
                   borderRadius: 2,
+                  backdropFilter: 'blur(5px)',
                   display: 'flex',
                   flexDirection: { xs: 'column', md: 'row' },
                   gap: 2,
@@ -1479,36 +1438,36 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <CheckIcon sx={{ color: 'success.main' }} />
-                  <Typography variant="body2">AI Enhanced Color Suggestions</Typography>
+                  <CheckIcon sx={{ color: 'white' }} />
+                  <Typography variant="body2" sx={{ color: 'white' }}>Smart Color Analysis</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <CheckIcon sx={{ color: 'success.main' }} />
-                  <Typography variant="body2">Realistic Shadow Detection</Typography>
+                  <CheckIcon sx={{ color: 'white' }} />
+                  <Typography variant="body2" sx={{ color: 'white' }}>Real-time Preview</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <CheckIcon sx={{ color: 'success.main' }} />
-                  <Typography variant="body2">Room-Specific Color Palettes</Typography>
+                  <CheckIcon sx={{ color: 'white' }} />
+                  <Typography variant="body2" sx={{ color: 'white' }}>Color Matching</Typography>
                 </Box>
-              </Paper>
+              </Box>
             </Fade>
           </Box>
-        </Paper>
+        </Box>
       </Grow>
     );
   };
   
-  // Render enhanced camera view with improved UI
+  // Render enhanced camera view with simplified vibrant UI
   const renderCameraView = () => {
     return (
       <Fade in={showCamera} timeout={600}>
-        <Paper
-          elevation={6}
+        <Box
           sx={{
             borderRadius: '24px',
             overflow: 'hidden',
             position: 'relative',
             boxShadow: '0 15px 50px rgba(0, 0, 0, 0.2)',
+            background: 'linear-gradient(45deg, #ff9a9e, #fad0c4)',
             animation: 'fadeInUp 0.6s ease-out',
             '@keyframes fadeInUp': {
               '0%': { opacity: 0, transform: 'translateY(20px)' },
@@ -1530,17 +1489,18 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 width: '100%',
                 height: 'auto',
                 display: 'block',
+                borderRadius: '12px',
               }}
             />
             
-            {/* Camera overlay with improved design and animations */}
+            {/* Camera overlay with simplified design */}
             <Box sx={{
               position: 'absolute',
               top: 0,
               left: 0,
               right: 0,
               p: 2,
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%)',
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 60%, transparent 100%)',
               color: 'white',
               textAlign: 'center',
               animation: 'fadeInDown 0.8s ease-out',
@@ -1550,48 +1510,14 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               }
             }}>
               <Typography variant="h6" fontWeight="bold">
-                Position Camera for Best Results
+                Position Camera
               </Typography>
               <Typography variant="caption" sx={{ opacity: 0.9, display: 'block', mt: 0.5 }}>
-                Ensure good lighting and hold steady for accurate color detection
+                Hold steady for accurate color detection
               </Typography>
-              
-              {/* Animated guidelines overlay */}
-              <Box sx={{
-                position: 'absolute',
-                top: 80,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '80%',
-                height: '80%',
-                border: '2px dashed rgba(255,255,255,0.4)',
-                borderRadius: '8px',
-                display: { xs: 'none', md: 'block' },
-                animation: 'pulseBorder 2s infinite',
-                '@keyframes pulseBorder': {
-                  '0%': { borderColor: 'rgba(255,255,255,0.2)' },
-                  '50%': { borderColor: 'rgba(255,255,255,0.6)' },
-                  '100%': { borderColor: 'rgba(255,255,255,0.2)' }
-                },
-                zIndex: 5,
-                pointerEvents: 'none'
-              }}>
-                <Box sx={{
-                  position: 'absolute',
-                  top: 10,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  backgroundColor: 'rgba(0,0,0,0.5)',
-                  borderRadius: '4px',
-                  px: 1,
-                  py: 0.5
-                }}>
-                  <Typography variant="caption">Align wall within frame</Typography>
-                </Box>
-              </Box>
             </Box>
             
-            {/* Room type selector with enhanced UI */}
+            {/* Room type selector - simplified */}
             <Box sx={{
               position: 'absolute',
               top: 100,
@@ -1603,16 +1529,16 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 '100%': { opacity: 1, transform: 'translateX(0)' }
               }
             }}>
-              <Paper sx={{ p: 1.5, bgcolor: 'rgba(0,0,0,0.75)', color: 'white', borderRadius: 2 }}>
+              <Paper sx={{ p: 1.5, bgcolor: 'rgba(0,0,0,0.5)', color: 'white', borderRadius: 2, backdropFilter: 'blur(5px)' }}>
                 <Typography variant="body2" fontWeight="bold" sx={{ mb: 1 }}>
-                  Wall Type:
+                  Room Type:
                 </Typography>
                 <FormControl fullWidth size="small">
                   <Select
                     value={roomType || 'Living Room'}
                     onChange={(e) => setRoomType(e.target.value as string)}
                     sx={{ 
-                      minWidth: 160,
+                      minWidth: 140,
                       color: 'white', 
                       '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' },
                       '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.5)' },
@@ -1625,10 +1551,10 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                           bgcolor: 'rgba(30,30,30,0.95)',
                           color: 'white',
                           '& .MuiMenuItem-root:hover': {
-                            bgcolor: 'rgba(99,102,241,0.2)'
+                            bgcolor: 'rgba(255,154,158,0.2)'
                           },
                           '& .MuiMenuItem-root.Mui-selected': {
-                            bgcolor: 'rgba(99,102,241,0.3)'
+                            bgcolor: 'rgba(255,154,158,0.3)'
                           }
                         }
                       }
@@ -1640,54 +1566,19 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                     <MenuItem value="Bathroom">Bathroom</MenuItem>
                     <MenuItem value="Dining Room">Dining Room</MenuItem>
                     <MenuItem value="Home Office">Home Office</MenuItem>
-                    <MenuItem value="Accent Wall">Accent Wall</MenuItem>
-                    <MenuItem value="Hallway">Hallway</MenuItem>
                   </Select>
                 </FormControl>
-                
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="body2" fontWeight="bold" sx={{ mb: 1 }}>
-                    Lighting Condition:
-                  </Typography>
-                  <ToggleButtonGroup
-                    exclusive
-                    value={lightingCondition || 'Well-lit'}
-                    onChange={(e, newValue) => {
-                      if (newValue) setLightingCondition(newValue);
-                    }}
-                    size="small"
-                    fullWidth
-                    sx={{
-                      '.MuiToggleButton-root': {
-                        color: 'rgba(255,255,255,0.7)',
-                        borderColor: 'rgba(255,255,255,0.2)',
-                        textTransform: 'none',
-                        '&.Mui-selected': {
-                          color: 'white',
-                          backgroundColor: 'rgba(99,102,241,0.5)',
-                        }
-                      }
-                    }}
-                  >
-                    <ToggleButton value="Well-lit">
-                      <LightIcon sx={{ fontSize: 14, mr: 0.5 }} /> Bright
-                    </ToggleButton>
-                    <ToggleButton value="Dimly lit">
-                      <Brightness4Icon sx={{ fontSize: 14, mr: 0.5 }} /> Dim
-                    </ToggleButton>
-                  </ToggleButtonGroup>
-                </Box>
               </Paper>
             </Box>
             
-            {/* Enhanced camera controls with animations */}
+            {/* Simplified camera controls */}
             <Box sx={{ 
               position: 'absolute', 
               bottom: 0, 
               left: 0, 
               right: 0, 
               p: 3,
-              background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 60%, transparent 100%)',
+              background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 60%, transparent 100%)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -1697,20 +1588,17 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 '100%': { opacity: 1, transform: 'translateY(0)' }
               }
             }}>
-              <Typography variant="body2" sx={{ mb: 2, color: 'rgba(255,255,255,0.7)' }}>
-                Tap capture when your wall is properly framed
-              </Typography>
-              
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                 {/* Camera flip button with animation */}
-                <Tooltip title={`Switch to ${facingMode === 'user' ? 'back' : 'front'} camera`}>
+                <Tooltip title={`Switch camera`}>
                   <IconButton 
                     onClick={toggleCameraFacingMode}
                     sx={{
-                      bgcolor: 'rgba(255,255,255,0.15)',
+                      bgcolor: 'rgba(255,255,255,0.2)',
                       color: 'white',
+                      backdropFilter: 'blur(5px)',
                       '&:hover': { 
-                        bgcolor: 'rgba(255,255,255,0.25)',
+                        bgcolor: 'rgba(255,255,255,0.3)',
                         transform: 'scale(1.1)'
                       },
                       width: 50,
@@ -1728,7 +1616,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   onClick={handleCapture}
                   sx={{
                     bgcolor: 'white',
-                    color: '#6366f1',
+                    color: '#ff6b6b',
                     borderRadius: '50%',
                     width: 80,
                     height: 80,
@@ -1769,10 +1657,11 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   <IconButton 
                     onClick={() => setShowCamera(false)}
                     sx={{
-                      bgcolor: 'rgba(255,255,255,0.15)',
+                      bgcolor: 'rgba(255,255,255,0.2)',
                       color: 'white',
+                      backdropFilter: 'blur(5px)',
                       '&:hover': { 
-                        bgcolor: 'rgba(255,255,255,0.25)',
+                        bgcolor: 'rgba(255,255,255,0.3)',
                         transform: 'scale(1.1)'
                       },
                       width: 50,
@@ -1786,7 +1675,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               </Box>
             </Box>
           </Box>
-        </Paper>
+        </Box>
       </Fade>
     );
   };

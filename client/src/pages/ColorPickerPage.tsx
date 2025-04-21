@@ -186,26 +186,31 @@ const ColorPickerPage = () => {
 
   // Get adjusted color with applied intensity settings
   const getAdjustedColor = () => {
-    let adjustedColor = colorInfo;
-    
-    // Apply brightness
-    if (colorIntensity.brightness > 100) {
-      adjustedColor = adjustedColor.lighten((colorIntensity.brightness - 100) / 100);
-    } else if (colorIntensity.brightness < 100) {
-      adjustedColor = adjustedColor.darken((100 - colorIntensity.brightness) / 100);
+    try {
+      let adjustedColor = colorInfo;
+      
+      // Apply brightness
+      if (colorIntensity.brightness > 100) {
+        adjustedColor = adjustedColor.lighten((colorIntensity.brightness - 100) / 100);
+      } else if (colorIntensity.brightness < 100) {
+        adjustedColor = adjustedColor.darken((100 - colorIntensity.brightness) / 100);
+      }
+      
+      // Apply saturation
+      if (colorIntensity.saturation > 100) {
+        adjustedColor = adjustedColor.saturate((colorIntensity.saturation - 100) / 50);
+      } else if (colorIntensity.saturation < 100) {
+        adjustedColor = adjustedColor.desaturate((100 - colorIntensity.saturation) / 50);
+      }
+      
+      // Apply opacity (for display purposes)
+      const finalColor = adjustedColor.alpha(colorIntensity.opacity / 100);
+      
+      return finalColor;
+    } catch (error) {
+      console.error('Error adjusting color:', error);
+      return colorInfo; // Return original color as fallback
     }
-    
-    // Apply saturation
-    if (colorIntensity.saturation > 100) {
-      adjustedColor = adjustedColor.saturate((colorIntensity.saturation - 100) / 50);
-    } else if (colorIntensity.saturation < 100) {
-      adjustedColor = adjustedColor.desaturate((100 - colorIntensity.saturation) / 50);
-    }
-    
-    // Apply opacity (for display purposes)
-    const finalColor = adjustedColor.alpha(colorIntensity.opacity / 100);
-    
-    return finalColor;
   };
 
   return (
@@ -373,9 +378,9 @@ const ColorPickerPage = () => {
             </Typography>
             
             <ColorSwatch sx={{ 
-              bgcolor: getAdjustedColor().toRgbString(),
+              bgcolor: getAdjustedColor()?.toRgbString() || 'transparent',
               boxShadow: shadowTracking ? '0px 10px 20px rgba(0,0,0,0.2), inset 0 -5px 10px rgba(0,0,0,0.1), inset 0 5px 10px rgba(255,255,255,0.3)' : undefined,
-              background: vision360 ? `linear-gradient(135deg, ${getAdjustedColor().toRgbString()} 0%, ${getAdjustedColor().lighten(0.1).toRgbString()} 50%, ${getAdjustedColor().darken(0.1).toRgbString()} 100%)` : getAdjustedColor().toRgbString(),
+              background: vision360 ? `linear-gradient(135deg, ${getAdjustedColor()?.toRgbString() || 'transparent'} 0%, ${getAdjustedColor()?.lighten(0.1)?.toRgbString() || 'transparent'} 50%, ${getAdjustedColor()?.darken(0.1)?.toRgbString() || 'transparent'} 100%)` : getAdjustedColor()?.toRgbString() || 'transparent',
               mb: 3 
             }} />
             
@@ -399,31 +404,31 @@ const ColorPickerPage = () => {
               
               <ColorFormatDisplay
                 label="HEX"
-                value={getAdjustedColor().toHex().toUpperCase()}
+                value={getAdjustedColor()?.toHex()?.toUpperCase() || ''}
                 onCopy={handleCopy}
               />
               
               <ColorFormatDisplay
                 label="RGB"
-                value={getAdjustedColor().toRgbString()}
+                value={getAdjustedColor()?.toRgbString() || ''}
                 onCopy={handleCopy}
               />
               
               <ColorFormatDisplay
                 label="HSL"
-                value={getAdjustedColor().toHslString()}
+                value={getAdjustedColor()?.toHslString() || ''}
                 onCopy={handleCopy}
               />
               
               <ColorFormatDisplay
                 label="CMYK"
-                value={getAdjustedColor().toCmykString()}
+                value={getAdjustedColor()?.toCmykString() || ''}
                 onCopy={handleCopy}
               />
               
               <ColorFormatDisplay
                 label="LAB"
-                value={getAdjustedColor().toLab().toString()}
+                value={getAdjustedColor()?.toLab()?.toString() || ''}
                 onCopy={handleCopy}
               />
             </Box>
@@ -452,7 +457,7 @@ const ColorPickerPage = () => {
                         onClick={() => setColor(c)}
                       />
                       <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
-                        {c.toUpperCase()}
+                        {typeof c === 'string' ? c.toUpperCase() : c}
                       </Typography>
                     </Grid>
                   ))}
@@ -510,7 +515,7 @@ const ColorPickerPage = () => {
                         }}
                       >
                         <Typography variant="caption" component="div">
-                          {colord(c).toName({ closest: true }) || c.toUpperCase()}
+                          {colord(c).toName({ closest: true }) || (typeof c === 'string' ? c.toUpperCase() : c)}
                         </Typography>
                       </Box>
                     </Box>

@@ -68,6 +68,7 @@ import ColorSuggestionService, {
   defaultPreviewOptions
 } from '../services/ColorSuggestionService';
 import { generateId } from '../utils/helpers';
+import { alpha } from '@mui/material/styles';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -826,17 +827,17 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
             />
             <Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {selectedColor.name}
+                {selectedColor?.name}
               </Typography>
               <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
-                {selectedColor.hex.toUpperCase()}
+                {selectedColor?.hex?.toUpperCase()}
                 <IconButton size="small" onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
-                  copyColorCode(selectedColor.hex);
+                  copyColorCode(selectedColor?.hex || '');
                 }}>
                   {copied ? <CheckIcon fontSize="small" /> : <CopyIcon fontSize="small" />}
                 </IconButton>
-                {selectedColor.rgb && (
+                {selectedColor?.rgb && (
                   <Tooltip title={`RGB: ${selectedColor.rgb}`}>
                     <Chip 
                       label="RGB" 
@@ -1205,6 +1206,19 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                       <Typography variant="subtitle2" gutterBottom>
                         {color.name}
                       </Typography>
+                      {color.moodCategory && (
+                        <Chip 
+                          label={color.moodCategory} 
+                          size="small"
+                          sx={{ 
+                            mb: 1, 
+                            fontSize: '0.6rem', 
+                            height: 18,
+                            bgcolor: alpha(theme.palette.primary.main, 0.1),
+                            color: theme.palette.primary.main
+                          }}
+                        />
+                      )}
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Typography variant="body2" color="textSecondary">
                           {color.hex}

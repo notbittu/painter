@@ -69,6 +69,13 @@ interface SimilarColorOptions {
   realisticBlending?: boolean;
 }
 
+export interface SimilarColor {
+  hex: string;
+  name: string;
+  confidence: number;
+  moodCategory?: string;
+}
+
 const API_BASE_URL = process.env.REACT_APP_API_URL || '';
 
 // Default preview options with enhanced realism
@@ -217,44 +224,57 @@ class ColorSuggestionService {
    */
   private getEnhancedFallbackSimilarColors(colorHex: string, options: SimilarColorOptions): ColorSuggestion[] {
     const color = colord(colorHex);
-    const rgb = color.toRgbString();
+    const hslColor = color.toHsl();
     
-    // More sophisticated fallback
+    // Create more variations for walls specifically
     return [
-      { 
-        name: 'Lighter Shade', 
-        hex: color.lighten(0.2).toHex(),
-        rgb: options.includeRGB ? color.lighten(0.2).toRgbString() : undefined,
+      {
+        name: 'Light Shade',
+        hex: color.lighten(0.1).toHex(),
+        rgb: options.includeRGB ? color.lighten(0.1).toRgbString() : undefined,
+        roomTypes: ['Small Rooms', 'Dark Spaces', 'North-facing Rooms'],
         moodCategory: 'Airy',
-        complementaryColors: [color.rotate(180).toHex()]
+        brand: 'Benjamin Moore'
       },
-      { 
-        name: 'Darker Shade', 
-        hex: color.darken(0.2).toHex(),
-        rgb: options.includeRGB ? color.darken(0.2).toRgbString() : undefined,
-        moodCategory: 'Rich',
-        complementaryColors: [color.rotate(180).toHex()]
-      },
-      { 
-        name: 'Similar Tone 1', 
-        hex: color.rotate(15).saturate(0.1).toHex(),
-        rgb: options.includeRGB ? color.rotate(15).saturate(0.1).toRgbString() : undefined,
-        moodCategory: 'Harmonious',
-        complementaryColors: [color.rotate(195).toHex()]
-      },
-      { 
-        name: 'Similar Tone 2', 
-        hex: color.rotate(-15).saturate(0.1).toHex(),
-        rgb: options.includeRGB ? color.rotate(-15).saturate(0.1).toRgbString() : undefined,
+      {
+        name: 'Wall Perfect',
+        hex: colorHex,
+        rgb: options.includeRGB ? color.toRgbString() : undefined,
+        roomTypes: ['Living Room', 'Dining Room', 'Bedroom'],
         moodCategory: 'Balanced',
-        complementaryColors: [color.rotate(165).toHex()]
+        brand: 'Sherwin-Williams'
       },
-      { 
-        name: 'Complementary', 
+      {
+        name: 'Accent Depth',
+        hex: color.darken(0.1).toHex(),
+        rgb: options.includeRGB ? color.darken(0.1).toRgbString() : undefined,
+        roomTypes: ['Accent Walls', 'Well-lit Rooms', 'South-facing Rooms'],
+        moodCategory: 'Cozy',
+        brand: 'Behr'
+      },
+      {
+        name: 'Complementary Wall',
         hex: color.rotate(180).toHex(),
         rgb: options.includeRGB ? color.rotate(180).toRgbString() : undefined,
-        moodCategory: 'Contrasting',
-        complementaryColors: [colorHex]
+        roomTypes: ['Accent Walls', 'Feature Walls', 'Bold Statements'],
+        moodCategory: 'Dramatic',
+        brand: 'Farrow & Ball'
+      },
+      {
+        name: 'Analogous Wall 1',
+        hex: color.rotate(30).toHex(),
+        rgb: options.includeRGB ? color.rotate(30).toRgbString() : undefined,
+        roomTypes: ['Connected Spaces', 'Open Floor Plans', 'Transitions'],
+        moodCategory: 'Harmonious',
+        brand: 'Dulux'
+      },
+      {
+        name: 'Analogous Wall 2',
+        hex: color.rotate(-30).toHex(),
+        rgb: options.includeRGB ? color.rotate(-30).toRgbString() : undefined,
+        roomTypes: ['Connected Spaces', 'Open Floor Plans', 'Transitions'],
+        moodCategory: 'Harmonious',
+        brand: 'Valspar'
       }
     ];
   }
@@ -335,52 +355,133 @@ class ColorSuggestionService {
    * Get enhanced fallback color suggestions with all new features
    */
   private getEnhancedFallbackColorSuggestions(): ColorAnalysisResult {
-    // Generate more sophisticated fallback data for testing
+    // More realistic and interior design-focused color suggestions
     return {
       dominantColors: [
-        { 
-          name: 'Soft White',
-          hex: '#F5F5F5',
-          rgb: 'rgb(245, 245, 245)',
-          moodCategory: 'Clean'
+        {
+          name: 'Soft Sage',
+          hex: '#D0DAC8',
+          rgb: 'rgb(208, 218, 200)',
+          moodCategory: 'Calm',
+          roomTypes: ['Living Room', 'Bedroom', 'Home Office'],
+          brand: 'Benjamin Moore',
+          colorCode: 'BM-HC-110'
         },
         {
-          name: 'Light Gray',
-          hex: '#E0E0E0',
-          rgb: 'rgb(224, 224, 224)',
-          moodCategory: 'Neutral'
+          name: 'Warm Taupe',
+          hex: '#BFB0A3',
+          rgb: 'rgb(191, 176, 163)',
+          moodCategory: 'Cozy',
+          roomTypes: ['Dining Room', 'Hallway', 'Living Room'],
+          brand: 'Sherwin-Williams',
+          colorCode: 'SW-7038'
         },
         {
-          name: 'Beige',
-          hex: '#F5F5DC',
-          rgb: 'rgb(245, 245, 220)',
-          moodCategory: 'Warm'
+          name: 'Misted Blue',
+          hex: '#C5D5D8',
+          rgb: 'rgb(197, 213, 216)',
+          moodCategory: 'Serene',
+          roomTypes: ['Bathroom', 'Bedroom', 'Nursery'],
+          brand: 'Behr',
+          colorCode: 'BHR-720C'
         }
       ],
       suggestedPalettes: [
         {
-          name: 'Modern Neutrals',
-          description: 'A clean, contemporary palette with neutral tones',
+          name: 'Calming Neutrals',
+          description: 'Perfect palette for creating a serene and timeless backdrop that works well with most furniture styles',
+          style: 'Modern Minimal',
+          moodCategory: 'Calm',
           colors: [
-            { name: 'Soft White', hex: '#F5F5F5', rgb: 'rgb(245, 245, 245)' },
-            { name: 'Light Gray', hex: '#E0E0E0', rgb: 'rgb(224, 224, 224)' },
-            { name: 'Charcoal', hex: '#36454F', rgb: 'rgb(54, 69, 79)' },
-            { name: 'Slate Blue', hex: '#6A93AB', rgb: 'rgb(106, 147, 171)' }
-          ],
-          style: 'Modern',
-          moodCategory: 'Calm'
+            {
+              name: 'Creamy White',
+              hex: '#F5F2EA',
+              rgb: 'rgb(245, 242, 234)',
+              roomTypes: ['Any Room', 'Small Spaces'],
+              brand: 'Sherwin-Williams',
+              colorCode: 'SW-7012'
+            },
+            {
+              name: 'Greige',
+              hex: '#D6D1C0',
+              rgb: 'rgb(214, 209, 192)',
+              roomTypes: ['Living Room', 'Hallway', 'Bedroom'],
+              brand: 'Benjamin Moore',
+              colorCode: 'BM-1568'
+            },
+            {
+              name: 'Soft Linen',
+              hex: '#E8E1D6',
+              rgb: 'rgb(232, 225, 214)',
+              roomTypes: ['Dining Room', 'Home Office', 'Bedroom'],
+              brand: 'Behr',
+              colorCode: 'BHR-N220-1'
+            }
+          ]
         },
         {
-          name: 'Warm Naturals',
-          description: 'Earthy tones that create a cozy atmosphere',
+          name: 'Modern Earthy',
+          description: 'Warm, earth-inspired tones that add depth and grounding energy to any space',
+          style: 'Contemporary Organic',
+          moodCategory: 'Warm',
           colors: [
-            { name: 'Beige', hex: '#F5F5DC', rgb: 'rgb(245, 245, 220)' },
-            { name: 'Warm Gray', hex: '#D3D3D3', rgb: 'rgb(211, 211, 211)' },
-            { name: 'Terracotta', hex: '#E2725B', rgb: 'rgb(226, 114, 91)' },
-            { name: 'Olive Green', hex: '#BAB86C', rgb: 'rgb(186, 184, 108)' }
-          ],
-          style: 'Natural',
-          moodCategory: 'Cozy'
+            {
+              name: 'Terracotta',
+              hex: '#D8A18B',
+              rgb: 'rgb(216, 161, 139)',
+              roomTypes: ['Living Room', 'Dining Room', 'Accent Wall'],
+              brand: 'Sherwin-Williams',
+              colorCode: 'SW-7567'
+            },
+            {
+              name: 'Olive Grove',
+              hex: '#B0B59A',
+              rgb: 'rgb(176, 181, 154)',
+              roomTypes: ['Kitchen', 'Dining Room', 'Home Office'],
+              brand: 'Benjamin Moore',
+              colorCode: 'BM-1495'
+            },
+            {
+              name: 'Warm Clay',
+              hex: '#C2A392',
+              rgb: 'rgb(194, 163, 146)',
+              roomTypes: ['Bedroom', 'Living Room', 'Entryway'],
+              brand: 'Behr',
+              colorCode: 'BHR-S210-4'
+            }
+          ]
+        },
+        {
+          name: 'Serene Coastal',
+          description: 'Soft blues and sandy neutrals inspired by coastal landscapes for a relaxing atmosphere',
+          style: 'Coastal Modern',
+          moodCategory: 'Serene',
+          colors: [
+            {
+              name: 'Pale Ocean',
+              hex: '#CFD8D7',
+              rgb: 'rgb(207, 216, 215)',
+              roomTypes: ['Bathroom', 'Bedroom', 'Living Room'],
+              brand: 'Benjamin Moore',
+              colorCode: 'BM-2162-60'
+            },
+            {
+              name: 'Sandy Beach',
+              hex: '#E5DBCA',
+              rgb: 'rgb(229, 219, 202)',
+              roomTypes: ['Any Room', 'Hallway', 'Kitchen'],
+              brand: 'Sherwin-Williams',
+              colorCode: 'SW-7542'
+            },
+            {
+              name: 'Sea Salt',
+              hex: '#DBE0D7',
+              rgb: 'rgb(219, 224, 215)',
+              roomTypes: ['Bathroom', 'Kitchen', 'Bedroom'],
+              brand: 'Behr',
+              colorCode: 'BHR-PPL-83'
+            }
+          ]
         }
       ],
       wallFeatures: {
@@ -391,7 +492,7 @@ class ColorSuggestionService {
         hasTexturedSurface: false,
         roomType: 'Living Room',
         wallCondition: 'Good',
-        lightingCondition: 'Bright'
+        lightingCondition: 'Well-lit'
       }
     };
   }

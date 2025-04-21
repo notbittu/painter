@@ -32,7 +32,8 @@ import {
   ToggleButtonGroup,
   Zoom,
   FormControlLabel,
-  Switch
+  Switch,
+  SelectChangeEvent
 } from '@mui/material';
 import {
   CameraAlt as CameraIcon,
@@ -126,6 +127,9 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
   // Camera settings
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const [shadowTrackingEnabled, setShadowTrackingEnabled] = useState<boolean>(true);
+  
+  // Room type for better analysis
+  const [roomType, setRoomType] = useState<string>('Living Room');
   
   // Enhanced preview options
   const [previewOptions, setPreviewOptions] = useState<ColorPreviewOptions>({
@@ -351,9 +355,20 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
     }
   };
   
-  // Toggle comparison mode
+  // Toggle comparison mode with better features
   const toggleCompareMode = () => {
     setCompareMode(!compareMode);
+    
+    if (!compareMode && !originalPreviewImage && wallImage) {
+      // Ensure we have the original image for comparison
+      setOriginalPreviewImage(wallImage);
+    }
+    
+    setSnackbarMessage(compareMode ? 
+      'Normal view mode' : 
+      'Before/After comparison mode - drag the slider to compare'
+    );
+    setOpenSnackbar(true);
   };
   
   // Copy color code to clipboard
@@ -697,15 +712,49 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
             </Box>
           
           {compareMode ? (
-            // Compare view with slider
+            // Enhanced Compare view with slider
             <Box sx={{ position: 'relative', height: 400, overflow: 'hidden' }}>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  position: 'absolute', 
+                  top: 10, 
+                  left: 10, 
+                  zIndex: 10, 
+                  color: 'white', 
+                  bgcolor: 'rgba(0,0,0,0.5)',
+                  px: 1,
+                  py: 0.5,
+                  borderRadius: 1
+                }}
+              >
+                Before
+              </Typography>
+              
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  position: 'absolute', 
+                  top: 10, 
+                  right: 10, 
+                  zIndex: 10, 
+                  color: 'white', 
+                  bgcolor: 'rgba(0,0,0,0.5)',
+                  px: 1,
+                  py: 0.5,
+                  borderRadius: 1
+                }}
+              >
+                After
+              </Typography>
+              
               <Box sx={{ 
                   position: 'absolute', 
                 top: 0, 
                   left: 0, 
                   right: 0, 
                 bottom: 0, 
-                backgroundImage: `url(${originalPreviewImage})`,
+                backgroundImage: `url(${originalPreviewImage || wallImage})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 zIndex: 1
@@ -721,7 +770,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 zIndex: 2,
-                borderRight: '2px solid white'
+                borderRight: '3px solid white'
               }} />
               
               <Box sx={{ 
@@ -730,16 +779,17 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 left: `${previewOptions.intensity}%`, 
                 transform: 'translate(-50%, -50%)',
                 zIndex: 3,
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 borderRadius: '50%',
                 width: 40,
                 height: 40,
                   display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: theme.shadows[5]
+                boxShadow: theme.shadows[5],
+                border: '2px solid white'
               }}>
-                <CompareIcon />
+                <CompareIcon fontSize="small" />
               </Box>
               
               <Slider
@@ -751,12 +801,16 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   zIndex: 4,
                   color: 'white',
                   '& .MuiSlider-thumb': {
-                        width: 20, 
-                        height: 20, 
+                        width: 24, 
+                        height: 24, 
                     backgroundColor: 'white',
+                    border: '2px solid #6366f1',
+                    '&:hover': {
+                      boxShadow: '0 0 0 8px rgba(99, 102, 241, 0.16)'
+                    }
                   },
                   '& .MuiSlider-track': {
-                    backgroundColor: 'white',
+                    backgroundColor: '#6366f1',
                     border: 'none',
                   },
                   '& .MuiSlider-rail': {
@@ -772,10 +826,11 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 }}
                 min={0}
                 max={100}
+                aria-label="Before/After comparison slider"
               />
             </Box>
           ) : (
-            // Regular preview
+            // Regular preview with enhanced info
             <Box 
               sx={{ 
                 height: 400, 
@@ -788,48 +843,67 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 overflow: 'hidden'
               }}
             >
-              {// Add feature indicators
+              {// Add feature indicators with improved information
               previewOptions.shadowTracking && (
-                <Tooltip title="Shadow Tracking enabled">
+                <Tooltip title="Shadow Tracking uses AI to adapt the paint color to existing shadows and lighting conditions on your wall">
                   <Chip
                     icon={<ShadowTrackingIcon />}
                     label="Shadow Tracking"
                     size="small"
-                    sx={{ position: 'absolute', top: 10, right: 10, bgcolor: 'rgba(0,0,0,0.6)', color: 'white' }}
+                    sx={{ position: 'absolute', top: 10, right: 10, bgcolor: 'rgba(0,0,0,0.7)', color: 'white' }}
                   />
                 </Tooltip>
               )}
               
               {previewOptions.vision360 && (
-                <Tooltip title="NFD Vision 360 enabled">
+                <Tooltip title="NFD Vision 360 analyzes your wall's depth and contours for realistic paint visualization">
                   <Chip
                     icon={<Vision360Icon />}
                     label="Vision 360"
                     size="small"
-                    sx={{ position: 'absolute', top: previewOptions.shadowTracking ? 50 : 10, right: 10, bgcolor: 'rgba(0,0,0,0.6)', color: 'white' }}
+                    sx={{ position: 'absolute', top: previewOptions.shadowTracking ? 50 : 10, right: 10, bgcolor: 'rgba(0,0,0,0.7)', color: 'white' }}
+                  />
+                </Tooltip>
+              )}
+              
+              {previewOptions.realisticBlending && (
+                <Tooltip title="Realistic Blending simulates how paint interacts with your wall's texture and surface">
+                  <Chip
+                    icon={<FormatColorFillIcon />}
+                    label="Realistic Blend"
+                    size="small"
+                    sx={{ 
+                      position: 'absolute', 
+                      top: previewOptions.shadowTracking && previewOptions.vision360 ? 90 : 
+                           previewOptions.shadowTracking || previewOptions.vision360 ? 50 : 10, 
+                      right: 10, 
+                      bgcolor: 'rgba(0,0,0,0.7)', 
+                      color: 'white' 
+                    }}
                   />
                 </Tooltip>
               )}
                   </Box>
           )}
                 
-          <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, mt: 2 }}>
             <Box 
                   sx={{ 
-                width: 50, 
-                height: 50, 
+                width: 60, 
+                height: 60, 
                 borderRadius: '50%', 
-                bgcolor: selectedColor.hex,
+                bgcolor: selectedColor?.hex || '#ccc',
                 mr: 2,
-                border: '2px solid white',
-                boxShadow: 1
+                border: '3px solid white',
+                boxShadow: 1,
+                flexShrink: 0
               }} 
             />
-            <Box>
+            <Box sx={{ flex: 1 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {selectedColor?.name}
+                {selectedColor?.name || 'Select a color'}
               </Typography>
-              <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>
                 {selectedColor?.hex?.toUpperCase()}
                 <IconButton size="small" onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
@@ -841,7 +915,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   <Tooltip title={`RGB: ${selectedColor.rgb}`}>
                     <Chip 
                       label="RGB" 
-                  size="small"
+                      size="small"
                       sx={{ ml: 1, fontSize: '0.7rem', height: 20 }}
                       onClick={(e: React.MouseEvent) => {
                         e.stopPropagation();
@@ -850,9 +924,33 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                     />
                   </Tooltip>
                 )}
+                {selectedColor?.brand && (
+                  <Tooltip title={`Brand: ${selectedColor.brand}`}>
+                    <Chip 
+                      label={selectedColor.brand} 
+                      size="small"
+                      sx={{ ml: 1, fontSize: '0.7rem', height: 20 }}
+                    />
+                  </Tooltip>
+                )}
               </Typography>
-              </Box>
+              {selectedColor?.roomTypes && selectedColor.roomTypes.length > 0 && (
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                  Perfect for: {selectedColor.roomTypes.join(', ')}
+                </Typography>
+              )}
+              {selectedColor?.moodCategory && (
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                  Mood: {selectedColor.moodCategory}
+                </Typography>
+              )}
+              {selectedColor?.suitableFor && (
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5, fontStyle: 'italic' }}>
+                  {selectedColor.suitableFor}
+                </Typography>
+              )}
             </Box>
+          </Box>
         </Paper>
         
         {renderColorAdjustmentControls()}
@@ -1031,7 +1129,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               ref={webcamRef}
               screenshotFormat="image/jpeg"
               videoConstraints={{
-                facingMode: 'environment', // Default to back camera for wall photos
+                facingMode: facingMode,
                 width: 1280,
                 height: 720,
               }}
@@ -1042,35 +1140,89 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               }}
             />
             
-            {/* Camera overlay with instructions */}
+            {/* Camera overlay with improved instructions */}
             <Box sx={{
               position: 'absolute',
               top: 0,
               left: 0,
               right: 0,
               p: 2,
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)',
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%)',
               color: 'white',
               textAlign: 'center',
             }}>
               <Typography variant="subtitle1" fontWeight="bold">
                 Position camera to clearly capture your wall
               </Typography>
+              <Typography variant="caption">
+                Ensure good lighting and a straight angle for best results
+              </Typography>
             </Box>
             
-            {/* Simplified camera controls */}
+            {/* Room type indicator for better analysis */}
+            <Box sx={{
+              position: 'absolute',
+              top: 80,
+              right: 20,
+              zIndex: 10,
+            }}>
+              <Paper sx={{ p: 1, bgcolor: 'rgba(0,0,0,0.7)', color: 'white', borderRadius: 2 }}>
+                <Typography variant="caption" fontWeight="bold">
+                  Room Type:
+                </Typography>
+                <Select
+                  value={roomType || 'Living Room'}
+                  onChange={(e: SelectChangeEvent) => setRoomType(e.target.value as string)}
+                  size="small"
+                  sx={{ 
+                    ml: 1, 
+                    color: 'white', 
+                    '& .MuiSelect-select': { 
+                      py: 0,
+                      color: 'white',
+                    },
+                    '& .MuiSvgIcon-root': {
+                      color: 'white',
+                    }
+                  }}
+                >
+                  <MenuItem value="Living Room">Living Room</MenuItem>
+                  <MenuItem value="Bedroom">Bedroom</MenuItem>
+                  <MenuItem value="Kitchen">Kitchen</MenuItem>
+                  <MenuItem value="Bathroom">Bathroom</MenuItem>
+                  <MenuItem value="Dining Room">Dining Room</MenuItem>
+                  <MenuItem value="Home Office">Home Office</MenuItem>
+                </Select>
+              </Paper>
+            </Box>
+            
+            {/* Improved camera controls */}
             <Box sx={{ 
               position: 'absolute', 
               bottom: 0, 
               left: 0, 
               right: 0, 
               p: 3,
-              background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%)',
+              background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
               gap: 3
             }}>
+              {/* Camera flip button */}
+              <IconButton 
+                onClick={toggleCameraFacingMode}
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+                  width: 48,
+                  height: 48,
+                }}
+              >
+                <FlipCameraIcon />
+              </IconButton>
+              
               {/* Capture button */}
               <Button
                 variant="contained"

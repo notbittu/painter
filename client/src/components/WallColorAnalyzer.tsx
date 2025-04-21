@@ -59,7 +59,11 @@ import {
   FlipCameraAndroid as FlipCameraIcon,
   ViewInAr as Vision360Icon,
   Brightness4 as ShadowTrackingIcon,
-  Panorama as PanoramaIcon
+  Panorama as PanoramaIcon,
+  Tune as TuneIcon,
+  InfoOutlined as InfoOutlinedIcon,
+  RestartAlt as RestartAltIcon,
+  LightMode as LightModeIcon
 } from '@mui/icons-material';
 import Webcam from 'react-webcam';
 import ColorSuggestionService, { 
@@ -130,6 +134,9 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
   
   // Room type for better analysis
   const [roomType, setRoomType] = useState<string>('Living Room');
+  
+  // Lighting condition for more accurate color suggestions
+  const [lightingCondition, setLightingCondition] = useState<string>('Well-lit');
   
   // Enhanced preview options
   const [previewOptions, setPreviewOptions] = useState<ColorPreviewOptions>({
@@ -446,306 +453,430 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
     setOpenSnackbar(false);
   };
   
-  // Replace the existing color adjustment controls with enhanced version
+  // Render color adjustment controls with enhanced UI
   const renderColorAdjustmentControls = () => {
-    if (!selectedColor) return null;
-    
     return (
-      <Box sx={{ mt: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Advanced Color Adjustment
-        </Typography>
-        
-        <Box sx={{ mb: 3 }}>
-          <Typography gutterBottom variant="body2" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span>Color Intensity</span>
-            <span>{previewOptions.intensity}%</span>
+      <Fade in={true} timeout={800}>
+        <Paper 
+          sx={{ 
+            p: 3, 
+            borderRadius: 3, 
+            overflow: 'hidden',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              boxShadow: '0 12px 28px rgba(0,0,0,0.15)',
+            }
+          }}
+        >
+          <Typography 
+            variant="h6" 
+            component="h3" 
+            sx={{ 
+              mb: 2, 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1,
+              fontWeight: 600,
+              color: theme.palette.primary.main
+            }}
+          >
+            <TuneIcon /> Fine-Tune Visualization
           </Typography>
-          <Slider
-            value={previewOptions.intensity}
-            onChange={handleIntensityChange}
-            min={50}
-            max={150}
-            aria-labelledby="color-intensity-slider"
-            valueLabelDisplay="auto"
-            marks={[
-              { value: 50, label: '50%' },
-              { value: 100, label: '100%' },
-              { value: 150, label: '150%' },
-            ]}
-          />
-        </Box>
-        
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth size="small">
-              <InputLabel id="finish-type-label">Finish Type</InputLabel>
-              <Select
-                labelId="finish-type-label"
-                id="finish-type"
-                value={previewOptions.finish}
-                label="Finish Type"
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  const newFinish = e.target.value as string;
-                  setPreviewOptions({
-                    ...previewOptions,
-                    finish: newFinish
-                  });
-                  if (selectedColor && wallImage) {
-                    generatePreview(selectedColor, {
-                      ...previewOptions,
-                      finish: newFinish
-                    });
-                  }
+          
+          <Grid container spacing={3}>
+            {/* Intensity slider with enhanced UI */}
+            <Grid item xs={12} sm={6}>
+              <Typography 
+                variant="subtitle2" 
+                sx={{ 
+                  mb: 1, 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  justifyContent: 'space-between' 
                 }}
               >
-                <MenuItem value="matte">Matte</MenuItem>
-                <MenuItem value="eggshell">Eggshell</MenuItem>
-                <MenuItem value="satin">Satin</MenuItem>
-                <MenuItem value="semi-gloss">Semi-Gloss</MenuItem>
-                <MenuItem value="high-gloss">High-Gloss</MenuItem>
-                <MenuItem value="metallic">Metallic</MenuItem>
-                <MenuItem value="pearl">Pearl</MenuItem>
-              </Select>
-            </FormControl>
+                <span>
+                  <OpacityIcon sx={{ fontSize: '1rem', mr: 0.5, verticalAlign: 'text-bottom', opacity: 0.7 }} /> 
+                  Color Intensity
+                </span>
+                <Chip 
+                  label={`${previewOptions.intensity}%`} 
+                  size="small" 
+                  sx={{ 
+                    height: 20, 
+                    fontSize: '0.7rem',
+                    fontWeight: 600,
+                    bgcolor: alpha(theme.palette.primary.main, 0.1),
+                    color: theme.palette.primary.main,
+                  }}
+                />
+              </Typography>
+              <Box sx={{ px: 1 }}>
+                <Slider
+                  value={previewOptions.intensity}
+                  onChange={(e: Event, newValue: number | number[]) => {
+                    setPreviewOptions({
+                      ...previewOptions,
+                      intensity: newValue as number
+                    });
+                  }}
+                  min={0}
+                  max={100}
+                  sx={{
+                    color: theme.palette.primary.main,
+                    '& .MuiSlider-thumb': {
+                      '&:hover, &.Mui-focusVisible': {
+                        boxShadow: `0px 0px 0px 8px ${alpha(theme.palette.primary.main, 0.16)}`
+                      }
+                    }
+                  }}
+                />
+              </Box>
+            </Grid>
+            
+            {/* Realistic Blending toggle with enhanced UI */}
+            <Grid item xs={12} sm={6}>
+              <Typography 
+                variant="subtitle2" 
+                sx={{ 
+                  mb: 1, 
+                  display: 'flex', 
+                  alignItems: 'center' 
+                }}
+              >
+                <FormatColorFillIcon sx={{ fontSize: '1rem', mr: 0.5, verticalAlign: 'text-bottom', opacity: 0.7 }} /> 
+                Realistic Blending
+              </Typography>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={previewOptions.realisticBlending}
+                    onChange={() => {
+                      setPreviewOptions({
+                        ...previewOptions,
+                        realisticBlending: !previewOptions.realisticBlending
+                      });
+                    }}
+                    color="primary"
+                    sx={{
+                      '& .MuiSwitch-switchBase.Mui-checked': {
+                        color: theme.palette.primary.main
+                      },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                        backgroundColor: alpha(theme.palette.primary.main, 0.5)
+                      }
+                    }}
+                  />
+                }
+                label={
+                  <Typography variant="body2" color={previewOptions.realisticBlending ? 'primary' : 'text.secondary'}>
+                    {previewOptions.realisticBlending ? 'Enabled' : 'Disabled'}
+                  </Typography>
+                }
+              />
+              <Tooltip title="Realistic Blending simulates how paint interacts with your wall's texture and surface">
+                <IconButton size="small" sx={{ ml: 1 }}>
+                  <InfoOutlinedIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Grid>
+            
+            {/* Shadow Tracking toggle with enhanced UI */}
+            <Grid item xs={12} sm={6}>
+              <Typography 
+                variant="subtitle2" 
+                sx={{ 
+                  mb: 1, 
+                  display: 'flex', 
+                  alignItems: 'center' 
+                }}
+              >
+                <ShadowTrackingIcon sx={{ fontSize: '1rem', mr: 0.5, verticalAlign: 'text-bottom', opacity: 0.7 }} /> 
+                Shadow Tracking
+              </Typography>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={previewOptions.shadowTracking}
+                    onChange={() => {
+                      setPreviewOptions({
+                        ...previewOptions,
+                        shadowTracking: !previewOptions.shadowTracking
+                      });
+                    }}
+                    color="primary"
+                    sx={{
+                      '& .MuiSwitch-switchBase.Mui-checked': {
+                        color: '#ffa726'
+                      },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                        backgroundColor: alpha('#ffa726', 0.5)
+                      }
+                    }}
+                  />
+                }
+                label={
+                  <Typography variant="body2" color={previewOptions.shadowTracking ? '#d97706' : 'text.secondary'}>
+                    {previewOptions.shadowTracking ? 'Enabled' : 'Disabled'}
+                  </Typography>
+                }
+              />
+              <Tooltip title="Shadow Tracking uses AI to adapt the paint color to existing shadows and lighting conditions on your wall">
+                <IconButton size="small" sx={{ ml: 1 }}>
+                  <InfoOutlinedIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Grid>
+            
+            {/* Vision 360 toggle with enhanced UI */}
+            <Grid item xs={12} sm={6}>
+              <Typography 
+                variant="subtitle2" 
+                sx={{ 
+                  mb: 1, 
+                  display: 'flex', 
+                  alignItems: 'center' 
+                }}
+              >
+                <Vision360Icon sx={{ fontSize: '1rem', mr: 0.5, verticalAlign: 'text-bottom', opacity: 0.7 }} /> 
+                Vision 360
+              </Typography>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={previewOptions.vision360}
+                    onChange={() => {
+                      setPreviewOptions({
+                        ...previewOptions,
+                        vision360: !previewOptions.vision360
+                      });
+                    }}
+                    color="primary"
+                    sx={{
+                      '& .MuiSwitch-switchBase.Mui-checked': {
+                        color: '#42a5f5'
+                      },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                        backgroundColor: alpha('#42a5f5', 0.5)
+                      }
+                    }}
+                  />
+                }
+                label={
+                  <Typography variant="body2" color={previewOptions.vision360 ? '#1976d2' : 'text.secondary'}>
+                    {previewOptions.vision360 ? 'Enabled' : 'Disabled'}
+                  </Typography>
+                }
+              />
+              <Tooltip title="NFD Vision 360 analyzes your wall's depth and contours for realistic paint visualization">
+                <IconButton size="small" sx={{ ml: 1 }}>
+                  <InfoOutlinedIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Grid>
           </Grid>
           
-          <Grid item xs={12} sm={6}>
+          {/* Lighting condition selector with enhanced UI */}
+          <Box sx={{ mt: 3 }}>
+            <Typography 
+              variant="subtitle2" 
+              sx={{ 
+                mb: 1, 
+                display: 'flex', 
+                alignItems: 'center' 
+              }}
+            >
+              <LightModeIcon sx={{ fontSize: '1rem', mr: 0.5, verticalAlign: 'text-bottom', opacity: 0.7 }} /> 
+              Lighting Condition
+            </Typography>
             <FormControl fullWidth size="small">
-              <InputLabel id="lighting-label">Lighting</InputLabel>
               <Select
-                labelId="lighting-label"
-                id="lighting"
-                value={previewOptions.lighting}
-                label="Lighting"
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  const newLighting = e.target.value as string;
-                  setPreviewOptions({
-                    ...previewOptions,
-                    lighting: newLighting
-                  });
-                  if (selectedColor && wallImage) {
-                    generatePreview(selectedColor, {
-                      ...previewOptions,
-                      lighting: newLighting
-                    });
+                value={lightingCondition}
+                onChange={(e) => setLightingCondition(e.target.value as string)}
+                sx={{ 
+                  borderRadius: 2,
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: alpha(theme.palette.primary.main, 0.2)
                   }
                 }}
               >
-                <MenuItem value="natural">Natural</MenuItem>
-                <MenuItem value="warm">Warm</MenuItem>
-                <MenuItem value="cool">Cool</MenuItem>
-                <MenuItem value="bright">Bright</MenuItem>
-                <MenuItem value="dim">Dim</MenuItem>
-                <MenuItem value="evening">Evening</MenuItem>
-                <MenuItem value="morning">Morning</MenuItem>
+                <MenuItem value="Well-lit">Well-lit Room</MenuItem>
+                <MenuItem value="Natural light">Natural Light</MenuItem>
+                <MenuItem value="Artificial light">Artificial Light</MenuItem>
+                <MenuItem value="Low light">Low Light</MenuItem>
+                <MenuItem value="Evening light">Evening Light</MenuItem>
               </Select>
             </FormControl>
-          </Grid>
-        </Grid>
-        
-        <Box sx={{ mb: 3 }}>
-          <Typography gutterBottom variant="body2">
-            Blend Mode
-                  </Typography>
-          <ToggleButtonGroup
-            value={previewOptions.blendMode}
-            exclusive
-            onChange={(e: SyntheticEvent, newBlendMode: string | null) => {
-              if (newBlendMode) {
-                setPreviewOptions({
-                  ...previewOptions,
-                  blendMode: newBlendMode
-                });
-                if (selectedColor && wallImage) {
-                  generatePreview(selectedColor, {
-                    ...previewOptions,
-                    blendMode: newBlendMode
-                  });
+            <Typography variant="caption" sx={{ mt: 0.5, display: 'block', color: 'text.secondary' }}>
+              Selecting the correct lighting helps visualize how colors will appear in your actual environment
+            </Typography>
+          </Box>
+          
+          {/* Actions row with enhanced buttons */}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            mt: 4,
+            pt: 3,
+            borderTop: `1px solid ${alpha('#000', 0.05)}`
+          }}>
+            <Button
+              variant="outlined"
+              onClick={resetPreviewOptions}
+              startIcon={<RestartAltIcon />}
+              size="small"
+              sx={{
+                borderRadius: 2,
+                textTransform: 'none',
+                px: 2
+              }}
+            >
+              Reset Options
+            </Button>
+            
+            <Button
+              variant="contained"
+              onClick={applyPreviewOptions}
+              startIcon={<CheckIcon />}
+              size="small"
+              sx={{
+                borderRadius: 2,
+                textTransform: 'none',
+                px: 2,
+                boxShadow: 2,
+                background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+                '&:hover': {
+                  boxShadow: 4,
+                  background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`
                 }
-              }
-            }}
-            fullWidth
-            size="small"
-          >
-            <ToggleButton value="normal">Normal</ToggleButton>
-            <ToggleButton value="multiply">Multiply</ToggleButton>
-            <ToggleButton value="screen">Screen</ToggleButton>
-            <ToggleButton value="overlay">Overlay</ToggleButton>
-          </ToggleButtonGroup>
-                </Box>
-        
-        <Box sx={{ mb: 3 }}>
-          <Typography gutterBottom variant="body2">
-            Smart Features
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={4}>
-              <Tooltip title="Adapts color to lighting conditions and surface shadows">
-                <Paper 
-                    sx={{ 
-                    p: 1, 
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                    bgcolor: previewOptions.shadowTracking ? 'primary.light' : 'background.paper',
-                    color: previewOptions.shadowTracking ? 'primary.contrastText' : 'text.primary',
-                    '&:hover': {
-                      bgcolor: previewOptions.shadowTracking ? 'primary.main' : 'action.hover',
-                    }
-                  }}
-                  onClick={toggleShadowTracking}
-                >
-                  <ShadowTrackingIcon fontSize="small" />
-                  <Typography variant="caption" display="block">Shadow Tracking</Typography>
-                </Paper>
-              </Tooltip>
-            </Grid>
-            
-            <Grid item xs={4}>
-              <Tooltip title="Enhanced depth perception for more accurate rendering">
-                <Paper 
-                  sx={{ 
-                    p: 1, 
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                    bgcolor: previewOptions.vision360 ? 'primary.light' : 'background.paper',
-                    color: previewOptions.vision360 ? 'primary.contrastText' : 'text.primary',
-                    '&:hover': {
-                      bgcolor: previewOptions.vision360 ? 'primary.main' : 'action.hover',
-                    }
-                  }}
-                  onClick={toggleVision360}
-                >
-                  <Vision360Icon fontSize="small" />
-                  <Typography variant="caption" display="block">Vision 360</Typography>
-                </Paper>
-              </Tooltip>
-            </Grid>
-            
-            <Grid item xs={4}>
-              <Tooltip title="Realistic color blending with surface textures">
-                <Paper 
-                sx={{ 
-                    p: 1, 
-                  textAlign: 'center',
-                    cursor: 'pointer',
-                    bgcolor: previewOptions.realisticBlending ? 'primary.light' : 'background.paper',
-                    color: previewOptions.realisticBlending ? 'primary.contrastText' : 'text.primary',
-                    '&:hover': {
-                      bgcolor: previewOptions.realisticBlending ? 'primary.main' : 'action.hover',
-                    }
-                  }}
-                  onClick={toggleRealisticBlending}
-                >
-                  <FormatColorFillIcon fontSize="small" />
-                  <Typography variant="caption" display="block">Realistic Blend</Typography>
-                </Paper>
-              </Tooltip>
-            </Grid>
-          </Grid>
-        </Box>
-        
-        <Box sx={{ textAlign: 'center', mt: 2 }}>
-          <Button 
-            variant="contained" 
-            color="primary" 
-            startIcon={<TextureIcon />}
-            onClick={() => {
-              // Apply optimal settings based on AI analysis
-              if (selectedColor && wallImage) {
-                const optimalSettings: ColorPreviewOptions = {
-                  ...previewOptions,
-                  intensity: Math.min(Math.max(previewOptions.intensity, 80), 120), // Normalize intensity
-                  shadowTracking: true,
-                  vision360: true,
-                  realisticBlending: true,
-                  finish: selectedColor.name.toLowerCase().includes('gloss') ? 'semi-gloss' : 'matte',
-                  lighting: 'natural'
-                };
-                
-                setPreviewOptions(optimalSettings);
-                generatePreview(selectedColor, optimalSettings);
-                setSnackbarMessage('Applied AI-optimized settings for best results');
-                setOpenSnackbar(true);
-              }
-            }}
-          >
-            Auto-Optimize Settings
-          </Button>
-        </Box>
-      </Box>
+              }}
+            >
+              Apply Changes
+            </Button>
+          </Box>
+        </Paper>
+      </Fade>
     );
   };
   
-  // Render preview section
+  // Render preview section with enhanced visualization
   const renderPreviewSection = () => {
     if (!selectedColor || !previewImage) return null;
     
     return (
       <Box sx={{ mt: 4 }}>
-        <Paper sx={{ p: 3, borderRadius: 2, overflow: 'hidden', mb: 2 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6" component="h3">
-              Color Preview
-                </Typography>
+        <Paper 
+          sx={{ 
+            p: 0, 
+            borderRadius: 3, 
+            overflow: 'hidden', 
+            mb: 3,
+            boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+            animation: 'fadeInUp 0.6s ease-out',
+            '@keyframes fadeInUp': {
+              '0%': { opacity: 0, transform: 'translateY(20px)' },
+              '100%': { opacity: 1, transform: 'translateY(0)' }
+            }
+          }}
+          elevation={4}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+            <Typography variant="h6" component="h3" sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1,
+              color: theme.palette.primary.main,
+              fontWeight: 600 
+            }}>
+              <FormatColorFillIcon /> Wall Color Preview
+            </Typography>
             <Box>
               <Tooltip title="Compare Before/After">
                 <IconButton 
                   onClick={toggleCompareMode} 
                   color={compareMode ? "primary" : "default"}
-                  sx={{ mr: 1 }}
+                  sx={{ 
+                    mr: 1,
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      transform: 'scale(1.1)',
+                      bgcolor: alpha(theme.palette.primary.main, 0.1)
+                    }
+                  }}
                 >
                   <CompareIcon />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Save Image">
-                <IconButton onClick={savePreviewImage}>
+                <IconButton 
+                  onClick={savePreviewImage}
+                  sx={{ 
+                    mr: 1,
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      transform: 'scale(1.1)',
+                      bgcolor: alpha(theme.palette.primary.main, 0.1)
+                    }
+                  }}
+                >
                   <SaveIcon />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Share">
-                <IconButton onClick={sharePreview}>
+                <IconButton 
+                  onClick={sharePreview}
+                  sx={{ 
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      transform: 'scale(1.1)',
+                      bgcolor: alpha(theme.palette.primary.main, 0.1)
+                    }
+                  }}
+                >
                   <ShareIcon />
                 </IconButton>
               </Tooltip>
-              </Box>
             </Box>
+          </Box>
           
           {compareMode ? (
-            // Enhanced Compare view with slider
-            <Box sx={{ position: 'relative', height: 400, overflow: 'hidden' }}>
+            // Enhanced Compare view with 3D slider effect
+            <Box sx={{ position: 'relative', height: 500, overflow: 'hidden' }}>
               <Typography 
                 variant="caption" 
                 sx={{ 
                   position: 'absolute', 
-                  top: 10, 
-                  left: 10, 
+                  top: 16, 
+                  left: 16, 
                   zIndex: 10, 
                   color: 'white', 
-                  bgcolor: 'rgba(0,0,0,0.5)',
-                  px: 1,
-                  py: 0.5,
-                  borderRadius: 1
+                  bgcolor: 'rgba(0,0,0,0.6)',
+                  px: 1.5,
+                  py: 0.75,
+                  borderRadius: 2,
+                  fontWeight: 600
                 }}
               >
-                Before
+                BEFORE
               </Typography>
               
               <Typography 
                 variant="caption" 
                 sx={{ 
                   position: 'absolute', 
-                  top: 10, 
-                  right: 10, 
+                  top: 16, 
+                  right: 16, 
                   zIndex: 10, 
                   color: 'white', 
-                  bgcolor: 'rgba(0,0,0,0.5)',
-                  px: 1,
-                  py: 0.5,
-                  borderRadius: 1
+                  bgcolor: 'rgba(0,0,0,0.6)',
+                  px: 1.5,
+                  py: 0.75,
+                  borderRadius: 2,
+                  fontWeight: 600
                 }}
               >
-                After
+                AFTER
               </Typography>
               
               <Box sx={{ 
@@ -770,7 +901,8 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 zIndex: 2,
-                borderRight: '3px solid white'
+                borderRight: '3px solid white',
+                boxShadow: '2px 0px 15px rgba(0,0,0,0.5)'
               }} />
               
               <Box sx={{ 
@@ -779,23 +911,31 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 left: `${previewOptions.intensity}%`, 
                 transform: 'translate(-50%, -50%)',
                 zIndex: 3,
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                backgroundColor: 'rgba(255,255,255,0.95)',
                 borderRadius: '50%',
-                width: 40,
-                height: 40,
+                width: 48,
+                height: 48,
                   display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: theme.shadows[5],
-                border: '2px solid white'
+                boxShadow: '0 0 20px rgba(0,0,0,0.4)',
+                border: '3px solid white',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  transform: 'translate(-50%, -50%) scale(1.1)',
+                },
+                cursor: 'grab',
+                '&:active': {
+                  cursor: 'grabbing'
+                }
               }}>
-                <CompareIcon fontSize="small" />
+                <CompareIcon sx={{ color: theme.palette.primary.main }} />
               </Box>
               
               <Slider
                       sx={{ 
                   position: 'absolute', 
-                  bottom: 20, 
+                  bottom: 40, 
                   left: 40, 
                   right: 40, 
                   zIndex: 4,
@@ -804,14 +944,15 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                         width: 24, 
                         height: 24, 
                     backgroundColor: 'white',
-                    border: '2px solid #6366f1',
+                    border: `2px solid ${theme.palette.primary.main}`,
                     '&:hover': {
-                      boxShadow: '0 0 0 8px rgba(99, 102, 241, 0.16)'
+                      boxShadow: `0 0 0 8px ${alpha(theme.palette.primary.main, 0.16)}`
                     }
                   },
                   '& .MuiSlider-track': {
-                    backgroundColor: '#6366f1',
+                    backgroundColor: theme.palette.primary.main,
                     border: 'none',
+                    boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
                   },
                   '& .MuiSlider-rail': {
                     backgroundColor: 'rgba(255, 255, 255, 0.5)',
@@ -828,95 +969,238 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 max={100}
                 aria-label="Before/After comparison slider"
               />
+              
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  position: 'absolute', 
+                  bottom: 85, 
+                  left: '50%', 
+                  transform: 'translateX(-50%)',
+                  color: 'white',
+                  bgcolor: 'rgba(0,0,0,0.6)',
+                  px: 2,
+                  py: 0.75,
+                  borderRadius: 2,
+                  fontWeight: 500,
+                  textAlign: 'center'
+                }}
+              >
+                Drag slider to compare before and after
+              </Typography>
             </Box>
           ) : (
-            // Regular preview with enhanced info
+            // Enhanced regular preview with depth effects
             <Box 
               sx={{ 
-                height: 400, 
+                height: 500, 
                 backgroundImage: `url(${previewImage})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                borderRadius: 1,
-                boxShadow: theme.shadows[1],
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                transition: 'all 0.5s ease',
+                transform: 'perspective(1000px) rotateX(0deg)',
+                '&:hover': {
+                  transform: 'perspective(1000px) rotateX(2deg)'
+                }
               }}
             >
-              {// Add feature indicators with improved information
-              previewOptions.shadowTracking && (
-                <Tooltip title="Shadow Tracking uses AI to adapt the paint color to existing shadows and lighting conditions on your wall">
-                  <Chip
-                    icon={<ShadowTrackingIcon />}
-                    label="Shadow Tracking"
-                    size="small"
-                    sx={{ position: 'absolute', top: 10, right: 10, bgcolor: 'rgba(0,0,0,0.7)', color: 'white' }}
-                  />
-                </Tooltip>
-              )}
+              {/* Feature badge container */}
+              <Box 
+                sx={{ 
+                  position: 'absolute', 
+                  top: 16, 
+                  right: 16, 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: 1, 
+                  zIndex: 5,
+                  animation: 'fadeInRight 0.8s ease-out',
+                  '@keyframes fadeInRight': {
+                    '0%': { opacity: 0, transform: 'translateX(20px)' },
+                    '100%': { opacity: 1, transform: 'translateX(0)' }
+                  }
+                }}
+              >
+                {/* Shadow Tracking badge with improved design */}
+                {previewOptions.shadowTracking && (
+                  <Tooltip title="Shadow Tracking uses AI to adapt the paint color to existing shadows and lighting conditions on your wall">
+                    <Chip
+                      icon={<ShadowTrackingIcon />}
+                      label="Shadow Tracking"
+                      size="small"
+                      sx={{ 
+                        bgcolor: 'rgba(0,0,0,0.75)', 
+                        color: 'white',
+                        fontWeight: 500,
+                        backdropFilter: 'blur(4px)',
+                        '& .MuiChip-icon': { color: '#ffa726' }
+                      }}
+                    />
+                  </Tooltip>
+                )}
+                
+                {/* Vision 360 badge with improved design */}
+                {previewOptions.vision360 && (
+                  <Tooltip title="NFD Vision 360 analyzes your wall's depth and contours for realistic paint visualization">
+                    <Chip
+                      icon={<Vision360Icon />}
+                      label="Vision 360"
+                      size="small"
+                      sx={{ 
+                        bgcolor: 'rgba(0,0,0,0.75)', 
+                        color: 'white',
+                        fontWeight: 500,
+                        backdropFilter: 'blur(4px)',
+                        '& .MuiChip-icon': { color: '#42a5f5' }
+                      }}
+                    />
+                  </Tooltip>
+                )}
+                
+                {/* Realistic Blending badge with improved design */}
+                {previewOptions.realisticBlending && (
+                  <Tooltip title="Realistic Blending simulates how paint interacts with your wall's texture and surface">
+                    <Chip
+                      icon={<FormatColorFillIcon />}
+                      label="Realistic Blend"
+                      size="small"
+                      sx={{ 
+                        bgcolor: 'rgba(0,0,0,0.75)', 
+                        color: 'white',
+                        fontWeight: 500,
+                        backdropFilter: 'blur(4px)',
+                        '& .MuiChip-icon': { color: '#66bb6a' }
+                      }}
+                    />
+                  </Tooltip>
+                )}
+              </Box>
               
-              {previewOptions.vision360 && (
-                <Tooltip title="NFD Vision 360 analyzes your wall's depth and contours for realistic paint visualization">
-                  <Chip
-                    icon={<Vision360Icon />}
-                    label="Vision 360"
-                    size="small"
-                    sx={{ position: 'absolute', top: previewOptions.shadowTracking ? 50 : 10, right: 10, bgcolor: 'rgba(0,0,0,0.7)', color: 'white' }}
-                  />
-                </Tooltip>
-              )}
+              {/* Animated effect layer */}
+              <Box 
+                sx={{ 
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundImage: 'linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(0,0,0,0.05))',
+                  pointerEvents: 'none'
+                }}
+              />
               
-              {previewOptions.realisticBlending && (
-                <Tooltip title="Realistic Blending simulates how paint interacts with your wall's texture and surface">
-                  <Chip
-                    icon={<FormatColorFillIcon />}
-                    label="Realistic Blend"
-                    size="small"
-                    sx={{ 
-                      position: 'absolute', 
-                      top: previewOptions.shadowTracking && previewOptions.vision360 ? 90 : 
-                           previewOptions.shadowTracking || previewOptions.vision360 ? 50 : 10, 
-                      right: 10, 
-                      bgcolor: 'rgba(0,0,0,0.7)', 
-                      color: 'white' 
-                    }}
-                  />
-                </Tooltip>
-              )}
-                  </Box>
+              {/* Room context indicator */}
+              <Box 
+                sx={{ 
+                  position: 'absolute', 
+                  bottom: 16, 
+                  left: 16, 
+                  zIndex: 5,
+                  bgcolor: 'rgba(0,0,0,0.75)',
+                  color: 'white',
+                  px: 2,
+                  py: 1,
+                  borderRadius: 2,
+                  backdropFilter: 'blur(4px)',
+                  animation: 'fadeInUp 0.8s ease-out',
+                  '@keyframes fadeInUp': {
+                    '0%': { opacity: 0, transform: 'translateY(20px)' },
+                    '100%': { opacity: 1, transform: 'translateY(0)' }
+                  }
+                }}
+              >
+                <Typography variant="body2" sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  fontWeight: 500,
+                  '& svg': { mr: 1, opacity: 0.8 }
+                }}>
+                  {roomType === 'Living Room' && <WeekendIcon sx={{ fontSize: '1.1rem' }} />}
+                  {roomType === 'Bedroom' && <BedIcon sx={{ fontSize: '1.1rem' }} />}
+                  {roomType === 'Kitchen' && <KitchenIcon sx={{ fontSize: '1.1rem' }} />}
+                  {roomType === 'Bathroom' && <BathtubIcon sx={{ fontSize: '1.1rem' }} />}
+                  {roomType === 'Dining Room' && <TableRestaurantIcon sx={{ fontSize: '1.1rem' }} />}
+                  {roomType === 'Home Office' && <LaptopIcon sx={{ fontSize: '1.1rem' }} />}
+                  {roomType} • {lightingCondition}
+                </Typography>
+              </Box>
+            </Box>
           )}
                 
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, mt: 2 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: { xs: 'column', sm: 'row' }, 
+            alignItems: { xs: 'flex-start', sm: 'center' }, 
+            p: 3,
+            borderTop: '1px solid rgba(0,0,0,0.05)',
+            background: 'linear-gradient(to bottom, rgba(250,250,255,1), rgba(255,255,255,1))'
+          }}>
             <Box 
-                  sx={{ 
-                width: 60, 
-                height: 60, 
+              sx={{ 
+                width: 70, 
+                height: 70, 
                 borderRadius: '50%', 
                 bgcolor: selectedColor?.hex || '#ccc',
-                mr: 2,
-                border: '3px solid white',
-                boxShadow: 1,
-                flexShrink: 0
+                mr: 3,
+                border: `4px solid ${alpha(selectedColor?.hex || '#ccc', 0.3)}`,
+                boxShadow: `0 5px 15px ${alpha(selectedColor?.hex || '#ccc', 0.2)}`,
+                flexShrink: 0,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                }
               }} 
             />
             <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {selectedColor?.name || 'Select a color'}
-              </Typography>
-              <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>
-                {selectedColor?.hex?.toUpperCase()}
-                <IconButton size="small" onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation();
-                  copyColorCode(selectedColor?.hex || '');
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                flexWrap: 'wrap',
+                justifyContent: 'space-between'
+              }}>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  {selectedColor?.name || 'Select a color'}
+                </Typography>
+                
+                {selectedColor?.colorCode && (
+                  <Chip 
+                    label={selectedColor.colorCode} 
+                    size="small"
+                    sx={{ 
+                      bgcolor: alpha(theme.palette.primary.main, 0.1),
+                      color: theme.palette.primary.main,
+                      fontWeight: 600,
+                      fontFamily: 'monospace'
+                    }}
+                  />
+                )}
+              </Box>
+              
+              <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
+                <Typography variant="body2" sx={{ 
+                  fontFamily: 'monospace', 
+                  fontWeight: 'bold',
+                  color: alpha('#000', 0.7),
+                  display: 'flex',
+                  alignItems: 'center'
                 }}>
-                  {copied ? <CheckIcon fontSize="small" /> : <CopyIcon fontSize="small" />}
-                </IconButton>
+                  {selectedColor?.hex?.toUpperCase()}
+                  <IconButton size="small" onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    copyColorCode(selectedColor?.hex || '');
+                  }} sx={{ ml: 0.5 }}>
+                    {copied ? <CheckIcon fontSize="small" /> : <CopyIcon fontSize="small" />}
+                  </IconButton>
+                </Typography>
+                
                 {selectedColor?.rgb && (
                   <Tooltip title={`RGB: ${selectedColor.rgb}`}>
                     <Chip 
                       label="RGB" 
                       size="small"
-                      sx={{ ml: 1, fontSize: '0.7rem', height: 20 }}
+                      sx={{ fontSize: '0.7rem', height: 20 }}
                       onClick={(e: React.MouseEvent) => {
                         e.stopPropagation();
                         copyColorCode(selectedColor.rgb || '');
@@ -924,28 +1208,69 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                     />
                   </Tooltip>
                 )}
+                
                 {selectedColor?.brand && (
                   <Tooltip title={`Brand: ${selectedColor.brand}`}>
                     <Chip 
                       label={selectedColor.brand} 
                       size="small"
-                      sx={{ ml: 1, fontSize: '0.7rem', height: 20 }}
+                      sx={{ fontSize: '0.7rem', height: 20 }}
                     />
                   </Tooltip>
                 )}
-              </Typography>
+              </Box>
+              
               {selectedColor?.roomTypes && selectedColor.roomTypes.length > 0 && (
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                  Perfect for: {selectedColor.roomTypes.join(', ')}
-                </Typography>
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="caption" sx={{ 
+                    display: 'block', 
+                    mb: 0.5,
+                    color: alpha('#000', 0.6),
+                    fontWeight: 500
+                  }}>
+                    Perfect for:
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {selectedColor.roomTypes.map((room, idx) => (
+                      <Chip 
+                        key={idx}
+                        label={room} 
+                        size="small"
+                        sx={{ 
+                          height: 20, 
+                          fontSize: '0.7rem',
+                          bgcolor: alpha(theme.palette.primary.light, 0.1),
+                          color: theme.palette.primary.dark,
+                        }}
+                      />
+                    ))}
+                  </Box>
+                </Box>
               )}
+              
               {selectedColor?.moodCategory && (
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                  Mood: {selectedColor.moodCategory}
+                <Typography variant="caption" color="text.secondary" sx={{ 
+                  display: 'block', 
+                  mt: 1,
+                  fontWeight: 500
+                }}>
+                  Mood: <span style={{ fontWeight: 600 }}>{selectedColor.moodCategory}</span>
                 </Typography>
               )}
+              
               {selectedColor?.suitableFor && (
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5, fontStyle: 'italic' }}>
+                <Typography variant="body2" 
+                  sx={{ 
+                    display: 'block', 
+                    mt: 2, 
+                    fontStyle: 'italic',
+                    color: alpha('#000', 0.6),
+                    bgcolor: alpha(theme.palette.primary.light, 0.05),
+                    p: 1,
+                    borderLeft: `3px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                    borderRadius: '0 4px 4px 0'
+                  }}
+                >
                   {selectedColor.suitableFor}
                 </Typography>
               )}
@@ -986,6 +1311,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               zIndex: 0,
               transform: 'rotate(10deg)',
               pointerEvents: 'none',
+              animation: 'float 8s ease-in-out infinite',
             },
             '&::after': {
               content: '""',
@@ -999,103 +1325,134 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               zIndex: 0,
               transform: 'rotate(190deg)',
               pointerEvents: 'none',
-            }
+              animation: 'float 10s ease-in-out infinite reverse',
+            },
+            '@keyframes float': {
+              '0%': { transform: 'translateY(0px) rotate(10deg)' },
+              '50%': { transform: 'translateY(-20px) rotate(5deg)' },
+              '100%': { transform: 'translateY(0px) rotate(10deg)' },
+            },
           }}
         >
-          <Typography variant="h3" component="h1" gutterBottom
-            sx={{
-              background: 'linear-gradient(135deg, #6366f1, #ec4899)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              fontWeight: 800,
-              mb: 3,
-              position: 'relative',
-              zIndex: 1,
-              textShadow: '0 5px 15px rgba(0,0,0,0.1)',
-              letterSpacing: '-0.02em',
-              animation: 'shimmer 2.5s infinite linear',
-              '@keyframes shimmer': {
-                '0%': { backgroundPosition: '0% 50%' },
-                '50%': { backgroundPosition: '100% 50%' },
-                '100%': { backgroundPosition: '0% 50%' },
-              },
-              backgroundSize: '200% auto',
-            }}
-          >
-            Wall Color Visualizer
-          </Typography>
+          <Zoom in={true} style={{ transitionDelay: '100ms' }}>
+            <Typography variant="h3" component="h1" gutterBottom
+              sx={{
+                background: 'linear-gradient(135deg, #6366f1, #ec4899)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                fontWeight: 800,
+                mb: 3,
+                position: 'relative',
+                zIndex: 1,
+                textShadow: '0 5px 15px rgba(0,0,0,0.1)',
+                letterSpacing: '-0.02em',
+                animation: 'shimmer 2.5s infinite linear',
+                '@keyframes shimmer': {
+                  '0%': { backgroundPosition: '0% 50%' },
+                  '50%': { backgroundPosition: '100% 50%' },
+                  '100%': { backgroundPosition: '0% 50%' },
+                },
+                backgroundSize: '200% auto',
+                textTransform: 'uppercase',
+                fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }
+              }}
+            >
+              Wall Color Visualizer
+            </Typography>
+          </Zoom>
           
-          <Typography 
-            variant="h6" 
-            component="h2" 
-            color="textSecondary" 
-            paragraph
-            sx={{
-              maxWidth: '800px',
-              mx: 'auto',
-              mb: 4,
-              position: 'relative',
-              zIndex: 1,
-              opacity: 0.8,
-              fontWeight: 500,
-            }}
-          >
-            Transform your space with our AI-powered tool that suggests perfect colors and shows you exactly how they'll look on your walls
-          </Typography>
+          <Fade in={true} style={{ transitionDelay: '300ms' }}>
+            <Typography 
+              variant="h6" 
+              component="h2" 
+              color="textSecondary" 
+              paragraph
+              sx={{
+                maxWidth: '800px',
+                mx: 'auto',
+                mb: 4,
+                position: 'relative',
+                zIndex: 1,
+                opacity: 0.8,
+                fontWeight: 500,
+                lineHeight: 1.6,
+                fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' }
+              }}
+            >
+              Transform your space with our AI-powered tool that suggests perfect colors based on your wall type and lighting conditions
+            </Typography>
+          </Fade>
           
           <Box sx={{ 
-            display: 'flex', 
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
             gap: 3, 
-            justifyContent: 'center', 
-            flexWrap: 'wrap',
             position: 'relative',
-            zIndex: 1 
+            zIndex: 1,
+            mt: 4
           }}>
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<CameraIcon />}
-              onClick={() => setShowCamera(true)}
-              sx={{
-                px: 4,
-                py: 2,
-                borderRadius: '14px',
-                backgroundImage: 'linear-gradient(to right, #6366f1, #ec4899)',
-                boxShadow: '0 10px 20px rgba(99, 102, 241, 0.3)',
-                '&:hover': {
-                  boxShadow: '0 15px 25px rgba(99, 102, 241, 0.4)',
-                  transform: 'translateY(-3px) scale(1.02)',
-                },
-                transition: 'all 0.3s ease',
-                fontSize: '1.1rem',
-                fontWeight: 600,
-              }}
-            >
-              Take Photo
-            </Button>
+            <Zoom in={true} style={{ transitionDelay: '500ms' }}>
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<CameraIcon />}
+                onClick={() => setShowCamera(true)}
+                sx={{
+                  px: 6,
+                  py: 2.5,
+                  borderRadius: '16px',
+                  backgroundImage: 'linear-gradient(to right, #6366f1, #8b5cf6, #d946ef)',
+                  boxShadow: '0 10px 25px rgba(99, 102, 241, 0.5)',
+                  '&:hover': {
+                    boxShadow: '0 15px 30px rgba(99, 102, 241, 0.6)',
+                    transform: 'translateY(-5px) scale(1.03)',
+                    backgroundImage: 'linear-gradient(to right, #4f46e5, #7c3aed, #c026d3)',
+                  },
+                  transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                  fontSize: '1.25rem',
+                  fontWeight: 600,
+                  width: { xs: '100%', sm: 'auto' },
+                  mb: 2
+                }}
+              >
+                Get Started with Camera
+              </Button>
+            </Zoom>
             
-            <Button
-              variant="outlined"
-              size="large"
-              startIcon={<UploadIcon />}
-              onClick={handleFileUploadClick}
-              sx={{
-                px: 4,
-                py: 2,
-                borderRadius: '14px',
-                borderWidth: '2px',
-                '&:hover': {
+            <Typography variant="caption" color="textSecondary" sx={{ mb: 2, fontSize: '0.9rem', fontWeight: 500 }}>
+              or
+            </Typography>
+            
+            <Fade in={true} style={{ transitionDelay: '700ms' }}>
+              <Button
+                variant="outlined"
+                size="large"
+                startIcon={<UploadIcon />}
+                onClick={handleFileUploadClick}
+                sx={{
+                  px: 4,
+                  py: 1.5,
+                  borderRadius: '14px',
                   borderWidth: '2px',
-                  transform: 'translateY(-3px)',
-                  boxShadow: '0 8px 15px rgba(0, 0, 0, 0.05)',
-                },
-                transition: 'all 0.3s ease',
-                fontSize: '1.1rem',
-                fontWeight: 600,
-              }}
-            >
-              Upload Image
-            </Button>
+                  borderColor: 'rgba(99, 102, 241, 0.5)',
+                  color: '#6366f1',
+                  '&:hover': {
+                    borderWidth: '2px',
+                    borderColor: '#6366f1',
+                    transform: 'translateY(-3px)',
+                    boxShadow: '0 8px 15px rgba(0, 0, 0, 0.05)',
+                    backgroundColor: 'rgba(99, 102, 241, 0.04)',
+                  },
+                  transition: 'all 0.3s ease',
+                  fontSize: '1rem',
+                  fontWeight: 500,
+                  width: { xs: '100%', sm: 'auto' }
+                }}
+              >
+                Upload Wall Image
+              </Button>
+            </Fade>
             
             <input
               type="file"
@@ -1105,22 +1462,58 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               style={{ display: 'none' }}
             />
           </Box>
+          
+          <Box sx={{ mt: 6, position: 'relative', zIndex: 1 }}>
+            <Fade in={true} style={{ transitionDelay: '900ms' }}>
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  bgcolor: 'rgba(255,255,255,0.5)', 
+                  p: 2, 
+                  borderRadius: 2,
+                  display: 'flex',
+                  flexDirection: { xs: 'column', md: 'row' },
+                  gap: 2,
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CheckIcon sx={{ color: 'success.main' }} />
+                  <Typography variant="body2">AI Enhanced Color Suggestions</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CheckIcon sx={{ color: 'success.main' }} />
+                  <Typography variant="body2">Realistic Shadow Detection</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CheckIcon sx={{ color: 'success.main' }} />
+                  <Typography variant="body2">Room-Specific Color Palettes</Typography>
+                </Box>
+              </Paper>
+            </Fade>
+          </Box>
         </Paper>
       </Grow>
     );
   };
   
-  // Render enhanced camera view with simplified controls
+  // Render enhanced camera view with improved UI
   const renderCameraView = () => {
     return (
-      <Fade in={showCamera}>
+      <Fade in={showCamera} timeout={600}>
         <Paper
-          elevation={4}
+          elevation={6}
           sx={{
             borderRadius: '24px',
             overflow: 'hidden',
             position: 'relative',
-            boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)',
+            boxShadow: '0 15px 50px rgba(0, 0, 0, 0.2)',
+            animation: 'fadeInUp 0.6s ease-out',
+            '@keyframes fadeInUp': {
+              '0%': { opacity: 0, transform: 'translateY(20px)' },
+              '100%': { opacity: 1, transform: 'translateY(0)' }
+            }
           }}
         >
           <Box sx={{ position: 'relative' }}>
@@ -1130,8 +1523,8 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               screenshotFormat="image/jpeg"
               videoConstraints={{
                 facingMode: facingMode,
-                width: 1280,
-                height: 720,
+                width: 1920,
+                height: 1080,
               }}
               style={{
                 width: '100%',
@@ -1140,126 +1533,257 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               }}
             />
             
-            {/* Camera overlay with improved instructions */}
+            {/* Camera overlay with improved design and animations */}
             <Box sx={{
               position: 'absolute',
               top: 0,
               left: 0,
               right: 0,
               p: 2,
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%)',
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%)',
               color: 'white',
               textAlign: 'center',
+              animation: 'fadeInDown 0.8s ease-out',
+              '@keyframes fadeInDown': {
+                '0%': { opacity: 0, transform: 'translateY(-20px)' },
+                '100%': { opacity: 1, transform: 'translateY(0)' }
+              }
             }}>
-              <Typography variant="subtitle1" fontWeight="bold">
-                Position camera to clearly capture your wall
+              <Typography variant="h6" fontWeight="bold">
+                Position Camera for Best Results
               </Typography>
-              <Typography variant="caption">
-                Ensure good lighting and a straight angle for best results
+              <Typography variant="caption" sx={{ opacity: 0.9, display: 'block', mt: 0.5 }}>
+                Ensure good lighting and hold steady for accurate color detection
               </Typography>
+              
+              {/* Animated guidelines overlay */}
+              <Box sx={{
+                position: 'absolute',
+                top: 80,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '80%',
+                height: '80%',
+                border: '2px dashed rgba(255,255,255,0.4)',
+                borderRadius: '8px',
+                display: { xs: 'none', md: 'block' },
+                animation: 'pulseBorder 2s infinite',
+                '@keyframes pulseBorder': {
+                  '0%': { borderColor: 'rgba(255,255,255,0.2)' },
+                  '50%': { borderColor: 'rgba(255,255,255,0.6)' },
+                  '100%': { borderColor: 'rgba(255,255,255,0.2)' }
+                },
+                zIndex: 5,
+                pointerEvents: 'none'
+              }}>
+                <Box sx={{
+                  position: 'absolute',
+                  top: 10,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  backgroundColor: 'rgba(0,0,0,0.5)',
+                  borderRadius: '4px',
+                  px: 1,
+                  py: 0.5
+                }}>
+                  <Typography variant="caption">Align wall within frame</Typography>
+                </Box>
+              </Box>
             </Box>
             
-            {/* Room type indicator for better analysis */}
+            {/* Room type selector with enhanced UI */}
             <Box sx={{
               position: 'absolute',
-              top: 80,
+              top: 100,
               right: 20,
               zIndex: 10,
+              animation: 'fadeInRight 0.8s ease-out',
+              '@keyframes fadeInRight': {
+                '0%': { opacity: 0, transform: 'translateX(20px)' },
+                '100%': { opacity: 1, transform: 'translateX(0)' }
+              }
             }}>
-              <Paper sx={{ p: 1, bgcolor: 'rgba(0,0,0,0.7)', color: 'white', borderRadius: 2 }}>
-                <Typography variant="caption" fontWeight="bold">
-                  Room Type:
+              <Paper sx={{ p: 1.5, bgcolor: 'rgba(0,0,0,0.75)', color: 'white', borderRadius: 2 }}>
+                <Typography variant="body2" fontWeight="bold" sx={{ mb: 1 }}>
+                  Wall Type:
                 </Typography>
-                <Select
-                  value={roomType || 'Living Room'}
-                  onChange={(e: SelectChangeEvent) => setRoomType(e.target.value as string)}
-                  size="small"
-                  sx={{ 
-                    ml: 1, 
-                    color: 'white', 
-                    '& .MuiSelect-select': { 
-                      py: 0,
-                      color: 'white',
-                    },
-                    '& .MuiSvgIcon-root': {
-                      color: 'white',
-                    }
-                  }}
-                >
-                  <MenuItem value="Living Room">Living Room</MenuItem>
-                  <MenuItem value="Bedroom">Bedroom</MenuItem>
-                  <MenuItem value="Kitchen">Kitchen</MenuItem>
-                  <MenuItem value="Bathroom">Bathroom</MenuItem>
-                  <MenuItem value="Dining Room">Dining Room</MenuItem>
-                  <MenuItem value="Home Office">Home Office</MenuItem>
-                </Select>
+                <FormControl fullWidth size="small">
+                  <Select
+                    value={roomType || 'Living Room'}
+                    onChange={(e) => setRoomType(e.target.value as string)}
+                    sx={{ 
+                      minWidth: 160,
+                      color: 'white', 
+                      '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.5)' },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.7)' },
+                      '& .MuiSvgIcon-root': { color: 'white' }
+                    }}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          bgcolor: 'rgba(30,30,30,0.95)',
+                          color: 'white',
+                          '& .MuiMenuItem-root:hover': {
+                            bgcolor: 'rgba(99,102,241,0.2)'
+                          },
+                          '& .MuiMenuItem-root.Mui-selected': {
+                            bgcolor: 'rgba(99,102,241,0.3)'
+                          }
+                        }
+                      }
+                    }}
+                  >
+                    <MenuItem value="Living Room">Living Room</MenuItem>
+                    <MenuItem value="Bedroom">Bedroom</MenuItem>
+                    <MenuItem value="Kitchen">Kitchen</MenuItem>
+                    <MenuItem value="Bathroom">Bathroom</MenuItem>
+                    <MenuItem value="Dining Room">Dining Room</MenuItem>
+                    <MenuItem value="Home Office">Home Office</MenuItem>
+                    <MenuItem value="Accent Wall">Accent Wall</MenuItem>
+                    <MenuItem value="Hallway">Hallway</MenuItem>
+                  </Select>
+                </FormControl>
+                
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="body2" fontWeight="bold" sx={{ mb: 1 }}>
+                    Lighting Condition:
+                  </Typography>
+                  <ToggleButtonGroup
+                    exclusive
+                    value={lightingCondition || 'Well-lit'}
+                    onChange={(e, newValue) => {
+                      if (newValue) setLightingCondition(newValue);
+                    }}
+                    size="small"
+                    fullWidth
+                    sx={{
+                      '.MuiToggleButton-root': {
+                        color: 'rgba(255,255,255,0.7)',
+                        borderColor: 'rgba(255,255,255,0.2)',
+                        textTransform: 'none',
+                        '&.Mui-selected': {
+                          color: 'white',
+                          backgroundColor: 'rgba(99,102,241,0.5)',
+                        }
+                      }
+                    }}
+                  >
+                    <ToggleButton value="Well-lit">
+                      <LightIcon sx={{ fontSize: 14, mr: 0.5 }} /> Bright
+                    </ToggleButton>
+                    <ToggleButton value="Dimly lit">
+                      <Brightness4Icon sx={{ fontSize: 14, mr: 0.5 }} /> Dim
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>
               </Paper>
             </Box>
             
-            {/* Improved camera controls */}
+            {/* Enhanced camera controls with animations */}
             <Box sx={{ 
               position: 'absolute', 
               bottom: 0, 
               left: 0, 
               right: 0, 
               p: 3,
-              background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
+              background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 60%, transparent 100%)',
               display: 'flex',
-              justifyContent: 'center',
+              flexDirection: 'column',
               alignItems: 'center',
-              gap: 3
+              animation: 'fadeInUp 0.8s ease-out',
+              '@keyframes fadeInUp': {
+                '0%': { opacity: 0, transform: 'translateY(20px)' },
+                '100%': { opacity: 1, transform: 'translateY(0)' }
+              }
             }}>
-              {/* Camera flip button */}
-              <IconButton 
-                onClick={toggleCameraFacingMode}
-                sx={{
-                  bgcolor: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
-                  width: 48,
-                  height: 48,
-                }}
-              >
-                <FlipCameraIcon />
-              </IconButton>
+              <Typography variant="body2" sx={{ mb: 2, color: 'rgba(255,255,255,0.7)' }}>
+                Tap capture when your wall is properly framed
+              </Typography>
               
-              {/* Capture button */}
-              <Button
-                variant="contained"
-                onClick={handleCapture}
-                sx={{
-                  bgcolor: 'white',
-                  color: '#6366f1',
-                  borderRadius: '50%',
-                  width: 80,
-                  height: 80,
-                  minWidth: 'auto',
-                  boxShadow: '0 0 0 5px rgba(255,255,255,0.3)',
-                  '&:hover': {
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                {/* Camera flip button with animation */}
+                <Tooltip title={`Switch to ${facingMode === 'user' ? 'back' : 'front'} camera`}>
+                  <IconButton 
+                    onClick={toggleCameraFacingMode}
+                    sx={{
+                      bgcolor: 'rgba(255,255,255,0.15)',
+                      color: 'white',
+                      '&:hover': { 
+                        bgcolor: 'rgba(255,255,255,0.25)',
+                        transform: 'scale(1.1)'
+                      },
+                      width: 50,
+                      height: 50,
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <FlipCameraIcon />
+                  </IconButton>
+                </Tooltip>
+                
+                {/* Animated capture button */}
+                <Button
+                  variant="contained"
+                  onClick={handleCapture}
+                  sx={{
                     bgcolor: 'white',
-                    transform: 'scale(1.05)',
-                  },
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <PhotoCameraIcon sx={{ fontSize: 36 }} />
-              </Button>
-              
-              {/* Cancel button */}
-              <IconButton 
-                onClick={() => setShowCamera(false)}
-                sx={{
-                  bgcolor: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
-                  width: 48,
-                  height: 48,
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
+                    color: '#6366f1',
+                    borderRadius: '50%',
+                    width: 80,
+                    height: 80,
+                    minWidth: 'auto',
+                    boxShadow: '0 0 0 5px rgba(255,255,255,0.3), 0 5px 15px rgba(0,0,0,0.3)',
+                    position: 'relative',
+                    '&:hover': {
+                      bgcolor: 'white',
+                      transform: 'scale(1.05)',
+                    },
+                    '&::after': {
+                      content: '""',
+                      position: 'absolute',
+                      top: '-8px',
+                      left: '-8px',
+                      right: '-8px',
+                      bottom: '-8px',
+                      borderRadius: '50%',
+                      border: '2px solid white',
+                      opacity: 0.5,
+                      animation: 'pulse 2s infinite',
+                    },
+                    '@keyframes pulse': {
+                      '0%': { transform: 'scale(1)', opacity: 0.5 },
+                      '50%': { transform: 'scale(1.1)', opacity: 0.3 },
+                      '100%': { transform: 'scale(1)', opacity: 0.5 }
+                    },
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <PhotoCameraIcon sx={{ fontSize: 36 }} />
+                </Button>
+                
+                {/* Cancel button */}
+                <Tooltip title="Close camera">
+                  <IconButton 
+                    onClick={() => setShowCamera(false)}
+                    sx={{
+                      bgcolor: 'rgba(255,255,255,0.15)',
+                      color: 'white',
+                      '&:hover': { 
+                        bgcolor: 'rgba(255,255,255,0.25)',
+                        transform: 'scale(1.1)'
+                      },
+                      width: 50,
+                      height: 50,
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Tooltip>
+              </Box>
             </Box>
           </Box>
         </Paper>
@@ -1329,67 +1853,306 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
           </Box>
           
           <TabPanel value={tabValue} index={0}>
-            <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-              AI Recommended Colors
+            <Typography variant="h6" gutterBottom sx={{ 
+              mb: 3, 
+              position: 'relative',
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                bottom: -8,
+                left: 0,
+                width: 60,
+                height: 3,
+                bgcolor: 'primary.main',
+                borderRadius: 3
+              }
+            }}>
+              AI Recommended Colors For Your Wall
             </Typography>
             
-            <Grid container spacing={2}>
+            <Grid container spacing={3}>
               {colorResult.dominantColors.map((color, index) => (
-                <Grid item xs={6} sm={4} md={3} lg={2} key={index}>
-                  <Card 
-                    sx={{ 
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      transform: selectedColor?.hex === color.hex ? 'scale(1.05)' : 'scale(1)',
-                      boxShadow: selectedColor?.hex === color.hex ? '0 8px 16px rgba(0,0,0,0.1)' : '',
-                      borderRadius: '12px',
-                      overflow: 'hidden',
-                      border: selectedColor?.hex === color.hex ? `2px solid ${theme.palette.primary.main}` : 'none',
-                    }}
-                    onClick={() => handleColorSelect(color)}
-                  >
-                    <Box
-                      sx={{
-                        height: '100px',
-                        backgroundColor: color.hex,
+                <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
+                  <Zoom in={true} style={{ transitionDelay: `${index * 100}ms` }}>
+                    <Card 
+                      sx={{ 
+                        cursor: 'pointer',
+                        transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                        transform: selectedColor?.hex === color.hex ? 'scale(1.05)' : 'scale(1)',
+                        boxShadow: selectedColor?.hex === color.hex ? '0 15px 30px rgba(0,0,0,0.15)' : '0 5px 15px rgba(0,0,0,0.05)',
+                        borderRadius: '16px',
+                        overflow: 'hidden',
+                        border: selectedColor?.hex === color.hex ? `2px solid ${theme.palette.primary.main}` : 'none',
+                        '&:hover': {
+                          transform: 'scale(1.05)',
+                          boxShadow: '0 15px 30px rgba(0,0,0,0.15)'
+                        },
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column'
                       }}
-                    ></Box>
-                    <CardContent>
-                      <Typography variant="subtitle2" gutterBottom>
-                        {color.name}
-                      </Typography>
-                      {color.moodCategory && (
-                        <Chip 
-                          label={color.moodCategory} 
-                          size="small"
-                          sx={{ 
-                            mb: 1, 
-                            fontSize: '0.6rem', 
-                            height: 18,
-                            bgcolor: alpha(theme.palette.primary.main, 0.1),
-                            color: theme.palette.primary.main
-                          }}
-                        />
-                      )}
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Typography variant="body2" color="textSecondary">
-                          {color.hex}
-                        </Typography>
-                        <IconButton 
-                          size="small" 
-                          onClick={(e: React.MouseEvent) => {
-                            e.stopPropagation();
-                            copyColorCode(color.hex);
-                          }}
-                        >
-                          <CopyIcon fontSize="small" />
-                        </IconButton>
+                      onClick={() => handleColorSelect(color)}
+                    >
+                      <Box
+                        sx={{
+                          height: '150px',
+                          backgroundColor: color.hex,
+                          position: 'relative',
+                          overflow: 'hidden',
+                          '&::after': {
+                            content: '""',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%)',
+                            backgroundSize: '20px 20px',
+                            opacity: 0.2
+                          }
+                        }}
+                      >
+                        {/* Room type indicator */}
+                        {color.roomTypes && color.roomTypes.length > 0 && (
+                          <Chip 
+                            label={color.roomTypes[0]}
+                            size="small"
+                            sx={{ 
+                              position: 'absolute', 
+                              top: 10, 
+                              right: 10,
+                              bgcolor: 'rgba(0,0,0,0.4)',
+                              color: 'white',
+                              fontWeight: 500,
+                              fontSize: '0.7rem'
+                            }}
+                          />
+                        )}
+                        
+                        {/* Light reflectance value */}
+                        {color.lightReflectanceValue && (
+                          <Tooltip title="Light Reflectance Value">
+                            <Chip 
+                              icon={<LightIcon sx={{ fontSize: '0.9rem', color: 'white' }} />}
+                              label={color.lightReflectanceValue}
+                              size="small"
+                              sx={{ 
+                                position: 'absolute', 
+                                bottom: 10, 
+                                left: 10,
+                                bgcolor: 'rgba(0,0,0,0.4)',
+                                color: 'white',
+                                fontWeight: 500,
+                                fontSize: '0.7rem'
+                              }}
+                            />
+                          </Tooltip>
+                        )}
                       </Box>
-                    </CardContent>
-                  </Card>
+                      <CardContent sx={{ p: 2, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                          <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 0 }}>
+                            {color.name}
+                          </Typography>
+                          <Chip 
+                            label={color.brand} 
+                            size="small"
+                            sx={{ 
+                              fontSize: '0.65rem', 
+                              height: 20,
+                              bgcolor: alpha(theme.palette.primary.main, 0.1),
+                              color: theme.palette.primary.main,
+                              fontWeight: 600
+                            }}
+                          />
+                        </Box>
+                        
+                        {color.moodCategory && (
+                          <Chip 
+                            label={color.moodCategory} 
+                            size="small"
+                            sx={{ 
+                              mb: 1.5, 
+                              fontSize: '0.7rem', 
+                              height: 20,
+                              alignSelf: 'flex-start',
+                              bgcolor: alpha(theme.palette.primary.main, 0.1),
+                              color: theme.palette.primary.main
+                            }}
+                          />
+                        )}
+                        
+                        {color.suitableFor && (
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5, flexGrow: 1 }}>
+                            {color.suitableFor}
+                          </Typography>
+                        )}
+                        
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 'auto' }}>
+                          <Typography variant="body2" color="text.secondary" sx={{ 
+                            fontFamily: 'monospace', 
+                            fontWeight: 'bold',
+                            fontSize: '0.75rem'
+                          }}>
+                            {color.hex.toUpperCase()}
+                          </Typography>
+                          <Box>
+                            <IconButton 
+                              size="small" 
+                              onClick={(e: React.MouseEvent) => {
+                                e.stopPropagation();
+                                copyColorCode(color.hex);
+                              }}
+                              sx={{
+                                bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                '&:hover': {
+                                  bgcolor: alpha(theme.palette.primary.main, 0.2),
+                                }
+                              }}
+                            >
+                              <CopyIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Zoom>
                 </Grid>
               ))}
             </Grid>
+            
+            {/* Color palette suggestions with animations */}
+            {colorResult.suggestedPalettes && colorResult.suggestedPalettes.length > 0 && (
+              <Box sx={{ mt: 5 }}>
+                <Typography variant="h6" gutterBottom sx={{ 
+                  mb: 3, 
+                  position: 'relative',
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    bottom: -8,
+                    left: 0,
+                    width: 60,
+                    height: 3,
+                    bgcolor: 'primary.main',
+                    borderRadius: 3
+                  }
+                }}>
+                  Coordinated Color Palettes
+                </Typography>
+                
+                <Grid container spacing={3}>
+                  {colorResult.suggestedPalettes.map((palette, paletteIndex) => (
+                    <Grid item xs={12} md={6} key={paletteIndex}>
+                      <Fade in={true} style={{ transitionDelay: `${paletteIndex * 150}ms` }}>
+                        <Paper sx={{ p: 3, borderRadius: 3, overflow: 'hidden', height: '100%' }}>
+                          <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 1 }}>
+                            {palette.name}
+                          </Typography>
+                          
+                          {palette.style && (
+                            <Chip 
+                              label={palette.style} 
+                              size="small"
+                              sx={{ 
+                                mb: 1,
+                                fontSize: '0.7rem', 
+                                height: 20,
+                                bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                color: theme.palette.primary.main
+                              }}
+                            />
+                          )}
+                          
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+                            {palette.description}
+                          </Typography>
+                          
+                          <Grid container spacing={1} sx={{ mb: 2 }}>
+                            {palette.colors.map((color, colorIndex) => (
+                              <Grid item xs={4} key={colorIndex}>
+                                <Box 
+                                  sx={{ 
+                                    bgcolor: color.hex, 
+                                    height: 100, 
+                                    borderRadius: 2, 
+                                    mb: 1,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    transform: selectedColor?.hex === color.hex ? 'scale(1.05)' : 'scale(1)',
+                                    boxShadow: selectedColor?.hex === color.hex ? 
+                                      '0 5px 15px rgba(0,0,0,0.2)' : '0 2px 8px rgba(0,0,0,0.1)',
+                                    border: selectedColor?.hex === color.hex ? 
+                                      `2px solid ${theme.palette.primary.main}` : 'none',
+                                    '&:hover': {
+                                      transform: 'scale(1.05)',
+                                      boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
+                                    },
+                                    position: 'relative'
+                                  }}
+                                  onClick={() => handleColorSelect(color)}
+                                >
+                                  <Typography 
+                                    variant="caption" 
+                                    sx={{ 
+                                      position: 'absolute',
+                                      bottom: 0,
+                                      left: 0,
+                                      right: 0,
+                                      p: 0.5,
+                                      bgcolor: 'rgba(0,0,0,0.5)',
+                                      color: 'white',
+                                      textAlign: 'center',
+                                      fontSize: '0.65rem',
+                                      fontWeight: 500,
+                                      borderBottomLeftRadius: 2,
+                                      borderBottomRightRadius: 2,
+                                      opacity: 0,
+                                      transition: 'opacity 0.2s ease',
+                                      '.MuiBox-root:hover &': {
+                                        opacity: 1
+                                      }
+                                    }}
+                                  >
+                                    {color.name}
+                                  </Typography>
+                                </Box>
+                                <Typography variant="caption" sx={{ display: 'block', fontWeight: 500 }}>
+                                  {color.name}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                                  {color.hex.toUpperCase()}
+                                </Typography>
+                              </Grid>
+                            ))}
+                          </Grid>
+                          
+                          <Button 
+                            variant="outlined" 
+                            size="small" 
+                            fullWidth
+                            onClick={() => {
+                              // Apply the first color from the palette
+                              if (palette.colors && palette.colors.length > 0) {
+                                handleColorSelect(palette.colors[0]);
+                              }
+                            }}
+                            sx={{
+                              borderRadius: 2,
+                              textTransform: 'none',
+                              mt: 1
+                            }}
+                          >
+                            <PaletteIcon sx={{ mr: 1, fontSize: '1rem' }} />
+                            Try This Palette
+                          </Button>
+                        </Paper>
+                      </Fade>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+            )}
           </TabPanel>
         </Box>
       )}

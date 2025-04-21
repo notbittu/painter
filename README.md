@@ -116,6 +116,64 @@ The application is configured for deployment on Render.com. Pushing to the conne
 
 3. Deploy the Flask app with the prebuilt frontend files.
 
+## Alternative Deployment Options
+
+### Vercel (Fast Deployment)
+
+1. Install the Vercel CLI:
+```bash
+npm install -g vercel
+```
+
+2. Deploy the project:
+```bash
+vercel
+```
+
+3. For production deployment:
+```bash
+vercel --prod
+```
+
+### Netlify (Fast Deployment)
+
+1. Install the Netlify CLI:
+```bash
+npm install -g netlify-cli
+```
+
+2. Deploy the frontend:
+```bash
+cd client
+netlify deploy
+```
+
+3. For production deployment:
+```bash
+netlify deploy --prod
+```
+
+### Railway (Fast Backend)
+
+1. Install the Railway CLI:
+```bash
+npm install -g @railway/cli
+```
+
+2. Login and deploy:
+```bash
+railway login
+railway init
+railway up
+```
+
+### Splitting Frontend and Backend
+
+For optimal performance, you can split the deployment:
+1. Deploy the frontend to Vercel or Netlify
+2. Deploy the backend to Railway or Fly.io
+3. Update the API URL in the frontend environment variables
+
 ## API Endpoints
 
 - `GET /api/health` - Health check endpoint

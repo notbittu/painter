@@ -869,15 +869,10 @@ def color_matches():
 # Configure for both local and production
 app.debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
 
-# This is the main entry point for Render.com deployment
-if __name__ == "__main__":
-    # For production
-    port = int(os.environ.get("PORT", 10000))
-    logger.info(f"Starting server on port {port}")
-    logger.info(f"Static directory path: {STATIC_DIR}")
-    logger.info(f"Directory exists: {os.path.exists(STATIC_DIR)}")
-    
-    if os.path.exists(STATIC_DIR):
-        logger.info(f"Contents of static directory: {os.listdir(STATIC_DIR)}")
-    
-    app.run(host="0.0.0.0", port=port, debug=app.debug)
+# Serverless Function handler for Vercel
+def handler(event, context):
+    return app(event, context)
+
+# Keep the original app.run code for local development
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))

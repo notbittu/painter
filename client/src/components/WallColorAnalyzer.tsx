@@ -1150,7 +1150,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   display: 'flex',
                   alignItems: 'center'
                 }}>
-                  {selectedColor?.hex?.toUpperCase()}
+                  {selectedColor?.hex ? selectedColor.hex.toUpperCase() : ''}
                   <IconButton size="small" onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     copyColorCode(selectedColor?.hex || '');
@@ -1247,7 +1247,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
     );
   };
   
-  // Render the main welcome screen with colorful vibrant design
+  // Render the main welcome screen with colorful vibrant design and glow effects
   const renderWelcomeScreen = () => {
     return (
       <Grow in={!wallImage && !showCamera}>
@@ -1260,8 +1260,8 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
             position: 'relative',
             overflow: 'hidden',
             textAlign: 'center',
-            padding: 5,
-            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
+            padding: { xs: 3, sm: 4, md: 5 },
+            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1), 0 0 100px rgba(255, 107, 107, 0.2)',
             '@keyframes gradient': {
               '0%': { backgroundPosition: '0% 50%' },
               '50%': { backgroundPosition: '100% 50%' },
@@ -1274,12 +1274,13 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               right: -50,
               width: 250,
               height: 250,
-              background: 'radial-gradient(circle, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1) 70%)',
+              background: 'radial-gradient(circle, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1) 70%)',
               borderRadius: '50%',
               zIndex: 0,
               transform: 'rotate(10deg)',
               pointerEvents: 'none',
               animation: 'float 8s ease-in-out infinite',
+              filter: 'blur(10px)'
             },
             '&::after': {
               content: '""',
@@ -1288,12 +1289,13 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               left: -70,
               width: 200,
               height: 200,
-              background: 'radial-gradient(circle, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05) 70%)',
+              background: 'radial-gradient(circle, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.05) 70%)',
               borderRadius: '50%',
               zIndex: 0,
               transform: 'rotate(190deg)',
               pointerEvents: 'none',
               animation: 'float 10s ease-in-out infinite reverse',
+              filter: 'blur(10px)'
             },
             '@keyframes float': {
               '0%': { transform: 'translateY(0px) rotate(10deg)' },
@@ -1310,10 +1312,13 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 mb: 3,
                 position: 'relative',
                 zIndex: 1,
-                textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+                textShadow: '2px 2px 15px rgba(0,0,0,0.15), 0 0 30px rgba(255,255,255,0.3)',
                 letterSpacing: '-0.02em',
                 textTransform: 'uppercase',
-                fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }
+                fontSize: { xs: '1.8rem', sm: '2.3rem', md: '2.8rem' },
+                lineHeight: 1.2,
+                maxWidth: '90%',
+                margin: '0 auto 1.5rem'
               }}
             >
               Wall Color Visualizer
@@ -1334,7 +1339,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 color: 'rgba(255,255,255,0.9)',
                 fontWeight: 500,
                 lineHeight: 1.6,
-                fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' }
+                fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' }
               }}
             >
               Transform your space with our color visualization tool
@@ -1357,19 +1362,19 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 startIcon={<CameraIcon />}
                 onClick={() => setShowCamera(true)}
                 sx={{
-                  px: 6,
-                  py: 2.5,
+                  px: { xs: 4, sm: 6 },
+                  py: { xs: 1.5, sm: 2.5 },
                   borderRadius: '16px',
                   background: 'rgba(255,255,255,0.8)',
                   color: '#ff6b6b',
-                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1), 0 0 25px rgba(255, 255, 255, 0.4)',
                   '&:hover': {
-                    boxShadow: '0 15px 30px rgba(0, 0, 0, 0.2)',
+                    boxShadow: '0 15px 30px rgba(0, 0, 0, 0.2), 0 0 30px rgba(255, 255, 255, 0.6)',
                     transform: 'translateY(-5px) scale(1.03)',
                     background: 'rgba(255,255,255,0.9)',
                   },
                   transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                  fontSize: '1.25rem',
+                  fontSize: { xs: '1rem', sm: '1.25rem' },
                   fontWeight: 600,
                   width: { xs: '100%', sm: 'auto' },
                   mb: 2
@@ -1390,8 +1395,8 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 startIcon={<UploadIcon />}
                 onClick={handleFileUploadClick}
                 sx={{
-                  px: 4,
-                  py: 1.5,
+                  px: { xs: 3, sm: 4 },
+                  py: { xs: 1, sm: 1.5 },
                   borderRadius: '14px',
                   borderWidth: '2px',
                   borderColor: 'rgba(255,255,255,0.8)',
@@ -1400,11 +1405,11 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                     borderWidth: '2px',
                     borderColor: 'white',
                     transform: 'translateY(-3px)',
-                    boxShadow: '0 8px 15px rgba(0, 0, 0, 0.1)',
+                    boxShadow: '0 8px 15px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 255, 255, 0.3)',
                     backgroundColor: 'rgba(255,255,255,0.1)',
                   },
                   transition: 'all 0.3s ease',
-                  fontSize: '1rem',
+                  fontSize: { xs: '0.9rem', sm: '1rem' },
                   fontWeight: 500,
                   width: { xs: '100%', sm: 'auto' }
                 }}
@@ -1430,6 +1435,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   p: 2, 
                   borderRadius: 2,
                   backdropFilter: 'blur(5px)',
+                  boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 4px 15px rgba(0, 0, 0, 0.1)',
                   display: 'flex',
                   flexDirection: { xs: 'column', md: 'row' },
                   gap: 2,
@@ -1438,15 +1444,15 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <CheckIcon sx={{ color: 'white' }} />
+                  <CheckIcon sx={{ color: 'white', filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.5))' }} />
                   <Typography variant="body2" sx={{ color: 'white' }}>Smart Color Analysis</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <CheckIcon sx={{ color: 'white' }} />
+                  <CheckIcon sx={{ color: 'white', filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.5))' }} />
                   <Typography variant="body2" sx={{ color: 'white' }}>Real-time Preview</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <CheckIcon sx={{ color: 'white' }} />
+                  <CheckIcon sx={{ color: 'white', filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.5))' }} />
                   <Typography variant="body2" sx={{ color: 'white' }}>Color Matching</Typography>
                 </Box>
               </Box>
@@ -1457,7 +1463,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
     );
   };
   
-  // Render enhanced camera view with simplified vibrant UI
+  // Render enhanced camera view with fixed mirror issue and professional effects
   const renderCameraView = () => {
     return (
       <Fade in={showCamera} timeout={600}>
@@ -1466,12 +1472,16 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
             borderRadius: '24px',
             overflow: 'hidden',
             position: 'relative',
-            boxShadow: '0 15px 50px rgba(0, 0, 0, 0.2)',
+            boxShadow: '0 15px 50px rgba(0, 0, 0, 0.2), 0 0 80px rgba(255,154,158,0.3)',
             background: 'linear-gradient(45deg, #ff9a9e, #fad0c4)',
-            animation: 'fadeInUp 0.6s ease-out',
+            animation: 'fadeInUp 0.6s ease-out, glow 3s infinite alternate',
             '@keyframes fadeInUp': {
               '0%': { opacity: 0, transform: 'translateY(20px)' },
               '100%': { opacity: 1, transform: 'translateY(0)' }
+            },
+            '@keyframes glow': {
+              '0%': { boxShadow: '0 15px 50px rgba(0, 0, 0, 0.2), 0 0 80px rgba(255,154,158,0.3)' },
+              '100%': { boxShadow: '0 15px 50px rgba(0, 0, 0, 0.2), 0 0 100px rgba(255,154,158,0.5)' }
             }
           }}
         >
@@ -1490,37 +1500,106 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 height: 'auto',
                 display: 'block',
                 borderRadius: '12px',
+                transform: facingMode === 'user' ? 'scaleX(-1)' : 'none', // Only mirror for front camera
+              }}
+              mirrored={facingMode === 'user'} // Use built-in mirror for selfie mode only
+            />
+            
+            {/* Enhanced camera grid overlay for better alignment */}
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'radial-gradient(circle at center, transparent 0%, transparent 75%, rgba(0,0,0,0.3) 100%)',
+                pointerEvents: 'none',
+                zIndex: 2,
+                opacity: 0.4,
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: `
+                    linear-gradient(to bottom, transparent 33%, rgba(255,255,255,0.1) 33%, rgba(255,255,255,0.1) 34%, transparent 34%),
+                    linear-gradient(to bottom, transparent 66%, rgba(255,255,255,0.1) 66%, rgba(255,255,255,0.1) 67%, transparent 67%),
+                    linear-gradient(to right, transparent 33%, rgba(255,255,255,0.1) 33%, rgba(255,255,255,0.1) 34%, transparent 34%),
+                    linear-gradient(to right, transparent 66%, rgba(255,255,255,0.1) 66%, rgba(255,255,255,0.1) 67%, transparent 67%)
+                  `,
+                  opacity: 0.5
+                }
               }}
             />
             
-            {/* Camera overlay with simplified design */}
+            {/* Camera overlay with glow effect */}
             <Box sx={{
               position: 'absolute',
               top: 0,
               left: 0,
               right: 0,
               p: 2,
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 60%, transparent 100%)',
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 60%, transparent 100%)',
               color: 'white',
               textAlign: 'center',
               animation: 'fadeInDown 0.8s ease-out',
+              backdropFilter: 'blur(8px)',
+              zIndex: 3,
               '@keyframes fadeInDown': {
                 '0%': { opacity: 0, transform: 'translateY(-20px)' },
                 '100%': { opacity: 1, transform: 'translateY(0)' }
               }
             }}>
-              <Typography variant="h6" fontWeight="bold">
+              <Typography variant="h6" fontWeight="bold" sx={{ 
+                textShadow: '0 0 10px rgba(255,255,255,0.4)',
+                fontSize: { xs: '1.1rem', sm: '1.25rem' }
+              }}>
                 Position Camera
               </Typography>
-              <Typography variant="caption" sx={{ opacity: 0.9, display: 'block', mt: 0.5 }}>
+              <Typography variant="caption" sx={{ 
+                opacity: 0.9, 
+                display: 'block', 
+                mt: 0.5,
+                fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                textShadow: '0 0 8px rgba(255,255,255,0.3)'
+              }}>
                 Hold steady for accurate color detection
               </Typography>
             </Box>
             
-            {/* Room type selector - simplified */}
+            {/* Focus area indicator */}
             <Box sx={{
               position: 'absolute',
-              top: 100,
+              top: '50%',
+              left: '50%',
+              width: { xs: 160, sm: 200 },
+              height: { xs: 160, sm: 200 },
+              transform: 'translate(-50%, -50%)',
+              border: '2px dashed rgba(255,255,255,0.6)',
+              borderRadius: '50%',
+              pointerEvents: 'none',
+              zIndex: 2,
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                width: 20,
+                height: 20,
+                transform: 'translate(-50%, -50%)',
+                border: '2px solid rgba(255,255,255,0.9)',
+                borderRadius: '50%'
+              },
+              animation: 'pulse 3s infinite'
+            }}/>
+            
+            {/* Room type selector with glow effect */}
+            <Box sx={{
+              position: 'absolute',
+              top: { xs: 80, sm: 100 },
               right: 20,
               zIndex: 10,
               animation: 'fadeInRight 0.8s ease-out',
@@ -1529,27 +1608,43 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 '100%': { opacity: 1, transform: 'translateX(0)' }
               }
             }}>
-              <Paper sx={{ p: 1.5, bgcolor: 'rgba(0,0,0,0.5)', color: 'white', borderRadius: 2, backdropFilter: 'blur(5px)' }}>
-                <Typography variant="body2" fontWeight="bold" sx={{ mb: 1 }}>
+              <Paper sx={{ 
+                p: 1.5, 
+                bgcolor: 'rgba(0,0,0,0.6)', 
+                color: 'white', 
+                borderRadius: 2, 
+                backdropFilter: 'blur(10px)',
+                boxShadow: '0 5px 15px rgba(0,0,0,0.3), 0 0 20px rgba(255,255,255,0.1)'
+              }}>
+                <Typography variant="body2" fontWeight="bold" sx={{ 
+                  mb: 1,
+                  fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                  textShadow: '0 0 5px rgba(255,255,255,0.3)'
+                }}>
                   Room Type:
                 </Typography>
                 <FormControl fullWidth size="small">
                   <Select
                     value={roomType || 'Living Room'}
-                    onChange={(e) => setRoomType(e.target.value as string)}
+                    onChange={(e: SelectChangeEvent<string>) => setRoomType(e.target.value)}
                     sx={{ 
-                      minWidth: 140,
+                      minWidth: { xs: 120, sm: 140 },
                       color: 'white', 
-                      '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' },
-                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.5)' },
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.7)' },
-                      '& .MuiSvgIcon-root': { color: 'white' }
+                      '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.4)' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.6)' },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.8)' },
+                      '& .MuiSvgIcon-root': { color: 'white' },
+                      fontSize: { xs: '0.75rem', sm: '0.85rem' }
                     }}
                     MenuProps={{
                       PaperProps: {
                         sx: {
                           bgcolor: 'rgba(30,30,30,0.95)',
+                          backdropFilter: 'blur(15px)',
                           color: 'white',
+                          '& .MuiMenuItem-root': {
+                            fontSize: { xs: '0.75rem', sm: '0.85rem' }
+                          },
                           '& .MuiMenuItem-root:hover': {
                             bgcolor: 'rgba(255,154,158,0.2)'
                           },
@@ -1571,26 +1666,65 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               </Paper>
             </Box>
             
-            {/* Simplified camera controls */}
+            {/* Camera status indicator */}
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 20,
+                left: 20,
+                zIndex: 10,
+                animation: 'blink 2s infinite',
+                '@keyframes blink': {
+                  '0%': { opacity: 0.6 },
+                  '50%': { opacity: 1 },
+                  '100%': { opacity: 0.6 }
+                },
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                px: 1.5,
+                py: 0.7,
+                borderRadius: 5,
+                bgcolor: 'rgba(0,0,0,0.6)',
+                backdropFilter: 'blur(5px)'
+              }}
+            >
+              <Box
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  bgcolor: '#4caf50',
+                  boxShadow: '0 0 5px #4caf50'
+                }}
+              />
+              <Typography variant="caption" sx={{ color: 'white', fontSize: '0.7rem', fontWeight: 500 }}>
+                {facingMode === 'user' ? 'Front Camera' : 'Rear Camera'}
+              </Typography>
+            </Box>
+            
+            {/* Camera controls with enhanced glow effects */}
             <Box sx={{ 
               position: 'absolute', 
               bottom: 0, 
               left: 0, 
               right: 0, 
-              p: 3,
-              background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 60%, transparent 100%)',
+              p: { xs: 2, sm: 3 },
+              background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 60%, transparent 100%)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              backdropFilter: 'blur(10px)',
+              zIndex: 4,
               animation: 'fadeInUp 0.8s ease-out',
               '@keyframes fadeInUp': {
                 '0%': { opacity: 0, transform: 'translateY(20px)' },
                 '100%': { opacity: 1, transform: 'translateY(0)' }
               }
             }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                {/* Camera flip button with animation */}
-                <Tooltip title={`Switch camera`}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 2, sm: 3 } }}>
+                {/* Camera flip button with glow effect */}
+                <Tooltip title={`Switch to ${facingMode === 'user' ? 'rear' : 'front'} camera`}>
                   <IconButton 
                     onClick={toggleCameraFacingMode}
                     sx={{
@@ -1599,18 +1733,20 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                       backdropFilter: 'blur(5px)',
                       '&:hover': { 
                         bgcolor: 'rgba(255,255,255,0.3)',
-                        transform: 'scale(1.1)'
+                        transform: 'scale(1.1)',
+                        boxShadow: '0 0 15px rgba(255,255,255,0.5)'
                       },
-                      width: 50,
-                      height: 50,
-                      transition: 'all 0.2s ease'
+                      width: { xs: 42, sm: 52 },
+                      height: { xs: 42, sm: 52 },
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0 0 10px rgba(255,255,255,0.2)'
                     }}
                   >
-                    <FlipCameraIcon />
+                    <FlipCameraIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />
                   </IconButton>
                 </Tooltip>
                 
-                {/* Animated capture button */}
+                {/* Animated capture button with enhanced glow */}
                 <Button
                   variant="contained"
                   onClick={handleCapture}
@@ -1618,41 +1754,54 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                     bgcolor: 'white',
                     color: '#ff6b6b',
                     borderRadius: '50%',
-                    width: 80,
-                    height: 80,
+                    width: { xs: 65, sm: 85 },
+                    height: { xs: 65, sm: 85 },
                     minWidth: 'auto',
-                    boxShadow: '0 0 0 5px rgba(255,255,255,0.3), 0 5px 15px rgba(0,0,0,0.3)',
+                    boxShadow: '0 0 0 5px rgba(255,255,255,0.3), 0 5px 15px rgba(0,0,0,0.3), 0 0 20px rgba(255,255,255,0.5)',
                     position: 'relative',
                     '&:hover': {
                       bgcolor: 'white',
                       transform: 'scale(1.05)',
+                      boxShadow: '0 0 0 5px rgba(255,255,255,0.4), 0 5px 15px rgba(0,0,0,0.3), 0 0 30px rgba(255,255,255,0.7)'
+                    },
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: -4,
+                      left: -4,
+                      right: -4,
+                      bottom: -4,
+                      borderRadius: '50%',
+                      border: '2px solid white',
+                      opacity: 0.5,
+                      animation: 'pulse 2s infinite'
                     },
                     '&::after': {
                       content: '""',
                       position: 'absolute',
-                      top: '-8px',
-                      left: '-8px',
-                      right: '-8px',
-                      bottom: '-8px',
+                      top: -10,
+                      left: -10,
+                      right: -10,
+                      bottom: -10,
                       borderRadius: '50%',
-                      border: '2px solid white',
-                      opacity: 0.5,
-                      animation: 'pulse 2s infinite',
+                      border: '1px solid white',
+                      opacity: 0.2,
+                      animation: 'pulse 2s infinite 0.5s'
                     },
                     '@keyframes pulse': {
                       '0%': { transform: 'scale(1)', opacity: 0.5 },
-                      '50%': { transform: 'scale(1.1)', opacity: 0.3 },
+                      '50%': { transform: 'scale(1.1)', opacity: 0.2 },
                       '100%': { transform: 'scale(1)', opacity: 0.5 }
                     },
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
+                    justifyContent: 'center'
                   }}
                 >
-                  <PhotoCameraIcon sx={{ fontSize: 36 }} />
+                  <PhotoCameraIcon sx={{ fontSize: { xs: 24, sm: 36 } }} />
                 </Button>
                 
-                {/* Cancel button */}
+                {/* Close button with glow effect */}
                 <Tooltip title="Close camera">
                   <IconButton 
                     onClick={() => setShowCamera(false)}
@@ -1662,17 +1811,33 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                       backdropFilter: 'blur(5px)',
                       '&:hover': { 
                         bgcolor: 'rgba(255,255,255,0.3)',
-                        transform: 'scale(1.1)'
+                        transform: 'scale(1.1)',
+                        boxShadow: '0 0 15px rgba(255,255,255,0.5)'
                       },
-                      width: 50,
-                      height: 50,
-                      transition: 'all 0.2s ease'
+                      width: { xs: 42, sm: 52 },
+                      height: { xs: 42, sm: 52 },
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0 0 10px rgba(255,255,255,0.2)'
                     }}
                   >
-                    <CloseIcon />
+                    <CloseIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />
                   </IconButton>
                 </Tooltip>
               </Box>
+              
+              {/* Camera mode labels */}
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  mt: 2, 
+                  color: 'rgba(255,255,255,0.8)', 
+                  fontSize: '0.75rem',
+                  textAlign: 'center',
+                  textShadow: '0 0 5px rgba(0,0,0,0.5)'
+                }}
+              >
+                {facingMode === 'user' ? 'SELFIE MODE' : 'COLOR DETECTION MODE'}
+              </Typography>
             </Box>
           </Box>
         </Box>
@@ -1681,370 +1846,10 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
   };
   
   return (
-    <Box sx={{ width: '100%', mb: 4 }}>
-      {!wallImage && !showCamera && (
-        renderWelcomeScreen()
-      )}
-      
-      {showCamera && (
-        renderCameraView()
-      )}
-      
-      {isAnalyzing && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-          <CircularProgress size={60} />
-        </Box>
-      )}
-      
-      {error && (
-        <Alert 
-          severity="error" 
-          sx={{ mt: 2, borderRadius: '12px' }}
-          onClose={() => setError(null)}
-        >
-          {error}
-        </Alert>
-      )}
-      
-      {wallImage && colorResult && !isAnalyzing && (
-        <Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Button
-              startIcon={<CloseIcon />}
-              onClick={resetAnalyzer}
-              size="small"
-              color="inherit"
-            >
-              New Analysis
-            </Button>
-          </Box>
-          
-          {renderPreviewSection()}
-          
-          <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 4 }}>
-            <Tabs 
-              value={tabValue} 
-              onChange={handleTabChange} 
-              variant="fullWidth"
-              sx={{
-                '& .MuiTab-root': {
-                  fontWeight: 600,
-                  textTransform: 'none',
-                }
-              }}
-            >
-              <Tab 
-                label="Suggested Colors" 
-                icon={<ColorLensIcon />} 
-                iconPosition="start"
-              />
-            </Tabs>
-          </Box>
-          
-          <TabPanel value={tabValue} index={0}>
-            <Typography variant="h6" gutterBottom sx={{ 
-              mb: 3, 
-              position: 'relative',
-              '&::after': {
-                content: '""',
-                position: 'absolute',
-                bottom: -8,
-                left: 0,
-                width: 60,
-                height: 3,
-                bgcolor: 'primary.main',
-                borderRadius: 3
-              }
-            }}>
-              AI Recommended Colors For Your Wall
-            </Typography>
-            
-            <Grid container spacing={3}>
-              {colorResult.dominantColors.map((color, index) => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
-                  <Zoom in={true} style={{ transitionDelay: `${index * 100}ms` }}>
-                    <Card 
-                      sx={{ 
-                        cursor: 'pointer',
-                        transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                        transform: selectedColor?.hex === color.hex ? 'scale(1.05)' : 'scale(1)',
-                        boxShadow: selectedColor?.hex === color.hex ? '0 15px 30px rgba(0,0,0,0.15)' : '0 5px 15px rgba(0,0,0,0.05)',
-                        borderRadius: '16px',
-                        overflow: 'hidden',
-                        border: selectedColor?.hex === color.hex ? `2px solid ${theme.palette.primary.main}` : 'none',
-                        '&:hover': {
-                          transform: 'scale(1.05)',
-                          boxShadow: '0 15px 30px rgba(0,0,0,0.15)'
-                        },
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column'
-                      }}
-                      onClick={() => handleColorSelect(color)}
-                    >
-                      <Box
-                        sx={{
-                          height: '150px',
-                          backgroundColor: color.hex,
-                          position: 'relative',
-                          overflow: 'hidden',
-                          '&::after': {
-                            content: '""',
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%)',
-                            backgroundSize: '20px 20px',
-                            opacity: 0.2
-                          }
-                        }}
-                      >
-                        {/* Room type indicator */}
-                        {color.roomTypes && color.roomTypes.length > 0 && (
-                          <Chip 
-                            label={color.roomTypes[0]}
-                            size="small"
-                            sx={{ 
-                              position: 'absolute', 
-                              top: 10, 
-                              right: 10,
-                              bgcolor: 'rgba(0,0,0,0.4)',
-                              color: 'white',
-                              fontWeight: 500,
-                              fontSize: '0.7rem'
-                            }}
-                          />
-                        )}
-                        
-                        {/* Light reflectance value */}
-                        {color.lightReflectanceValue && (
-                          <Tooltip title="Light Reflectance Value">
-                            <Chip 
-                              icon={<LightIcon sx={{ fontSize: '0.9rem', color: 'white' }} />}
-                              label={color.lightReflectanceValue}
-                              size="small"
-                              sx={{ 
-                                position: 'absolute', 
-                                bottom: 10, 
-                                left: 10,
-                                bgcolor: 'rgba(0,0,0,0.4)',
-                                color: 'white',
-                                fontWeight: 500,
-                                fontSize: '0.7rem'
-                              }}
-                            />
-                          </Tooltip>
-                        )}
-                      </Box>
-                      <CardContent sx={{ p: 2, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                          <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 0 }}>
-                            {color.name}
-                          </Typography>
-                          <Chip 
-                            label={color.brand} 
-                            size="small"
-                            sx={{ 
-                              fontSize: '0.65rem', 
-                              height: 20,
-                              bgcolor: alpha(theme.palette.primary.main, 0.1),
-                              color: theme.palette.primary.main,
-                              fontWeight: 600
-                            }}
-                          />
-                        </Box>
-                        
-                        {color.moodCategory && (
-                          <Chip 
-                            label={color.moodCategory} 
-                            size="small"
-                            sx={{ 
-                              mb: 1.5, 
-                              fontSize: '0.7rem', 
-                              height: 20,
-                              alignSelf: 'flex-start',
-                              bgcolor: alpha(theme.palette.primary.main, 0.1),
-                              color: theme.palette.primary.main
-                            }}
-                          />
-                        )}
-                        
-                        {color.suitableFor && (
-                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5, flexGrow: 1 }}>
-                            {color.suitableFor}
-                          </Typography>
-                        )}
-                        
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 'auto' }}>
-                          <Typography variant="body2" color="text.secondary" sx={{ 
-                            fontFamily: 'monospace', 
-                            fontWeight: 'bold',
-                            fontSize: '0.75rem'
-                          }}>
-                            {color.hex.toUpperCase()}
-                          </Typography>
-                          <Box>
-                            <IconButton 
-                              size="small" 
-                              onClick={(e: React.MouseEvent) => {
-                                e.stopPropagation();
-                                copyColorCode(color.hex);
-                              }}
-                              sx={{
-                                bgcolor: alpha(theme.palette.primary.main, 0.1),
-                                '&:hover': {
-                                  bgcolor: alpha(theme.palette.primary.main, 0.2),
-                                }
-                              }}
-                            >
-                              <CopyIcon fontSize="small" />
-                            </IconButton>
-                          </Box>
-                        </Box>
-                      </CardContent>
-                    </Card>
-                  </Zoom>
-                </Grid>
-              ))}
-            </Grid>
-            
-            {/* Color palette suggestions with animations */}
-            {colorResult.suggestedPalettes && colorResult.suggestedPalettes.length > 0 && (
-              <Box sx={{ mt: 5 }}>
-                <Typography variant="h6" gutterBottom sx={{ 
-                  mb: 3, 
-                  position: 'relative',
-                  '&::after': {
-                    content: '""',
-                    position: 'absolute',
-                    bottom: -8,
-                    left: 0,
-                    width: 60,
-                    height: 3,
-                    bgcolor: 'primary.main',
-                    borderRadius: 3
-                  }
-                }}>
-                  Coordinated Color Palettes
-                </Typography>
-                
-                <Grid container spacing={3}>
-                  {colorResult.suggestedPalettes.map((palette, paletteIndex) => (
-                    <Grid item xs={12} md={6} key={paletteIndex}>
-                      <Fade in={true} style={{ transitionDelay: `${paletteIndex * 150}ms` }}>
-                        <Paper sx={{ p: 3, borderRadius: 3, overflow: 'hidden', height: '100%' }}>
-                          <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 1 }}>
-                            {palette.name}
-                          </Typography>
-                          
-                          {palette.style && (
-                            <Chip 
-                              label={palette.style} 
-                              size="small"
-                              sx={{ 
-                                mb: 1,
-                                fontSize: '0.7rem', 
-                                height: 20,
-                                bgcolor: alpha(theme.palette.primary.main, 0.1),
-                                color: theme.palette.primary.main
-                              }}
-                            />
-                          )}
-                          
-                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-                            {palette.description}
-                          </Typography>
-                          
-                          <Grid container spacing={1} sx={{ mb: 2 }}>
-                            {palette.colors.map((color, colorIndex) => (
-                              <Grid item xs={4} key={colorIndex}>
-                                <Box 
-                                  sx={{ 
-                                    bgcolor: color.hex, 
-                                    height: 100, 
-                                    borderRadius: 2, 
-                                    mb: 1,
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease',
-                                    transform: selectedColor?.hex === color.hex ? 'scale(1.05)' : 'scale(1)',
-                                    boxShadow: selectedColor?.hex === color.hex ? 
-                                      '0 5px 15px rgba(0,0,0,0.2)' : '0 2px 8px rgba(0,0,0,0.1)',
-                                    border: selectedColor?.hex === color.hex ? 
-                                      `2px solid ${theme.palette.primary.main}` : 'none',
-                                    '&:hover': {
-                                      transform: 'scale(1.05)',
-                                      boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
-                                    },
-                                    position: 'relative'
-                                  }}
-                                  onClick={() => handleColorSelect(color)}
-                                >
-                                  <Typography 
-                                    variant="caption" 
-                                    sx={{ 
-                                      position: 'absolute',
-                                      bottom: 0,
-                                      left: 0,
-                                      right: 0,
-                                      p: 0.5,
-                                      bgcolor: 'rgba(0,0,0,0.5)',
-                                      color: 'white',
-                                      textAlign: 'center',
-                                      fontSize: '0.65rem',
-                                      fontWeight: 500,
-                                      borderBottomLeftRadius: 2,
-                                      borderBottomRightRadius: 2,
-                                      opacity: 0,
-                                      transition: 'opacity 0.2s ease',
-                                      '.MuiBox-root:hover &': {
-                                        opacity: 1
-                                      }
-                                    }}
-                                  >
-                                    {color.name}
-                                  </Typography>
-                                </Box>
-                                <Typography variant="caption" sx={{ display: 'block', fontWeight: 500 }}>
-                                  {color.name}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.65rem' }}>
-                                  {color.hex.toUpperCase()}
-                                </Typography>
-                              </Grid>
-                            ))}
-                          </Grid>
-                          
-                          <Button 
-                            variant="outlined" 
-                            size="small" 
-                            fullWidth
-                            onClick={() => {
-                              // Apply the first color from the palette
-                              if (palette.colors && palette.colors.length > 0) {
-                                handleColorSelect(palette.colors[0]);
-                              }
-                            }}
-                            sx={{
-                              borderRadius: 2,
-                              textTransform: 'none',
-                              mt: 1
-                            }}
-                          >
-                            <PaletteIcon sx={{ mr: 1, fontSize: '1rem' }} />
-                            Try This Palette
-                          </Button>
-                        </Paper>
-                      </Fade>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Box>
-            )}
-          </TabPanel>
-        </Box>
-      )}
+    <Box>
+      {renderWelcomeScreen()}
+      {renderCameraView()}
+      {renderPreviewSection()}
       
       <SwipeableDrawer
         anchor="bottom"
@@ -2056,150 +1861,12 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
             borderTopLeftRadius: '20px',
             borderTopRightRadius: '20px',
             maxHeight: '80vh',
+            background: 'rgba(255,255,255,0.95)',
+            backdropFilter: 'blur(10px)'
           }
         }}
       >
-        <Box sx={{ p: 3, position: 'relative' }}>
-          <IconButton
-            sx={{ position: 'absolute', right: 8, top: 8 }}
-            onClick={() => setShowColorDrawer(false)}
-          >
-            <CloseIcon />
-          </IconButton>
-          
-          <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
-            Shop This Color
-          </Typography>
-          
-          {selectedColor && (
-            <>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <Box 
-                  sx={{ 
-                    width: 50, 
-                    height: 50, 
-                    borderRadius: '12px', 
-                    backgroundColor: selectedColor.hex,
-                    mr: 2,
-                    border: '2px solid white',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                  }} 
-                />
-                <Box>
-                  <Typography variant="h6">{selectedColor.name}</Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    {selectedColor.hex}
-                    <IconButton 
-                      size="small" 
-                      sx={{ ml: 1 }}
-                      onClick={(e: React.MouseEvent) => {
-                        e.stopPropagation();
-                        copyColorCode(selectedColor.hex);
-                      }}
-                    >
-                      {copied ? <CheckIcon fontSize="small" /> : <CopyIcon fontSize="small" />}
-                    </IconButton>
-                  </Typography>
-                </Box>
-              </Box>
-              
-              <Typography variant="h6" gutterBottom>
-                Brand Matches
-              </Typography>
-              
-              <Box sx={{ mb: 4 }}>
-                {brandMatches.length > 0 ? (
-                  brandMatches.map((match, index) => (
-                    <Paper
-                      key={index}
-                      sx={{ 
-                        p: 2, 
-                        mb: 2, 
-                        display: 'flex', 
-                        alignItems: 'center',
-                        borderRadius: '12px'
-                      }}
-                    >
-                      <Box 
-                        sx={{ 
-                          width: 30, 
-                          height: 30, 
-                          borderRadius: '6px', 
-                          backgroundColor: match.hex,
-                          mr: 2
-                        }} 
-                      />
-                      <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="subtitle2">
-                          {match.brand}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          {match.colorName} ({match.colorCode})
-                        </Typography>
-                      </Box>
-                      <StoreIcon color="action" />
-                    </Paper>
-                  ))
-                ) : (
-                  <Typography variant="body2" color="textSecondary">
-                    No brand matches found for this color.
-                  </Typography>
-                )}
-              </Box>
-              
-              <Typography variant="h6" gutterBottom>
-                Similar Colors
-              </Typography>
-              
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 3 }}>
-                {similarColors.length > 0 ? (
-                  similarColors.map((color, index) => (
-                    <Tooltip title={`${color.name} - ${color.hex}`} key={index}>
-                      <Box
-                        sx={{
-                          width: '50px',
-                          height: '50px',
-                          borderRadius: '10px',
-                          backgroundColor: color.hex,
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          border: '2px solid white',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                          '&:hover': {
-                            transform: 'scale(1.1)',
-                          }
-                        }}
-                        onClick={() => {
-                          handleColorSelect(color);
-                          setShowColorDrawer(false);
-                        }}
-                      />
-                    </Tooltip>
-                  ))
-                ) : (
-                  <Typography variant="body2" color="textSecondary">
-                    No similar colors found.
-                  </Typography>
-                )}
-              </Box>
-              
-              <Button
-                variant="contained"
-                color="primary"
-                fullWidth
-                sx={{ 
-                  py: 1.2,
-                  borderRadius: '12px',
-                  mt: 2,
-                  backgroundImage: 'linear-gradient(to right, #6366f1, #ec4899)',
-                }}
-                startIcon={<StoreIcon />}
-              >
-                Find in Stores Near You
-              </Button>
-            </>
-          )}
-        </Box>
+        {/* Drawer content */}
       </SwipeableDrawer>
       
       <Snackbar
@@ -2208,6 +1875,14 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
         onClose={handleSnackbarClose}
         message={snackbarMessage}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        sx={{
+          '& .MuiSnackbarContent-root': {
+            bgcolor: 'rgba(0,0,0,0.8)',
+            backdropFilter: 'blur(5px)',
+            borderRadius: '10px',
+            fontWeight: 500
+          }
+        }}
       />
     </Box>
   );

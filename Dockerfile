@@ -1,36 +1,32 @@
-# Build stage for the React frontend
-FROM node:18-alpine as build
+FROM node:18-slim
 
-WORKDIR /app/client
-COPY client/package*.json ./
-RUN npm install
-COPY client/ .
-RUN npm run build
+# Install Python
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-setuptools \
+    python3-wheel \
+    && ln -sf /usr/bin/python3 /usr/bin/python \
+    && ln -sf /usr/bin/pip3 /usr/bin/pip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Production stage
-FROM node:18-alpine
-
+# Set working directory
 WORKDIR /app
 
-# Create the static directory structure
-RUN mkdir -p /app/static/client/build
-
-# Copy the built React app to the static directory
-COPY --from=build /app/client/build/ /app/static/client/build/
-
-# Verify the files were copied
-RUN if [ -f "/app/static/client/build/index.html" ]; then \
-        echo "Build files copied successfully"; \
-    else \
-        echo "Build files not found in static directory"; \
-        exit 1; \
-    fi
-
-# Install serve globally
+# Copy package.json and install dependencies
+COPY package*.json ./
+RUN npm install
 RUN npm install -g serve
 
-# Expose the port
+# Copy the rest of the application
+COPY . .
+
+# Build if needed
+RUN if [ -f "package.json" ] && grep -q "build" "package.json"; then npm run build; fi
+
+# Expose port
 EXPOSE 3000
 
-# Run the application
+# Start command
 CMD ["serve", "-s", "static/client/build", "-l", "3000"] 

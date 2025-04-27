@@ -29,4 +29,4 @@ RUN if [ -f "package.json" ] && grep -q "build" "package.json"; then npm run bui
 EXPOSE 3000
 
 # Start command
-CMD ["serve", "-s", "static/client/build", "-l", "3000"] 
+CMD ["serve", "-s", "client/build", "-l", "3000"] 

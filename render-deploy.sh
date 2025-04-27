@@ -7,9 +7,9 @@ echo "Current directory: $(pwd)"
 echo "Directory listing:"
 ls -la
 
-# Install Python dependencies
-echo "Installing Python dependencies..."
-pip install -r requirements.txt
+# Install Node dependencies
+echo "Installing Node dependencies..."
+npm install
 
 # Change to client directory
 echo "Changing to client directory..."

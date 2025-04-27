@@ -1,11 +1,11 @@
 services:
   - type: web
-    name: painter-api
-    env: python
+    name: painter-client
+    env: node
     buildCommand: bash render-deploy.sh
-    startCommand: python app.py
+    startCommand: node app.js
     envVars:
       - key: PORT
         value: 10000
-      - key: FLASK_ENV
+      - key: NODE_ENV
         value: production 

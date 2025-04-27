@@ -3,13 +3,18 @@
   "version": "1.0.0",
   "description": "Wall color visualization app",
   "scripts": {
-    "start": "cd client && npm start",
-    "build": "cd client && npm install && npm run build"
+    "start": "nginx -g 'daemon off;'",
+    "build": "cd client && npm install --legacy-peer-deps && npm run build",
+    "postinstall": "if [ -d \"client\" ]; then cd client && npm install --legacy-peer-deps; fi",
+    "dev": "cd client && npm start",
+    "railway:build": "docker build -t painter .",
+    "railway:deploy": "echo 'Deployment handled by Railway'"
   },
   "keywords": ["react", "wall-paint", "visualization"],
   "author": "",
   "license": "ISC",
   "engines": {
-    "node": "18.x"
+    "node": "18.x",
+    "npm": ">=7.0.0"
   }
 }

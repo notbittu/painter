@@ -10,10 +10,13 @@
     "restartPolicyMaxRetries": 10,
     "healthcheckPath": "/",
     "healthcheckTimeout": 10,
-    "healthcheckInterval": 30
+    "healthcheckInterval": 30,
+    "startCommand": "nginx -g 'daemon off;'"
   },
   "variables": {
     "NODE_ENV": "production",
-    "PORT": "80"
+    "PORT": "80",
+    "RAILWAY_STATIC_URL": "https://painter-production.up.railway.app",
+    "REACT_APP_API_BASE_URL": "https://painter-production.up.railway.app/api"
   }
 } 

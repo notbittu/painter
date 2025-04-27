@@ -1,0 +1,35 @@
+# Version control
+.git/
+.github/
+
+# Python environments (not needed since we're using Docker)
+venv/
+.venv/
+**/__pycache__/
+*.py[cod]
+app.py.bak
+
+# Local development
+.vscode/
+.idea/
+*.log
+
+# Deployment configs for other platforms
+vercel.json
+netlify.toml
+render*.yaml
+render*.sh
+
+# Documentation and help files
+*.md
+!README.md
+
+# Scripts for other deployment platforms
+deploy.sh
+deploy.ps1
+deploy-win.ps1
+deploy.bat
+
+# Large directories not needed for deployment
+node_modules/
+client/node_modules/ 

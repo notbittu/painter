@@ -1,48 +1,65 @@
-# Git
+# Version control
 .git
+.github
 .gitignore
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Node
+# Node modules and logs
 node_modules
-npm-debug.log
-yarn-debug.log
-yarn-error.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+client/node_modules
 
-# Environment variables
+# Python
+**/__pycache__
+**/*.py[cod]
+**/*$py.class
+.Python
+.venv
+venv
+
+# Development environments
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-
-# IDE
-.idea/
-.vscode/
+.idea
+.vscode
 *.swp
 *.swo
 
-# OS
+# OS specific
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Build files
+client/build
+
+# Deployment files (not needed in Docker)
+render*.yaml
+render*.sh
+vercel.json
+netlify.toml
+railway-deploy.bat
+railway-deploy.ps1
+railway-github-setup.bat
+railway-github-setup.ps1
+update-railway-config.bat
+update-railway-config.ps1
+deploy.bat
+deploy.sh
+deploy.ps1
+deploy-win.ps1
+DEPLOYMENT.md
+SETUP.md
+README.md
+CHANGELOG.md
+
+# Backups and old files
+*.bak
+app.py.bak
+
+# Documentation
+docs
+*.md 

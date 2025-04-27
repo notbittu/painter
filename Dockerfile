@@ -1,40 +1,23 @@
 # Build stage for the React frontend
 FROM node:18-alpine as build
 
-WORKDIR /app/client
+WORKDIR /app
 COPY client/package*.json ./
 RUN npm install
 COPY client/ .
 RUN npm run build
 
 # Production stage
-FROM node:18-alpine
+FROM nginx:alpine
 
-WORKDIR /app
+# Copy built files to nginx
+COPY --from=build /app/build /usr/share/nginx/html
 
-# Copy package files and install dependencies
-COPY package*.json ./
-RUN npm install
+# Set up nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Create the static directory structure
-RUN mkdir -p /app/static/client/build
+# Expose port
+EXPOSE 80
 
-# Copy the built React app to the static directory
-COPY --from=build /app/client/build/ /app/static/client/build/
-
-# Copy the express server file
-COPY app.js ./
-
-# Verify the files were copied
-RUN if [ -f "/app/static/client/build/index.html" ]; then \
-        echo "Build files copied successfully"; \
-    else \
-        echo "Build files not found in static directory"; \
-        exit 1; \
-    fi
-
-# Expose the port
-EXPOSE 3000
-
-# Run the application
-CMD ["node", "app.js"]
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

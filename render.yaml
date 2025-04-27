@@ -1,11 +1,9 @@
 services:
   - type: web
     name: painter-client
-    env: node
-    buildCommand: bash render-deploy.sh
-    startCommand: node app.js
+    env: static
+    buildCommand: cd client && npm install && npm run build
+    staticPublishPath: ./client/build
     envVars:
-      - key: PORT
-        value: 10000
       - key: NODE_ENV
         value: production 

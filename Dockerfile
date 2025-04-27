@@ -12,11 +12,18 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install
+
 # Create the static directory structure
 RUN mkdir -p /app/static/client/build
 
 # Copy the built React app to the static directory
 COPY --from=build /app/client/build/ /app/static/client/build/
+
+# Copy the express server file
+COPY app.js ./
 
 # Verify the files were copied
 RUN if [ -f "/app/static/client/build/index.html" ]; then \
@@ -26,11 +33,8 @@ RUN if [ -f "/app/static/client/build/index.html" ]; then \
         exit 1; \
     fi
 
-# Install serve globally
-RUN npm install -g serve
-
 # Expose the port
 EXPOSE 3000
 
 # Run the application
-CMD ["serve", "-s", "static/client/build", "-l", "3000"] 
+CMD ["node", "app.js"] 

@@ -4,10 +4,9 @@
   "description": "AI-powered wall color visualization app",
   "main": "app.js",
   "scripts": {
-    "start": "python app.py || node app.js",
-    "start:node": "node app.js",
-    "start:old": "node server.js",
-    "build": "cd client && npm install && npm run build"
+    "start": "node app.js",
+    "build": "cd client && npm install && npm run build",
+    "postbuild": "mkdir -p static/client && cp -r client/build static/client/"
   },
   "keywords": [],
   "author": "",
@@ -16,7 +15,6 @@
     "express": "^4.18.2"
   },
   "engines": {
-    "node": "18.x",
-    "python": "3.9.x"
+    "node": "18.x"
   }
 }

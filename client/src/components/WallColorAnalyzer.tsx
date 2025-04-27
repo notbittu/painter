@@ -492,7 +492,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
             }}
           >
             <TuneIcon /> Adjust Colors
-          </Typography>
+        </Typography>
         
           <Grid container spacing={3}>
             {/* Intensity slider with simplified UI */}
@@ -522,13 +522,13 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                     color: '#ff6b6b',
                   }}
                 />
-              </Typography>
+          </Typography>
               <Box sx={{ px: 1 }}>
-                <Slider
-                  value={previewOptions.intensity}
+          <Slider
+            value={previewOptions.intensity}
                   onChange={(e: Event, newValue: number | number[]) => {
-                    setPreviewOptions({
-                      ...previewOptions,
+                  setPreviewOptions({
+                    ...previewOptions,
                       intensity: newValue as number
                     });
                   }}
@@ -548,17 +548,17 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   }}
                 />
               </Box>
-            </Grid>
+          </Grid>
           
             {/* Toggles with cleaner design */}
-            <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={6}>
               <FormControlLabel
                 control={
                   <Switch
                     checked={previewOptions.realisticBlending}
                     onChange={() => {
-                      setPreviewOptions({
-                        ...previewOptions,
+                  setPreviewOptions({
+                    ...previewOptions,
                         realisticBlending: !previewOptions.realisticBlending
                       });
                     }}
@@ -581,7 +581,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   </Typography>
                 }
               />
-            </Grid>
+        </Grid>
         
             {/* Shadow Tracking toggle */}
             <Grid item xs={12} sm={6}>
@@ -590,8 +590,8 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   <Switch
                     checked={previewOptions.shadowTracking}
                     onChange={() => {
-                      setPreviewOptions({
-                        ...previewOptions,
+                setPreviewOptions({
+                  ...previewOptions,
                         shadowTracking: !previewOptions.shadowTracking
                       });
                     }}
@@ -630,12 +630,12 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
             >
               <LightModeIcon sx={{ fontSize: '1rem', mr: 0.5, verticalAlign: 'text-bottom' }} /> 
               Lighting
-            </Typography>
+          </Typography>
             <FormControl fullWidth size="small">
               <Select
                 value={lightingCondition}
                 onChange={(e) => setLightingCondition(e.target.value as string)}
-                sx={{ 
+                    sx={{ 
                   borderRadius: 2,
                   bgcolor: 'rgba(255,255,255,0.2)',
                   color: 'white',
@@ -682,11 +682,11 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               onClick={() => setPreviewOptions(defaultPreviewOptions)}
               startIcon={<RestartAltIcon />}
               size="small"
-              sx={{
+                sx={{ 
                 borderRadius: 2,
                 borderColor: 'rgba(255,255,255,0.5)',
                 color: 'white',
-                '&:hover': {
+                    '&:hover': {
                   borderColor: 'white',
                   bgcolor: 'rgba(255,255,255,0.1)'
                 },
@@ -696,10 +696,10 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               Reset
             </Button>
             
-            <Button
-              variant="contained"
-              onClick={() => {
-                if (selectedColor && wallImage) {
+          <Button 
+            variant="contained" 
+            onClick={() => {
+              if (selectedColor && wallImage) {
                   generatePreview(selectedColor, previewOptions);
                 }
               }}
@@ -717,9 +717,9 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               }}
             >
               Apply
-            </Button>
-          </Box>
+          </Button>
         </Box>
+      </Box>
       </Fade>
     );
   };
@@ -754,7 +754,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               fontWeight: 600 
             }}>
               <FormatColorFillIcon /> Wall Color Preview
-            </Typography>
+                </Typography>
             <Box>
               <Tooltip title="Compare Before/After">
                 <IconButton 
@@ -801,8 +801,8 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   <ShareIcon />
                 </IconButton>
               </Tooltip>
+              </Box>
             </Box>
-          </Box>
           
           {compareMode ? (
             // Enhanced Compare view with 3D slider effect
@@ -990,10 +990,10 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 {/* Shadow Tracking badge with improved design */}
                 {previewOptions.shadowTracking && (
                   <Tooltip title="Shadow Tracking uses AI to adapt the paint color to existing shadows and lighting conditions on your wall">
-                    <Chip
-                      icon={<ShadowTrackingIcon />}
-                      label="Shadow Tracking"
-                      size="small"
+                  <Chip
+                    icon={<ShadowTrackingIcon />}
+                    label="Shadow Tracking"
+                    size="small"
                       sx={{ 
                         bgcolor: 'rgba(0,0,0,0.75)', 
                         color: 'white',
@@ -1001,17 +1001,17 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                         backdropFilter: 'blur(4px)',
                         '& .MuiChip-icon': { color: '#ffa726' }
                       }}
-                    />
-                  </Tooltip>
-                )}
-                
+                  />
+                </Tooltip>
+              )}
+              
                 {/* Vision 360 badge with improved design */}
-                {previewOptions.vision360 && (
+              {previewOptions.vision360 && (
                   <Tooltip title="NFD Vision 360 analyzes your wall's depth and contours for realistic paint visualization">
-                    <Chip
-                      icon={<Vision360Icon />}
-                      label="Vision 360"
-                      size="small"
+                  <Chip
+                    icon={<Vision360Icon />}
+                    label="Vision 360"
+                    size="small"
                       sx={{ 
                         bgcolor: 'rgba(0,0,0,0.75)', 
                         color: 'white',
@@ -1037,9 +1037,9 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                         backdropFilter: 'blur(4px)',
                         '& .MuiChip-icon': { color: '#66bb6a' }
                       }}
-                    />
-                  </Tooltip>
-                )}
+                  />
+                </Tooltip>
+              )}
               </Box>
               
               {/* Animated effect layer */}
@@ -1090,7 +1090,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   {roomType} • {lightingCondition}
                 </Typography>
               </Box>
-            </Box>
+                  </Box>
           )}
                 
           <Box sx={{ 
@@ -1102,7 +1102,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
             background: 'linear-gradient(to bottom, rgba(250,250,255,1), rgba(255,255,255,1))'
           }}>
             <Box 
-              sx={{ 
+                  sx={{ 
                 width: 70, 
                 height: 70, 
                 borderRadius: '50%', 
@@ -1126,7 +1126,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               }}>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
                   {selectedColor?.name || 'Select a color'}
-                </Typography>
+              </Typography>
                 
                 {selectedColor?.colorCode && (
                   <Chip 
@@ -1151,19 +1151,19 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   alignItems: 'center'
                 }}>
                   {selectedColor?.hex ? selectedColor.hex.toUpperCase() : ''}
-                  <IconButton size="small" onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
+                <IconButton size="small" onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
                     copyColorCode(selectedColor?.hex || '');
                   }} sx={{ ml: 0.5 }}>
-                    {copied ? <CheckIcon fontSize="small" /> : <CopyIcon fontSize="small" />}
-                  </IconButton>
+                  {copied ? <CheckIcon fontSize="small" /> : <CopyIcon fontSize="small" />}
+                </IconButton>
                 </Typography>
                 
                 {selectedColor?.rgb && (
                   <Tooltip title={`RGB: ${selectedColor.rgb}`}>
                     <Chip 
                       label="RGB" 
-                      size="small"
+                  size="small"
                       sx={{ fontSize: '0.7rem', height: 20 }}
                       onClick={(e: React.MouseEvent) => {
                         e.stopPropagation();
@@ -1193,7 +1193,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                     fontWeight: 500
                   }}>
                     Perfect for:
-                  </Typography>
+              </Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                     {selectedColor.roomTypes.map((room, idx) => (
                       <Chip 
@@ -1238,8 +1238,8 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                   {selectedColor.suitableFor}
                 </Typography>
               )}
+              </Box>
             </Box>
-          </Box>
         </Paper>
         
         {renderColorAdjustmentControls()}
@@ -1306,44 +1306,44 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
         >
           <Zoom in={true} style={{ transitionDelay: '100ms' }}>
             <Typography variant="h2" component="h1" gutterBottom
-              sx={{
+            sx={{
                 color: 'white',
-                fontWeight: 800,
-                mb: 3,
-                position: 'relative',
-                zIndex: 1,
+              fontWeight: 800,
+              mb: 3,
+              position: 'relative',
+              zIndex: 1,
                 textShadow: '2px 2px 15px rgba(0,0,0,0.15), 0 0 30px rgba(255,255,255,0.3)',
-                letterSpacing: '-0.02em',
+              letterSpacing: '-0.02em',
                 textTransform: 'uppercase',
                 fontSize: { xs: '1.8rem', sm: '2.3rem', md: '2.8rem' },
                 lineHeight: 1.2,
                 maxWidth: '90%',
                 margin: '0 auto 1.5rem'
-              }}
-            >
-              Wall Color Visualizer
-            </Typography>
+            }}
+          >
+            Wall Color Visualizer
+          </Typography>
           </Zoom>
           
           <Fade in={true} style={{ transitionDelay: '300ms' }}>
-            <Typography 
-              variant="h6" 
-              component="h2" 
-              paragraph
-              sx={{
-                maxWidth: '800px',
-                mx: 'auto',
-                mb: 4,
-                position: 'relative',
-                zIndex: 1,
+          <Typography 
+            variant="h6" 
+            component="h2" 
+            paragraph
+            sx={{
+              maxWidth: '800px',
+              mx: 'auto',
+              mb: 4,
+              position: 'relative',
+              zIndex: 1,
                 color: 'rgba(255,255,255,0.9)',
-                fontWeight: 500,
+              fontWeight: 500,
                 lineHeight: 1.6,
                 fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' }
-              }}
-            >
+            }}
+          >
               Transform your space with our color visualization tool
-            </Typography>
+          </Typography>
           </Fade>
           
           <Box sx={{ 
@@ -1356,32 +1356,32 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
             mt: 4
           }}>
             <Zoom in={true} style={{ transitionDelay: '500ms' }}>
-              <Button
-                variant="contained"
-                size="large"
-                startIcon={<CameraIcon />}
-                onClick={() => setShowCamera(true)}
-                sx={{
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<CameraIcon />}
+              onClick={() => setShowCamera(true)}
+              sx={{
                   px: { xs: 4, sm: 6 },
                   py: { xs: 1.5, sm: 2.5 },
                   borderRadius: '16px',
                   background: 'rgba(255,255,255,0.8)',
                   color: '#ff6b6b',
                   boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1), 0 0 25px rgba(255, 255, 255, 0.4)',
-                  '&:hover': {
+                '&:hover': {
                     boxShadow: '0 15px 30px rgba(0, 0, 0, 0.2), 0 0 30px rgba(255, 255, 255, 0.6)',
                     transform: 'translateY(-5px) scale(1.03)',
                     background: 'rgba(255,255,255,0.9)',
-                  },
+                },
                   transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                   fontSize: { xs: '1rem', sm: '1.25rem' },
-                  fontWeight: 600,
+                fontWeight: 600,
                   width: { xs: '100%', sm: 'auto' },
                   mb: 2
-                }}
-              >
+              }}
+            >
                 Start Camera
-              </Button>
+            </Button>
             </Zoom>
             
             <Typography variant="caption" sx={{ mb: 2, fontSize: '0.9rem', fontWeight: 500, color: 'white' }}>
@@ -1389,33 +1389,33 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
             </Typography>
             
             <Fade in={true} style={{ transitionDelay: '700ms' }}>
-              <Button
-                variant="outlined"
-                size="large"
-                startIcon={<UploadIcon />}
-                onClick={handleFileUploadClick}
-                sx={{
+            <Button
+              variant="outlined"
+              size="large"
+              startIcon={<UploadIcon />}
+              onClick={handleFileUploadClick}
+              sx={{
                   px: { xs: 3, sm: 4 },
                   py: { xs: 1, sm: 1.5 },
-                  borderRadius: '14px',
-                  borderWidth: '2px',
+                borderRadius: '14px',
+                borderWidth: '2px',
                   borderColor: 'rgba(255,255,255,0.8)',
                   color: 'white',
-                  '&:hover': {
-                    borderWidth: '2px',
+                '&:hover': {
+                  borderWidth: '2px',
                     borderColor: 'white',
-                    transform: 'translateY(-3px)',
+                  transform: 'translateY(-3px)',
                     boxShadow: '0 8px 15px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 255, 255, 0.3)',
                     backgroundColor: 'rgba(255,255,255,0.1)',
-                  },
-                  transition: 'all 0.3s ease',
+                },
+                transition: 'all 0.3s ease',
                   fontSize: { xs: '0.9rem', sm: '1rem' },
                   fontWeight: 500,
                   width: { xs: '100%', sm: 'auto' }
-                }}
-              >
-                Upload Image
-              </Button>
+              }}
+            >
+              Upload Image
+            </Button>
             </Fade>
             
             <input
@@ -1747,21 +1747,21 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                 </Tooltip>
                 
                 {/* Animated capture button with enhanced glow */}
-                <Button
-                  variant="contained"
-                  onClick={handleCapture}
-                  sx={{
-                    bgcolor: 'white',
+              <Button
+                variant="contained"
+                onClick={handleCapture}
+                sx={{
+                  bgcolor: 'white',
                     color: '#ff6b6b',
-                    borderRadius: '50%',
+                  borderRadius: '50%',
                     width: { xs: 65, sm: 85 },
                     height: { xs: 65, sm: 85 },
-                    minWidth: 'auto',
+                  minWidth: 'auto',
                     boxShadow: '0 0 0 5px rgba(255,255,255,0.3), 0 5px 15px rgba(0,0,0,0.3), 0 0 20px rgba(255,255,255,0.5)',
                     position: 'relative',
-                    '&:hover': {
-                      bgcolor: 'white',
-                      transform: 'scale(1.05)',
+                  '&:hover': {
+                    bgcolor: 'white',
+                    transform: 'scale(1.05)',
                       boxShadow: '0 0 0 5px rgba(255,255,255,0.4), 0 5px 15px rgba(0,0,0,0.3), 0 0 30px rgba(255,255,255,0.7)'
                     },
                     '&::before': {
@@ -1792,22 +1792,22 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                       '0%': { transform: 'scale(1)', opacity: 0.5 },
                       '50%': { transform: 'scale(1.1)', opacity: 0.2 },
                       '100%': { transform: 'scale(1)', opacity: 0.5 }
-                    },
-                    display: 'flex',
-                    alignItems: 'center',
+                  },
+                  display: 'flex',
+                  alignItems: 'center',
                     justifyContent: 'center'
-                  }}
-                >
+                }}
+              >
                   <PhotoCameraIcon sx={{ fontSize: { xs: 24, sm: 36 } }} />
-                </Button>
-                
+              </Button>
+              
                 {/* Close button with glow effect */}
                 <Tooltip title="Close camera">
-                  <IconButton 
-                    onClick={() => setShowCamera(false)}
-                    sx={{
-                      bgcolor: 'rgba(255,255,255,0.2)',
-                      color: 'white',
+              <IconButton 
+                onClick={() => setShowCamera(false)}
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
                       backdropFilter: 'blur(5px)',
                       '&:hover': { 
                         bgcolor: 'rgba(255,255,255,0.3)',
@@ -1821,9 +1821,9 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
                     }}
                   >
                     <CloseIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />
-                  </IconButton>
+              </IconButton>
                 </Tooltip>
-              </Box>
+            </Box>
               
               {/* Camera mode labels */}
               <Typography 
@@ -1838,7 +1838,7 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
               >
                 {facingMode === 'user' ? 'SELFIE MODE' : 'COLOR DETECTION MODE'}
               </Typography>
-            </Box>
+          </Box>
           </Box>
         </Box>
       </Fade>
@@ -1846,10 +1846,10 @@ const WallColorAnalyzer: React.FC<WallColorAnalyzerProps> = ({ onColorSelect }) 
   };
   
   return (
-    <Box>
+        <Box>
       {renderWelcomeScreen()}
       {renderCameraView()}
-      {renderPreviewSection()}
+          {renderPreviewSection()}
       
       <SwipeableDrawer
         anchor="bottom"

@@ -1,15 +1,13 @@
 services:
   - type: web
-    name: painter-api
-    runtime: python
-    buildCommand: bash render-deploy.sh
-    startCommand: python app.py
+    name: painter-client
+    runtime: static
+    buildCommand: cd client && npm install && npm run build
+    staticPublishPath: ./client/build
     envVars:
-      - key: PORT
-        value: 10000
-      - key: FLASK_ENV
+      - key: NODE_ENV
         value: production
-      - key: PYTHON_VERSION
-        value: 3.9.0
+      - key: NODE_VERSION
+        value: 18.x
       - key: CI
         value: false 

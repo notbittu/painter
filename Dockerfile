@@ -37,4 +37,4 @@ RUN if [ -f "/app/static/client/build/index.html" ]; then \
 EXPOSE 3000
 
 # Run the application
-CMD ["node", "app.js"] 
+CMD ["node", "app.js"]
